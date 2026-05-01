@@ -54,7 +54,7 @@ public class DemoController {
 
     @PostMapping("/run/{scenario}")
     @Operation(summary = "Запускает выбранный демонстрационный сценарий")
-    public DemoRunResult runScenario(@PathVariable String scenario) {
+    public DemoRunResult runScenario(@PathVariable("scenario") String scenario) {
         return service.run(scenario);
     }
 
