@@ -16,6 +16,7 @@ import java.util.List;
  * @param bootstrapServers Kafka bootstrap servers
  * @param producedPoints сколько точек уже опубликовано producer-ом
  * @param totalPoints сколько точек должно быть опубликовано всего
+ * @param producers состояние отдельных тестовых producer-ов
  * @param consumedEvents события drift-а, прочитанные из output topic-а
  * @param samplePoints точки, опубликованные в Kafka и отображаемые на графике
  * @param error последняя ошибка интеграционного режима, если она была
@@ -29,6 +30,7 @@ public record KafkaDemoStatus(
         String bootstrapServers,
         int producedPoints,
         int totalPoints,
+        List<KafkaProducerStatus> producers,
         List<DriftEvent> consumedEvents,
         List<MetricPoint> samplePoints,
         String error

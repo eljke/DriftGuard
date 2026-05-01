@@ -43,7 +43,8 @@ public class DemoScenarioService {
             new DemoScenarioDescriptor("error-rate-spike", "Error rate spike", "error-rate", "Кратковременный всплеск доли ошибок."),
             new DemoScenarioDescriptor("throughput-drop", "Throughput drop", "throughput", "Падение пропускной способности сервиса."),
             new DemoScenarioDescriptor("queue-growth", "Queue backlog growth", "queue-size", "Плавный рост размера очереди."),
-            new DemoScenarioDescriptor("seasonal-latency", "Seasonal latency", "latency", "Регулярная сезонность без ожидаемого drift-а.")
+            new DemoScenarioDescriptor("seasonal-latency", "Seasonal latency", "latency", "Регулярная сезонность без ожидаемого drift-а."),
+            new DemoScenarioDescriptor("microservices-system", "Microservices system", "mixed", "Несколько сервисов одновременно публикуют latency, error rate и queue size.")
     );
 
     private final DriftDetectorEngine engine;
@@ -208,11 +209,19 @@ public class DemoScenarioService {
                     45,
                     2.0
             );
+            case "microservices-system" -> new StepDriftScenario(
+                    "microservices-system-latency",
+                    config("checkout-service", "latency", instance, "POST /checkout", MetricKind.DURATION, 160),
+                    80,
+                    100.0,
+                    260.0,
+                    4.0
+            );
             default -> throw new DriftGuardValidationException(DemoErrorReason.UNKNOWN_SCENARIO, scenarioId);
         };
     }
 
-    private static ScenarioConfig config(String service, String metric, String instance, String operation, MetricKind kind, int samples) {
+    static ScenarioConfig config(String service, String metric, String instance, String operation, MetricKind kind, int samples) {
         return new ScenarioConfig(
                 new MetricKey(service, metric, instance, operation),
                 kind,
