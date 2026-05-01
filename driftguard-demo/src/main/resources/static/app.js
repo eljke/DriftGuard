@@ -28,6 +28,7 @@ const elements = {
     kafkaEventCount: document.querySelector("#kafkaEventCount"),
     kafkaInputTopic: document.querySelector("#kafkaInputTopic"),
     kafkaOutputTopic: document.querySelector("#kafkaOutputTopic"),
+    producerGrid: document.querySelector("#producerGrid"),
     kafkaChart: document.querySelector("#kafkaChart"),
     kafkaEventsTable: document.querySelector("#kafkaEventsTable"),
     kafkaError: document.querySelector("#kafkaError"),
@@ -176,18 +177,35 @@ function renderKafka(status) {
     elements.kafkaInputTopic.textContent = status.inputTopic;
     elements.kafkaOutputTopic.textContent = status.outputTopic;
     elements.kafkaError.textContent = status.error ? `Ошибка Kafka demo: ${status.error}` : "";
+    renderProducers(status.producers);
     renderKafkaEvents(status.consumedEvents);
     drawChartOn(elements.kafkaChart, status.samplePoints, status.consumedEvents, []);
 }
 
+function renderProducers(producers = []) {
+    if (producers.length === 0) {
+        elements.producerGrid.innerHTML = "";
+        return;
+    }
+    elements.producerGrid.innerHTML = producers.map(producer => `
+        <div class="producer-card">
+            <strong>${producer.service}</strong>
+            <span>${producer.metric} · ${producer.operation ?? "-"}</span>
+            <span>${producer.id}</span>
+            <span>${producer.producedPoints}/${producer.totalPoints} points · ${producer.running ? "running" : "done"}</span>
+        </div>
+    `).join("");
+}
+
 function renderKafkaEvents(events) {
     if (events.length === 0) {
-        elements.kafkaEventsTable.innerHTML = `<tr><td colspan="6">Событий из Kafka пока нет</td></tr>`;
+        elements.kafkaEventsTable.innerHTML = `<tr><td colspan="7">Событий из Kafka пока нет</td></tr>`;
         return;
     }
     elements.kafkaEventsTable.innerHTML = events.map(event => `
         <tr>
             <td>${formatTime(event.detectedAt)}</td>
+            <td>${event.key.service}<br><span class="muted">${event.key.metric}</span></td>
             <td>${event.detector}</td>
             <td class="severity-${String(event.severity).toLowerCase()}">${event.severity}</td>
             <td>${formatNumber(event.score)}</td>

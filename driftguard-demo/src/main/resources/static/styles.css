@@ -276,6 +276,33 @@ th {
     margin-top: 14px;
 }
 
+.producer-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.producer-card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    background: #fbfcfd;
+}
+
+.producer-card strong {
+    display: block;
+    margin-bottom: 6px;
+    overflow-wrap: anywhere;
+}
+
+.producer-card span {
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.35;
+}
+
 .tools-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(160px, 1fr));
@@ -315,6 +342,7 @@ th {
     .control-row,
     .metric-strip,
     .split,
+    .producer-grid,
     .tools-grid {
         grid-template-columns: 1fr;
     }
