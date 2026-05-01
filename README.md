@@ -56,6 +56,8 @@ Metric source
 mvn test
 ```
 
+Kafka end-to-end тест использует Testcontainers и запускает временный Kafka broker. Если Docker недоступен, этот тест пропускается.
+
 Ожидаемый результат:
 
 ```text
