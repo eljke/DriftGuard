@@ -1,6 +1,7 @@
 package ru.eljke.driftguard.demo;
 
 import org.junit.jupiter.api.Test;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import ru.eljke.driftguard.algorithms.DefaultAlgorithms;
 import ru.eljke.driftguard.algorithms.pagehinkley.PageHinkleyConfig;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
@@ -23,7 +24,7 @@ class DemoScenarioServiceTest {
                 )
         );
 
-        DemoRunResult result = new DemoScenarioService(engine).runLatencyDegradation();
+        DemoRunResult result = new DemoScenarioService(engine, new SimpleMeterRegistry()).runLatencyDegradation();
 
         assertFalse(result.events().isEmpty());
         assertTrue(result.quality().detected());

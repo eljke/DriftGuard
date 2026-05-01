@@ -76,6 +76,7 @@ Compose поднимает:
 - Grafana: `http://localhost:3000` (`admin` / `admin`).
 
 Prometheus собирает метрики demo-приложения с `/actuator/prometheus` на `8080` и `8081`.
+Demo публикует counters `driftguard.demo.scenario.runs`, `driftguard.demo.metric.points` и `driftguard.demo.drift.events` с tags `scenario` и `mode`.
 
 ## Запуск Demo
 

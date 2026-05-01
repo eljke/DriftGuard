@@ -1,6 +1,8 @@
 package ru.eljke.driftguard.demo;
 
 import jakarta.annotation.PostConstruct;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Service;
 import ru.eljke.driftguard.core.detector.DriftDetectorEngine;
 import ru.eljke.driftguard.core.domain.DriftEvent;
@@ -45,6 +47,7 @@ public class DemoScenarioService {
     );
 
     private final DriftDetectorEngine engine;
+    private final MeterRegistry meterRegistry;
     private final AtomicLong runSequence = new AtomicLong();
     private final ScheduledExecutorService playbackExecutor = Executors.newSingleThreadScheduledExecutor(runnable -> {
         Thread thread = new Thread(runnable, "driftguard-demo-playback");
@@ -54,8 +57,9 @@ public class DemoScenarioService {
     private volatile DemoRunResult lastResult;
     private volatile ScheduledFuture<?> playbackTask;
 
-    public DemoScenarioService(DriftDetectorEngine engine) {
+    public DemoScenarioService(DriftDetectorEngine engine, MeterRegistry meterRegistry) {
         this.engine = engine;
+        this.meterRegistry = meterRegistry;
     }
 
     @PostConstruct
@@ -81,6 +85,7 @@ public class DemoScenarioService {
             events.addAll(engine.detect(point));
         }
         List<DriftEvent> representativeEvents = firstExpectedEventPerDetector(events, scenario.expectedDrifts());
+        recordRunMetrics(descriptor.id(), "instant", points.size(), representativeEvents.size());
         lastResult = new DemoRunResult(
                 scenario.name(),
                 descriptor.title(),
@@ -110,6 +115,8 @@ public class DemoScenarioService {
             @Override
             public void run() {
                 if (index >= points.size()) {
+                    List<DriftEvent> representativeEvents = firstExpectedEventPerDetector(events, scenario.expectedDrifts());
+                    recordRunMetrics(descriptor.id(), "live", processed.size(), representativeEvents.size());
                     lastResult = liveResult(scenario, descriptor, points, processed, events, false);
                     stopLive();
                     return;
@@ -250,5 +257,23 @@ public class DemoScenarioService {
             }
         }
         return List.copyOf(byDetector.values());
+    }
+
+    private void recordRunMetrics(String scenario, String mode, int points, int events) {
+        Counter.builder("driftguard.demo.scenario.runs")
+                .tag("scenario", scenario)
+                .tag("mode", mode)
+                .register(meterRegistry)
+                .increment();
+        Counter.builder("driftguard.demo.metric.points")
+                .tag("scenario", scenario)
+                .tag("mode", mode)
+                .register(meterRegistry)
+                .increment(points);
+        Counter.builder("driftguard.demo.drift.events")
+                .tag("scenario", scenario)
+                .tag("mode", mode)
+                .register(meterRegistry)
+                .increment(events);
     }
 }
