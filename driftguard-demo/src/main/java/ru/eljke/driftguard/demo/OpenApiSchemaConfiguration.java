@@ -75,6 +75,25 @@ public class OpenApiSchemaConfiguration {
                     "metric", "Основная метрика сценария.",
                     "description", "Краткое описание сценария."
             ));
+            describe(schemas, "KafkaDemoStatus", "Состояние реального Kafka demo-контура producer -> DriftGuard Kafka Streams -> events topic.", Map.ofEntries(
+                    Map.entry("enabled", "Включён ли Kafka demo режим."),
+                    Map.entry("running", "Идёт ли сейчас публикация тестового потока."),
+                    Map.entry("scenario", "Id запущенного сценария."),
+                    Map.entry("inputTopic", "Topic входных MetricPoint."),
+                    Map.entry("outputTopic", "Topic выходных DriftEvent."),
+                    Map.entry("bootstrapServers", "Kafka bootstrap servers."),
+                    Map.entry("producedPoints", "Количество опубликованных producer-ом точек."),
+                    Map.entry("totalPoints", "Общее количество точек в сценарии."),
+                    Map.entry("consumedEvents", "DriftEvent, прочитанные demo consumer-ом из output topic-а."),
+                    Map.entry("samplePoints", "MetricPoint, опубликованные producer-ом и отображаемые на графике."),
+                    Map.entry("error", "Последняя ошибка Kafka demo, если запуск не удался.")
+            ));
+            describe(schemas, "ToolLink", "Ссылка на инструмент локального demo-стенда.", Map.of(
+                    "id", "Стабильный id инструмента.",
+                    "title", "Название инструмента.",
+                    "url", "URL инструмента.",
+                    "description", "Назначение инструмента."
+            ));
         };
     }
 

@@ -22,8 +22,12 @@ class OpenApiEndpointTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.info.title").value("DriftGuard Demo API"))
                 .andExpect(jsonPath("$.paths['/api/demo/run']").exists())
+                .andExpect(jsonPath("$.paths['/api/demo/kafka/start/{scenario}']").exists())
+                .andExpect(jsonPath("$.paths['/api/demo/tools']").exists())
                 .andExpect(jsonPath("$.components.schemas.DriftEvent.description").exists())
                 .andExpect(jsonPath("$.components.schemas.MetricPoint.properties.value.description").exists())
-                .andExpect(jsonPath("$.components.schemas.DemoRunResult.properties.quality.description").exists());
+                .andExpect(jsonPath("$.components.schemas.DemoRunResult.properties.quality.description").exists())
+                .andExpect(jsonPath("$.components.schemas.KafkaDemoStatus.properties.inputTopic.description").exists())
+                .andExpect(jsonPath("$.components.schemas.ToolLink.properties.url.description").exists());
     }
 }
