@@ -19,12 +19,18 @@ import java.util.function.Predicate;
 public record DetectorDefinition(
         String name,
         DetectorConfig config,
-        Predicate<MetricKey> appliesTo
+        Predicate<MetricKey> appliesTo,
+        EmissionPolicyConfig emissionPolicy
 ) {
     public DetectorDefinition {
         name = normalize(name, "name");
         config = Objects.requireNonNull(config, "config must not be null");
         appliesTo = appliesTo == null ? key -> true : appliesTo;
+        emissionPolicy = emissionPolicy == null ? EmissionPolicyConfig.DEFAULT : emissionPolicy;
+    }
+
+    public DetectorDefinition(String name, DetectorConfig config, Predicate<MetricKey> appliesTo) {
+        this(name, config, appliesTo, EmissionPolicyConfig.DEFAULT);
     }
 
     public boolean matches(MetricKey key) {

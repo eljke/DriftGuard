@@ -5,6 +5,8 @@ import ru.eljke.driftguard.core.config.DetectorDefinition;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricPoint;
 import ru.eljke.driftguard.core.state.DetectorStateStore;
+import ru.eljke.driftguard.core.state.EmissionStateStore;
+import ru.eljke.driftguard.core.state.InMemoryEmissionStateStore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,7 @@ import java.util.Objects;
 public final class DriftDetectorEngine {
     private final DetectorRegistry registry;
     private final DetectorStateStore stateStore;
+    private final EmissionStateStore emissionStateStore;
     private final List<DetectorDefinition> definitions;
 
     public DriftDetectorEngine(
@@ -29,8 +32,18 @@ public final class DriftDetectorEngine {
             DetectorStateStore stateStore,
             List<DetectorDefinition> definitions
     ) {
+        this(registry, stateStore, new InMemoryEmissionStateStore(), definitions);
+    }
+
+    public DriftDetectorEngine(
+            DetectorRegistry registry,
+            DetectorStateStore stateStore,
+            EmissionStateStore emissionStateStore,
+            List<DetectorDefinition> definitions
+    ) {
         this.registry = Objects.requireNonNull(registry, "registry must not be null");
         this.stateStore = Objects.requireNonNull(stateStore, "stateStore must not be null");
+        this.emissionStateStore = Objects.requireNonNull(emissionStateStore, "emissionStateStore must not be null");
         this.definitions = List.copyOf(definitions == null ? List.of() : definitions);
     }
 
@@ -78,7 +91,36 @@ public final class DriftDetectorEngine {
 
         DetectionResult<S> result = algorithm.detect(point, state, config, new DetectionContext(definition.name()));
         stateStore.put(instanceKey, result.state());
-        return result.eventValue().stream().toList();
+        if (result.eventValue().isEmpty()) {
+            resetConsecutiveSignals(instanceKey);
+            return List.of();
+        }
+        return result.eventValue()
+                .filter(event -> shouldEmit(instanceKey, definition, event))
+                .stream()
+                .toList();
+    }
+
+    private void resetConsecutiveSignals(DetectorInstanceKey instanceKey) {
+        EmissionState previous = emissionStateStore.get(instanceKey).orElse(EmissionState.EMPTY);
+        if (previous.consecutiveSignals() > 0) {
+            emissionStateStore.put(instanceKey, new EmissionState(0, previous.lastEmittedAt()));
+        }
+    }
+
+    private boolean shouldEmit(DetectorInstanceKey instanceKey, DetectorDefinition definition, DriftEvent event) {
+        EmissionState previous = emissionStateStore.get(instanceKey).orElse(EmissionState.EMPTY);
+        int consecutiveSignals = previous.consecutiveSignals() + 1;
+        boolean enoughSignals = consecutiveSignals >= definition.emissionPolicy().minConsecutiveSignals();
+        boolean cooldownElapsed = previous.lastEmittedAtValue()
+                .map(last -> !event.detectedAt().isBefore(last.plus(definition.emissionPolicy().cooldown())))
+                .orElse(true);
+        boolean emit = enoughSignals && cooldownElapsed;
+        emissionStateStore.put(instanceKey, new EmissionState(
+                consecutiveSignals,
+                emit ? event.detectedAt() : previous.lastEmittedAt()
+        ));
+        return emit;
     }
 
     @SuppressWarnings("unchecked")
