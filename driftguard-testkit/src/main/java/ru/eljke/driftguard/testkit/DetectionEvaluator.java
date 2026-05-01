@@ -25,8 +25,10 @@ public final class DetectionEvaluator {
                 falsePositive++;
             }
         }
-        boolean detected = intervals.stream()
-                .anyMatch(interval -> events.stream().anyMatch(event -> interval.contains(event.detectedAt())));
+        int detectedIntervals = (int) intervals.stream()
+                .filter(interval -> events.stream().anyMatch(event -> interval.contains(event.detectedAt())))
+                .count();
+        boolean detected = detectedIntervals > 0;
         Duration delay = intervals.stream()
                 .flatMap(interval -> events.stream()
                         .filter(event -> interval.contains(event.detectedAt()))
@@ -35,6 +37,19 @@ public final class DetectionEvaluator {
                         .stream())
                 .findFirst()
                 .orElse(null);
-        return new DetectionMetrics(events.size(), truePositive, falsePositive, detected, delay);
+        double precision = events.isEmpty() ? 1.0 : (double) truePositive / events.size();
+        double recall = intervals.isEmpty() ? 1.0 : (double) detectedIntervals / intervals.size();
+        return new DetectionMetrics(
+                events.size(),
+                truePositive,
+                falsePositive,
+                intervals.size(),
+                detectedIntervals,
+                intervals.size() - detectedIntervals,
+                detected,
+                delay,
+                precision,
+                recall
+        );
     }
 }

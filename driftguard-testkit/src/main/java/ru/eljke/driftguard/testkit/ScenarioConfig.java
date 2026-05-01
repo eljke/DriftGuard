@@ -39,9 +39,25 @@ public record ScenarioConfig(
     }
 
     public static ScenarioConfig latency(String service, String operation, int samples) {
+        return metric(service, "latency", operation, MetricKind.DURATION, samples);
+    }
+
+    public static ScenarioConfig errorRate(String service, String operation, int samples) {
+        return metric(service, "error-rate", operation, MetricKind.RATE, samples);
+    }
+
+    public static ScenarioConfig throughput(String service, String operation, int samples) {
+        return metric(service, "throughput", operation, MetricKind.RATE, samples);
+    }
+
+    public static ScenarioConfig queueSize(String service, String operation, int samples) {
+        return metric(service, "queue-size", operation, MetricKind.SIZE, samples);
+    }
+
+    public static ScenarioConfig metric(String service, String metric, String operation, MetricKind kind, int samples) {
         return new ScenarioConfig(
-                new MetricKey(service, "latency", "instance-1", operation),
-                MetricKind.DURATION,
+                new MetricKey(service, metric, "instance-1", operation),
+                kind,
                 Instant.parse("2026-05-01T10:00:00Z"),
                 Duration.ofSeconds(1),
                 samples,

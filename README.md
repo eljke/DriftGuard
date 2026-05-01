@@ -225,7 +225,12 @@ DetectionMetrics quality = DetectionEvaluator.evaluate(scenario, events);
 
 - `StableNoiseScenario` - стабильный поток с шумом;
 - `StepDriftScenario` - резкая деградация;
-- `GradualDriftScenario` - плавный drift, например memory leak.
+- `GradualDriftScenario` - плавный drift, например memory leak;
+- `PulseSpikeScenario` - кратковременный spike error rate или latency;
+- `ThroughputDropScenario` - падение throughput;
+- `SeasonalNoiseScenario` - стабильная сезонность без ожидаемого drift-а.
+
+`DetectionMetrics` показывает число событий, true/false positive events, число обнаруженных и пропущенных drift-интервалов, precision, recall и задержку первого обнаружения.
 
 ## Архитектура
 
