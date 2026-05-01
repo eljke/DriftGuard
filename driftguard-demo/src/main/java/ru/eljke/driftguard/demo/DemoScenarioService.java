@@ -11,7 +11,9 @@ import ru.eljke.driftguard.testkit.ScenarioConfig;
 import ru.eljke.driftguard.testkit.StepDriftScenario;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Запускает synthetic scenario через настоящий DriftGuard engine и хранит
@@ -45,12 +47,13 @@ public class DemoScenarioService {
         for (MetricPoint point : points) {
             events.addAll(engine.detect(point));
         }
+        List<DriftEvent> representativeEvents = firstEventPerDetector(events);
         lastResult = new DemoRunResult(
                 scenario.name(),
                 points.size(),
                 points.stream().skip(Math.max(0, points.size() - 20L)).toList(),
-                List.copyOf(events),
-                DetectionEvaluator.evaluate(scenario, events)
+                representativeEvents,
+                DetectionEvaluator.evaluate(scenario, representativeEvents)
         );
         return lastResult;
     }
@@ -60,5 +63,13 @@ public class DemoScenarioService {
             return runLatencyDegradation();
         }
         return lastResult;
+    }
+
+    private static List<DriftEvent> firstEventPerDetector(List<DriftEvent> events) {
+        Map<String, DriftEvent> byDetector = new LinkedHashMap<>();
+        for (DriftEvent event : events) {
+            byDetector.putIfAbsent(event.detector(), event);
+        }
+        return List.copyOf(byDetector.values());
     }
 }

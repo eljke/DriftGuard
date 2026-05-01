@@ -29,5 +29,6 @@ class DemoScenarioServiceTest {
 
         assertFalse(result.events().isEmpty());
         assertTrue(result.quality().detected());
+        assertTrue(result.events().size() <= 2);
     }
 }
