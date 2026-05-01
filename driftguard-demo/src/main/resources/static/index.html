@@ -13,13 +13,18 @@
         <p>Поток технических метрик, события drift-а и качество детекции.</p>
     </div>
     <nav>
-        <a href="/swagger-ui.html">Swagger</a>
-        <a href="/actuator/health">Health</a>
+        <a href="#synthetic">Synthetic</a>
+        <a href="#kafka">Kafka demo</a>
+        <a href="#tools">Инструменты</a>
     </nav>
 </header>
 
 <main class="layout">
-    <section class="panel controls">
+    <section id="synthetic" class="panel controls">
+        <div class="section-head">
+            <h2>Synthetic engine demo</h2>
+            <span class="badge">Core library</span>
+        </div>
         <div class="control-row">
             <label for="scenarioSelect">Сценарий</label>
             <select id="scenarioSelect"></select>
@@ -108,6 +113,65 @@
                 <dd id="missedIntervals">0</dd>
             </dl>
         </div>
+    </section>
+
+    <section id="kafka" class="panel kafka-panel">
+        <div class="section-head">
+            <div>
+                <h2>Kafka integration demo</h2>
+                <p class="muted no-top">Producer публикует MetricPoint в Kafka, Kafka Streams topology DriftGuard читает поток и пишет DriftEvent в output topic.</p>
+            </div>
+            <span id="kafkaStatus" class="badge">stopped</span>
+        </div>
+        <div class="control-row kafka-controls">
+            <label for="kafkaScenarioSelect">Сценарий</label>
+            <select id="kafkaScenarioSelect"></select>
+            <button id="kafkaStartButton" type="button">Kafka start</button>
+            <button id="kafkaStopButton" type="button" class="secondary">Стоп</button>
+        </div>
+        <div class="metric-strip kafka-strip">
+            <div class="metric">
+                <span>Produced</span>
+                <strong id="kafkaPointCount">0/0</strong>
+            </div>
+            <div class="metric">
+                <span>Consumed events</span>
+                <strong id="kafkaEventCount">0</strong>
+            </div>
+            <div class="metric wide">
+                <span>Input topic</span>
+                <strong id="kafkaInputTopic">-</strong>
+            </div>
+            <div class="metric wide">
+                <span>Output topic</span>
+                <strong id="kafkaOutputTopic">-</strong>
+            </div>
+        </div>
+        <canvas id="kafkaChart" width="1100" height="300"></canvas>
+        <div class="table-wrap kafka-events">
+            <table>
+                <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Detector</th>
+                    <th>Severity</th>
+                    <th>Score</th>
+                    <th>Current</th>
+                    <th>Baseline</th>
+                </tr>
+                </thead>
+                <tbody id="kafkaEventsTable"></tbody>
+            </table>
+        </div>
+        <p id="kafkaError" class="muted"></p>
+    </section>
+
+    <section id="tools" class="panel tools-panel">
+        <div class="section-head">
+            <h2>Инструменты</h2>
+            <span class="badge">docker compose</span>
+        </div>
+        <div id="toolsGrid" class="tools-grid"></div>
     </section>
 </main>
 

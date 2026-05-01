@@ -19,23 +19,42 @@ const elements = {
     tp: document.querySelector("#tp"),
     fp: document.querySelector("#fp"),
     detectedIntervals: document.querySelector("#detectedIntervals"),
-    missedIntervals: document.querySelector("#missedIntervals")
+    missedIntervals: document.querySelector("#missedIntervals"),
+    kafkaScenarioSelect: document.querySelector("#kafkaScenarioSelect"),
+    kafkaStartButton: document.querySelector("#kafkaStartButton"),
+    kafkaStopButton: document.querySelector("#kafkaStopButton"),
+    kafkaStatus: document.querySelector("#kafkaStatus"),
+    kafkaPointCount: document.querySelector("#kafkaPointCount"),
+    kafkaEventCount: document.querySelector("#kafkaEventCount"),
+    kafkaInputTopic: document.querySelector("#kafkaInputTopic"),
+    kafkaOutputTopic: document.querySelector("#kafkaOutputTopic"),
+    kafkaChart: document.querySelector("#kafkaChart"),
+    kafkaEventsTable: document.querySelector("#kafkaEventsTable"),
+    kafkaError: document.querySelector("#kafkaError"),
+    toolsGrid: document.querySelector("#toolsGrid")
 };
 
 let scenarios = [];
 let polling = null;
+let kafkaPolling = null;
 
 async function init() {
     scenarios = await fetchJson("/api/demo/scenarios");
-    elements.scenarioSelect.innerHTML = scenarios
+    const options = scenarios
         .map(scenario => `<option value="${scenario.id}">${scenario.title}</option>`)
         .join("");
+    elements.scenarioSelect.innerHTML = options;
+    elements.kafkaScenarioSelect.innerHTML = options;
     elements.scenarioSelect.addEventListener("change", updateScenarioDescription);
     elements.runButton.addEventListener("click", runSelectedScenario);
     elements.liveButton.addEventListener("click", startLiveScenario);
     elements.stopButton.addEventListener("click", stopLiveScenario);
+    elements.kafkaStartButton.addEventListener("click", startKafkaScenario);
+    elements.kafkaStopButton.addEventListener("click", stopKafkaScenario);
     updateScenarioDescription();
     render(await fetchJson("/api/demo"));
+    renderKafka(await fetchJson("/api/demo/kafka"));
+    renderTools(await fetchJson("/api/demo/tools"));
 }
 
 async function runSelectedScenario() {
@@ -71,6 +90,41 @@ async function refreshLiveResult() {
     render(result);
     if (!result.running) {
         stopPolling();
+    }
+}
+
+async function startKafkaScenario() {
+    stopKafkaPolling();
+    elements.kafkaStartButton.disabled = true;
+    elements.kafkaError.textContent = "";
+    try {
+        const scenario = elements.kafkaScenarioSelect.value;
+        renderKafka(await fetchJson(`/api/demo/kafka/start/${scenario}`, {method: "POST"}));
+        kafkaPolling = window.setInterval(refreshKafkaResult, 700);
+    } catch (error) {
+        elements.kafkaError.textContent = `${error.message}. Проверь, что docker compose с Kafka запущен.`;
+    } finally {
+        elements.kafkaStartButton.disabled = false;
+    }
+}
+
+async function stopKafkaScenario() {
+    stopKafkaPolling();
+    renderKafka(await fetchJson("/api/demo/kafka/stop", {method: "POST"}));
+}
+
+async function refreshKafkaResult() {
+    const status = await fetchJson("/api/demo/kafka");
+    renderKafka(status);
+    if (!status.running) {
+        stopKafkaPolling();
+    }
+}
+
+function stopKafkaPolling() {
+    if (kafkaPolling) {
+        window.clearInterval(kafkaPolling);
+        kafkaPolling = null;
     }
 }
 
@@ -114,6 +168,45 @@ function render(result) {
     drawChart(result.samplePoints, result.events, result.expectedDrifts);
 }
 
+function renderKafka(status) {
+    elements.kafkaStatus.textContent = status.running ? "running" : "stopped";
+    elements.kafkaStatus.className = status.running ? "badge status-ok" : "badge";
+    elements.kafkaPointCount.textContent = `${status.producedPoints}/${status.totalPoints}`;
+    elements.kafkaEventCount.textContent = status.consumedEvents.length;
+    elements.kafkaInputTopic.textContent = status.inputTopic;
+    elements.kafkaOutputTopic.textContent = status.outputTopic;
+    elements.kafkaError.textContent = status.error ? `Ошибка Kafka demo: ${status.error}` : "";
+    renderKafkaEvents(status.consumedEvents);
+    drawChartOn(elements.kafkaChart, status.samplePoints, status.consumedEvents, []);
+}
+
+function renderKafkaEvents(events) {
+    if (events.length === 0) {
+        elements.kafkaEventsTable.innerHTML = `<tr><td colspan="6">Событий из Kafka пока нет</td></tr>`;
+        return;
+    }
+    elements.kafkaEventsTable.innerHTML = events.map(event => `
+        <tr>
+            <td>${formatTime(event.detectedAt)}</td>
+            <td>${event.detector}</td>
+            <td class="severity-${String(event.severity).toLowerCase()}">${event.severity}</td>
+            <td>${formatNumber(event.score)}</td>
+            <td>${formatNumber(event.currentValue)}</td>
+            <td>${formatNumber(event.baselineValue)}</td>
+        </tr>
+    `).join("");
+}
+
+function renderTools(tools) {
+    elements.toolsGrid.innerHTML = tools.map(tool => `
+        <a class="tool-link" href="${tool.url}" target="_blank" rel="noreferrer">
+            <strong>${tool.title}</strong>
+            <span>${tool.description}</span>
+            <span>${tool.url}</span>
+        </a>
+    `).join("");
+}
+
 function renderEvents(events) {
     if (events.length === 0) {
         elements.eventsTable.innerHTML = `<tr><td colspan="6">Событий нет</td></tr>`;
@@ -132,7 +225,10 @@ function renderEvents(events) {
 }
 
 function drawChart(points, events, intervals) {
-    const canvas = elements.chart;
+    drawChartOn(elements.chart, points, events, intervals);
+}
+
+function drawChartOn(canvas, points, events, intervals) {
     const ctx = canvas.getContext("2d");
     const width = canvas.width;
     const height = canvas.height;
