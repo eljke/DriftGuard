@@ -9,6 +9,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.Serdes;
 import org.springframework.stereotype.Service;
 import ru.eljke.driftguard.core.domain.DriftEvent;
@@ -168,6 +169,10 @@ public class KafkaDemoService {
         try {
             while (consuming.get()) {
                 consumer.poll(Duration.ofMillis(250)).forEach(record -> consumedEvents.add(record.value()));
+            }
+        } catch (WakeupException exception) {
+            if (consuming.get()) {
+                error = exception.getMessage();
             }
         } catch (RuntimeException exception) {
             error = exception.getMessage();
