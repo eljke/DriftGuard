@@ -18,6 +18,10 @@
         </dependency>
         <dependency>
             <groupId>ru.eljke</groupId>
+            <artifactId>driftguard-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ru.eljke</groupId>
             <artifactId>driftguard-testkit</artifactId>
         </dependency>
         <dependency>
@@ -36,6 +40,12 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

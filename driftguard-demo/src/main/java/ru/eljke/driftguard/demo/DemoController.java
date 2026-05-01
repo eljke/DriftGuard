@@ -17,9 +17,13 @@ import java.util.Map;
 @Tag(name = "Demo", description = "REST API демонстрационного сценария DriftGuard")
 public class DemoController {
     private final DemoScenarioService service;
+    private final KafkaDemoService kafkaDemoService;
+    private final DemoToolProperties toolProperties;
 
-    public DemoController(DemoScenarioService service) {
+    public DemoController(DemoScenarioService service, KafkaDemoService kafkaDemoService, DemoToolProperties toolProperties) {
         this.service = service;
+        this.kafkaDemoService = kafkaDemoService;
+        this.toolProperties = toolProperties;
     }
 
     @GetMapping
@@ -71,18 +75,51 @@ public class DemoController {
         return service.lastResult();
     }
 
+    @GetMapping("/kafka")
+    @Operation(summary = "Возвращает состояние интеграционного Kafka demo")
+    public KafkaDemoStatus kafkaStatus() {
+        return kafkaDemoService.status();
+    }
+
+    @PostMapping("/kafka/start/{scenario}")
+    @Operation(summary = "Запускает Kafka producer, Kafka Streams topology и consumer событий")
+    public KafkaDemoStatus startKafkaScenario(@PathVariable("scenario") String scenario) {
+        return kafkaDemoService.start(scenario);
+    }
+
+    @PostMapping("/kafka/stop")
+    @Operation(summary = "Останавливает интеграционный Kafka demo")
+    public KafkaDemoStatus stopKafkaScenario() {
+        return kafkaDemoService.stop();
+    }
+
+    @GetMapping("/tools")
+    @Operation(summary = "Возвращает ссылки на инструменты локального demo-стенда")
+    public List<ToolLink> tools() {
+        return List.of(
+                new ToolLink("kafka-ui", "Kafka UI", toolProperties.getKafkaUiUrl(), "Topic-и, consumer groups и сообщения Kafka."),
+                new ToolLink("prometheus", "Prometheus", toolProperties.getPrometheusUrl(), "Scrape target-ы и raw metrics DriftGuard."),
+                new ToolLink("grafana", "Grafana", toolProperties.getGrafanaUrl(), "Dashboard для метрик DriftGuard."),
+                new ToolLink("swagger", "Swagger", toolProperties.getSwaggerUrl(), "REST API demo-приложения.")
+        );
+    }
+
     @GetMapping("/help")
     @Operation(summary = "Возвращает краткий список доступных demo endpoint-ов")
     public Map<String, String> help() {
-        return Map.of(
-                "overview", "GET /api/demo",
-                "events", "GET /api/demo/events",
-                "quality", "GET /api/demo/quality",
-                "scenarios", "GET /api/demo/scenarios",
-                "rerun", "POST /api/demo/run",
-                "runScenario", "POST /api/demo/run/{scenario}",
-                "startLiveScenario", "POST /api/demo/live/{scenario}",
-                "stopLiveScenario", "POST /api/demo/live/stop"
+        return Map.ofEntries(
+                Map.entry("overview", "GET /api/demo"),
+                Map.entry("events", "GET /api/demo/events"),
+                Map.entry("quality", "GET /api/demo/quality"),
+                Map.entry("scenarios", "GET /api/demo/scenarios"),
+                Map.entry("rerun", "POST /api/demo/run"),
+                Map.entry("runScenario", "POST /api/demo/run/{scenario}"),
+                Map.entry("startLiveScenario", "POST /api/demo/live/{scenario}"),
+                Map.entry("stopLiveScenario", "POST /api/demo/live/stop"),
+                Map.entry("kafkaStatus", "GET /api/demo/kafka"),
+                Map.entry("startKafkaScenario", "POST /api/demo/kafka/start/{scenario}"),
+                Map.entry("stopKafkaScenario", "POST /api/demo/kafka/stop"),
+                Map.entry("tools", "GET /api/demo/tools")
         );
     }
 }

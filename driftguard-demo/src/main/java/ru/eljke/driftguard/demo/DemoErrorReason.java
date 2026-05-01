@@ -7,7 +7,9 @@ import ru.eljke.driftguard.core.error.ErrorReason;
  */
 public enum DemoErrorReason implements ErrorReason {
     UNKNOWN_SCENARIO("DG-DEMO-001", "Unknown demo scenario: {}"),
-    REQUEST_FAILED("DG-DEMO-002", "Demo request failed");
+    REQUEST_FAILED("DG-DEMO-002", "Demo request failed"),
+    KAFKA_DEMO_DISABLED("DG-DEMO-003", "Kafka demo is disabled"),
+    KAFKA_DEMO_FAILED("DG-DEMO-004", "Kafka demo failed: {}");
 
     private final String code;
     private final String description;

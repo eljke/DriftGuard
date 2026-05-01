@@ -7,6 +7,21 @@ management:
       exposure:
         include: health,info,prometheus
 
+demo:
+  kafka:
+    enabled: true
+    bootstrap-servers: localhost:9092
+    input-topic: driftguard.demo.metrics
+    output-topic: driftguard.demo.drift-events
+    application-id: driftguard-demo-streams
+    consumer-group: driftguard-demo-ui
+    playback-interval: 150ms
+  tools:
+    kafka-ui-url: http://localhost:8090
+    prometheus-url: http://localhost:9090
+    grafana-url: http://localhost:3000
+    swagger-url: /swagger-ui.html
+
 driftguard:
   enabled: true
   detectors:

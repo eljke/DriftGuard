@@ -165,7 +165,7 @@ public class DemoScenarioService {
                 .orElseThrow(() -> new DriftGuardValidationException(DemoErrorReason.UNKNOWN_SCENARIO, id));
     }
 
-    private static MetricScenario createScenario(String scenarioId, String instance) {
+    static MetricScenario createScenario(String scenarioId, String instance) {
         return switch (scenarioId) {
             case "latency-step" -> new StepDriftScenario(
                 "latency-step-degradation",
