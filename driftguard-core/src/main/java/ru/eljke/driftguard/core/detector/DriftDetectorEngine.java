@@ -1,0 +1,88 @@
+package ru.eljke.driftguard.core.detector;
+
+import ru.eljke.driftguard.core.config.DetectorConfig;
+import ru.eljke.driftguard.core.config.DetectorDefinition;
+import ru.eljke.driftguard.core.domain.DriftEvent;
+import ru.eljke.driftguard.core.domain.MetricPoint;
+import ru.eljke.driftguard.core.state.DetectorStateStore;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Transport-agnostic оркестратор обнаружения drift-а в метриках.
+ *
+ * <p>Engine не владеет потоками исполнения и не открывает сетевых соединений.
+ * Он применяет настроенные detector definitions к входящим {@link MetricPoint},
+ * находит алгоритмы через {@link DetectorRegistry}, читает и сохраняет
+ * состояние через {@link DetectorStateStore}, а затем возвращает созданные
+ * {@link DriftEvent}.</p>
+ */
+public final class DriftDetectorEngine {
+    private final DetectorRegistry registry;
+    private final DetectorStateStore stateStore;
+    private final List<DetectorDefinition> definitions;
+
+    public DriftDetectorEngine(
+            DetectorRegistry registry,
+            DetectorStateStore stateStore,
+            List<DetectorDefinition> definitions
+    ) {
+        this.registry = Objects.requireNonNull(registry, "registry must not be null");
+        this.stateStore = Objects.requireNonNull(stateStore, "stateStore must not be null");
+        this.definitions = List.copyOf(definitions == null ? List.of() : definitions);
+    }
+
+    /**
+     * Обрабатывает одну точку метрики через все подходящие detector definitions.
+     *
+     * @return immutable-список drift events; обычно пустой или из одного элемента,
+     * но может содержать несколько событий, если подошло несколько definitions
+     */
+    public List<DriftEvent> detect(MetricPoint point) {
+        Objects.requireNonNull(point, "point must not be null");
+        List<DriftEvent> events = new ArrayList<>();
+        for (DetectorDefinition definition : definitions) {
+            if (!definition.matches(point.key())) {
+                continue;
+            }
+            events.addAll(detectWithDefinition(point, definition));
+        }
+        return List.copyOf(events);
+    }
+
+    private List<DriftEvent> detectWithDefinition(MetricPoint point, DetectorDefinition definition) {
+        DetectorAlgorithm<?, ?> rawAlgorithm = registry.find(definition.config().algorithm())
+                .orElseThrow(() -> new IllegalArgumentException("Unknown detector algorithm: " + definition.config().algorithm()));
+        return detectTyped(point, definition, rawAlgorithm);
+    }
+
+    private <C extends DetectorConfig, S extends DetectorState> List<DriftEvent> detectTyped(
+            MetricPoint point,
+            DetectorDefinition definition,
+            DetectorAlgorithm<C, S> algorithm
+    ) {
+        C config = algorithm.configType().cast(definition.config());
+        DetectorInstanceKey instanceKey = new DetectorInstanceKey(point.key(), definition.name());
+        S state;
+        DetectorState existing = stateStore.get(instanceKey).orElse(null);
+        if (existing == null) {
+            state = algorithm.initialState(config);
+        } else {
+            if (!existing.algorithm().equals(algorithm.name())) {
+                throw new IllegalStateException("Stored state algorithm mismatch for " + instanceKey);
+            }
+            state = castState(existing);
+        }
+
+        DetectionResult<S> result = algorithm.detect(point, state, config, new DetectionContext(definition.name()));
+        stateStore.put(instanceKey, result.state());
+        return result.eventValue().stream().toList();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <S extends DetectorState> S castState(DetectorState state) {
+        return (S) state;
+    }
+}
