@@ -1,5 +1,7 @@
 package ru.eljke.driftguard.demo;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/demo")
+@Tag(name = "Demo", description = "REST API демонстрационного сценария DriftGuard")
 public class DemoController {
     private final DemoScenarioService service;
 
@@ -19,26 +22,31 @@ public class DemoController {
     }
 
     @GetMapping
+    @Operation(summary = "Возвращает последний результат демонстрационного запуска")
     public DemoRunResult overview() {
         return service.lastResult();
     }
 
     @GetMapping("/events")
+    @Operation(summary = "Возвращает события дрейфа из последнего запуска")
     public List<DriftEvent> events() {
         return service.lastResult().events();
     }
 
     @GetMapping("/quality")
+    @Operation(summary = "Возвращает оценку качества детекции из последнего запуска")
     public Object quality() {
         return service.lastResult().quality();
     }
 
     @PostMapping("/run")
+    @Operation(summary = "Перезапускает демонстрационный сценарий деградации latency")
     public DemoRunResult rerun() {
         return service.runLatencyDegradation();
     }
 
     @GetMapping("/help")
+    @Operation(summary = "Возвращает краткий список доступных demo endpoint-ов")
     public Map<String, String> help() {
         return Map.of(
                 "overview", "GET /api/demo",
