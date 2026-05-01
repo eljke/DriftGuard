@@ -10,6 +10,7 @@ import java.util.Map;
 /**
  * Обогащает OpenAPI схемы моделей, которые приходят из core/testkit модулей.
  */
+@SuppressWarnings("rawtypes")
 @Configuration
 public class OpenApiSchemaConfiguration {
     @Bean

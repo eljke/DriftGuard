@@ -21,6 +21,9 @@ class OpenApiEndpointTest {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.info.title").value("DriftGuard Demo API"))
-                .andExpect(jsonPath("$.paths['/api/demo/run']").exists());
+                .andExpect(jsonPath("$.paths['/api/demo/run']").exists())
+                .andExpect(jsonPath("$.components.schemas.DriftEvent.description").exists())
+                .andExpect(jsonPath("$.components.schemas.MetricPoint.properties.value.description").exists())
+                .andExpect(jsonPath("$.components.schemas.DemoRunResult.properties.quality.description").exists());
     }
 }
