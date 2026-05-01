@@ -84,9 +84,19 @@ public class OpenApiSchemaConfiguration {
                     Map.entry("bootstrapServers", "Kafka bootstrap servers."),
                     Map.entry("producedPoints", "Количество опубликованных producer-ом точек."),
                     Map.entry("totalPoints", "Общее количество точек в сценарии."),
+                    Map.entry("producers", "Состояние отдельных тестовых producer-ов."),
                     Map.entry("consumedEvents", "DriftEvent, прочитанные demo consumer-ом из output topic-а."),
                     Map.entry("samplePoints", "MetricPoint, опубликованные producer-ом и отображаемые на графике."),
                     Map.entry("error", "Последняя ошибка Kafka demo, если запуск не удался.")
+            ));
+            describe(schemas, "KafkaProducerStatus", "Состояние отдельного тестового producer-а в Kafka demo.", Map.of(
+                    "id", "Стабильный id producer-а.",
+                    "service", "Сервис, который producer имитирует.",
+                    "metric", "Публикуемая метрика.",
+                    "operation", "Операция или endpoint.",
+                    "producedPoints", "Количество опубликованных точек.",
+                    "totalPoints", "Общее количество точек producer-а.",
+                    "running", "Публикует ли producer поток сейчас."
             ));
             describe(schemas, "ToolLink", "Ссылка на инструмент локального demo-стенда.", Map.of(
                     "id", "Стабильный id инструмента.",

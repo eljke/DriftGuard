@@ -109,6 +109,7 @@ Demo UI позволяет запускать несколько synthetic scena
 - `throughput-drop` - падение throughput;
 - `queue-growth` - плавный рост queue size;
 - `seasonal-latency` - сезонная latency без ожидаемого drift-а.
+- `microservices-system` - несколько сервисов одновременно публикуют разные метрики.
 
 Dashboard показывает график потока, ожидаемые drift-интервалы, события detector-ов и quality metrics.
 Время в UI форматируется в таймзоне `Europe/Moscow`.
@@ -117,10 +118,16 @@ Instant-режим обрабатывает весь сценарий сразу
 Раздел `Kafka integration demo` запускает реальный контур:
 
 ```text
-test producer -> driftguard.demo.metrics -> Kafka Streams topology -> driftguard.demo.drift-events -> demo consumer -> UI
+test producers -> driftguard.demo.metrics -> Kafka Streams topology -> driftguard.demo.drift-events -> demo consumer -> UI
 ```
 
-В этом режиме demo producer публикует `MetricPoint` в Kafka, topology запускается через `driftguard-spring-boot-starter` и использует `driftguard-kafka`, а demo consumer читает `DriftEvent` из output topic-а. Сообщения и consumer groups можно смотреть в Kafka UI.
+В этом режиме demo producer-ы публикуют `MetricPoint` в Kafka, topology запускается через `driftguard-spring-boot-starter` и использует `driftguard-kafka`, а demo consumer читает `DriftEvent` из output topic-а. Сообщения и consumer groups можно смотреть в Kafka UI.
+
+Сценарий `microservices-system` запускает несколько producer-ов:
+
+- `checkout-service` публикует latency и throughput;
+- `payment-service` публикует error rate;
+- `orders-worker` публикует queue size.
 
 Раздел `Инструменты` содержит ссылки на Kafka UI, Prometheus, Grafana и Swagger.
 
