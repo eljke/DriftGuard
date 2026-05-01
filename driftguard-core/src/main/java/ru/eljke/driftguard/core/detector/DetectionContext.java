@@ -1,5 +1,7 @@
 package ru.eljke.driftguard.core.detector;
 
+import ru.eljke.driftguard.core.error.DriftGuardErrors;
+
 /**
  * Метаданные одного вызова, которые engine передаёт алгоритму.
  *
@@ -9,8 +11,6 @@ public record DetectionContext(
         String detectorName
 ) {
     public DetectionContext {
-        if (detectorName == null || detectorName.isBlank()) {
-            throw new IllegalArgumentException("detectorName must not be blank");
-        }
+        detectorName = DriftGuardErrors.requireNonBlank(detectorName, "detectorName");
     }
 }

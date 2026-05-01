@@ -1,5 +1,8 @@
 package ru.eljke.driftguard.core.detector;
 
+import ru.eljke.driftguard.core.error.CoreErrorReason;
+import ru.eljke.driftguard.core.error.DriftGuardErrors;
+
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,7 +20,7 @@ public final class SimpleDetectorRegistry implements DetectorRegistry {
         for (DetectorAlgorithm<?, ?> algorithm : algorithms == null ? List.<DetectorAlgorithm<?, ?>>of() : algorithms) {
             DetectorAlgorithm<?, ?> previous = byName.putIfAbsent(algorithm.name(), algorithm);
             if (previous != null) {
-                throw new IllegalArgumentException("Duplicate detector algorithm: " + algorithm.name());
+                throw DriftGuardErrors.validation(CoreErrorReason.DUPLICATE_ALGORITHM, algorithm.name());
             }
         }
         this.algorithms = Map.copyOf(byName);

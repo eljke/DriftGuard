@@ -1,5 +1,7 @@
 package ru.eljke.driftguard.core.config;
 
+import ru.eljke.driftguard.core.error.DriftGuardErrors;
+
 /**
  * Общая пара порогов warning/critical для алгоритмов со скалярным score.
  *
@@ -11,11 +13,7 @@ public record ThresholdConfig(
         double critical
 ) {
     public ThresholdConfig {
-        if (!Double.isFinite(warning) || warning <= 0) {
-            throw new IllegalArgumentException("warning threshold must be positive and finite");
-        }
-        if (!Double.isFinite(critical) || critical < warning) {
-            throw new IllegalArgumentException("critical threshold must be finite and greater than or equal to warning");
-        }
+        DriftGuardErrors.require(Double.isFinite(warning) && warning > 0, "warning threshold must be positive and finite");
+        DriftGuardErrors.require(Double.isFinite(critical) && critical >= warning, "critical threshold must be finite and greater than or equal to warning");
     }
 }

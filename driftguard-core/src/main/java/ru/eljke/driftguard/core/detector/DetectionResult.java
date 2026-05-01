@@ -1,6 +1,7 @@
 package ru.eljke.driftguard.core.detector;
 
 import ru.eljke.driftguard.core.domain.DriftEvent;
+import ru.eljke.driftguard.core.error.DriftGuardErrors;
 
 import java.util.Optional;
 
@@ -16,9 +17,7 @@ public record DetectionResult<S extends DetectorState>(
         DriftEvent event
 ) {
     public DetectionResult {
-        if (state == null) {
-            throw new IllegalArgumentException("state must not be null");
-        }
+        state = DriftGuardErrors.requireNonNull(state, "state");
     }
 
     public static <S extends DetectorState> DetectionResult<S> noDrift(S state) {

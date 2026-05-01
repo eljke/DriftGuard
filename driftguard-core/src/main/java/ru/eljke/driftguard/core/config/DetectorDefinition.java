@@ -1,8 +1,8 @@
 package ru.eljke.driftguard.core.config;
 
 import ru.eljke.driftguard.core.domain.MetricKey;
+import ru.eljke.driftguard.core.error.DriftGuardErrors;
 
-import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
@@ -24,7 +24,7 @@ public record DetectorDefinition(
 ) {
     public DetectorDefinition {
         name = normalize(name, "name");
-        config = Objects.requireNonNull(config, "config must not be null");
+        config = DriftGuardErrors.requireNonNull(config, "config");
         appliesTo = appliesTo == null ? key -> true : appliesTo;
         emissionPolicy = emissionPolicy == null ? EmissionPolicyConfig.DEFAULT : emissionPolicy;
     }
@@ -38,11 +38,6 @@ public record DetectorDefinition(
     }
 
     private static String normalize(String value, String field) {
-        Objects.requireNonNull(value, field + " must not be null");
-        String normalized = value.trim();
-        if (normalized.isEmpty()) {
-            throw new IllegalArgumentException(field + " must not be blank");
-        }
-        return normalized;
+        return DriftGuardErrors.requireNonBlank(value, field);
     }
 }

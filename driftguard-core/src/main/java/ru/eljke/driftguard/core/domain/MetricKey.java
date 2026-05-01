@@ -1,6 +1,7 @@
 package ru.eljke.driftguard.core.domain;
 
-import java.util.Objects;
+import ru.eljke.driftguard.core.error.DriftGuardErrors;
+
 import java.util.Optional;
 
 /**
@@ -41,12 +42,7 @@ public record MetricKey(
     }
 
     private static String normalizeRequired(String value, String field) {
-        Objects.requireNonNull(value, field + " must not be null");
-        String normalized = value.trim();
-        if (normalized.isEmpty()) {
-            throw new IllegalArgumentException(field + " must not be blank");
-        }
-        return normalized;
+        return DriftGuardErrors.requireNonBlank(value, field);
     }
 
     private static String normalizeOptional(String value) {

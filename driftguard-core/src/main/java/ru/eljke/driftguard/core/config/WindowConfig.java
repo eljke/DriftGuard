@@ -1,5 +1,7 @@
 package ru.eljke.driftguard.core.config;
 
+import ru.eljke.driftguard.core.error.DriftGuardErrors;
+
 /**
  * Общие настройки фиксированного окна.
  *
@@ -11,11 +13,7 @@ public record WindowConfig(
         int minSamples
 ) {
     public WindowConfig {
-        if (size <= 0) {
-            throw new IllegalArgumentException("window size must be positive");
-        }
-        if (minSamples <= 0 || minSamples > size) {
-            throw new IllegalArgumentException("minSamples must be in range [1, size]");
-        }
+        DriftGuardErrors.require(size > 0, "window size must be positive");
+        DriftGuardErrors.require(minSamples > 0 && minSamples <= size, "minSamples must be in range [1, size]");
     }
 }

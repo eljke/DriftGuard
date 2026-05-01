@@ -1,8 +1,9 @@
 package ru.eljke.driftguard.core.domain;
 
+import ru.eljke.driftguard.core.error.DriftGuardErrors;
+
 import java.time.Instant;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -48,8 +49,8 @@ public record DriftEvent(
 ) {
     public DriftEvent {
         id = id == null || id.isBlank() ? UUID.randomUUID().toString() : id;
-        key = Objects.requireNonNull(key, "key must not be null");
-        detectedAt = Objects.requireNonNull(detectedAt, "detectedAt must not be null");
+        key = DriftGuardErrors.requireNonNull(key, "key");
+        detectedAt = DriftGuardErrors.requireNonNull(detectedAt, "detectedAt");
         windowStart = windowStart == null ? detectedAt : windowStart;
         windowEnd = windowEnd == null ? detectedAt : windowEnd;
         direction = direction == null ? DriftDirection.UNKNOWN : direction;
@@ -62,11 +63,6 @@ public record DriftEvent(
     }
 
     private static String normalize(String value, String field) {
-        Objects.requireNonNull(value, field + " must not be null");
-        String normalized = value.trim();
-        if (normalized.isEmpty()) {
-            throw new IllegalArgumentException(field + " must not be blank");
-        }
-        return normalized;
+        return DriftGuardErrors.requireNonBlank(value, field);
     }
 }

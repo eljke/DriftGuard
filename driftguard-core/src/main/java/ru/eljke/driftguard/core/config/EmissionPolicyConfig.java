@@ -1,7 +1,8 @@
 package ru.eljke.driftguard.core.config;
 
+import ru.eljke.driftguard.core.error.DriftGuardErrors;
+
 import java.time.Duration;
-import java.util.Objects;
 
 /**
  * Политика генерации публичных drift events поверх внутренних сигналов алгоритма.
@@ -16,12 +17,8 @@ public record EmissionPolicyConfig(
     public static final EmissionPolicyConfig DEFAULT = new EmissionPolicyConfig(1, Duration.ZERO);
 
     public EmissionPolicyConfig {
-        if (minConsecutiveSignals <= 0) {
-            throw new IllegalArgumentException("minConsecutiveSignals must be positive");
-        }
-        cooldown = Objects.requireNonNull(cooldown, "cooldown must not be null");
-        if (cooldown.isNegative()) {
-            throw new IllegalArgumentException("cooldown must not be negative");
-        }
+        DriftGuardErrors.require(minConsecutiveSignals > 0, "minConsecutiveSignals must be positive");
+        cooldown = DriftGuardErrors.requireNonNull(cooldown, "cooldown");
+        DriftGuardErrors.require(!cooldown.isNegative(), "cooldown must not be negative");
     }
 }

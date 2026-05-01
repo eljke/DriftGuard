@@ -1,8 +1,10 @@
 package ru.eljke.driftguard.core.domain;
 
+import ru.eljke.driftguard.core.error.CoreErrorReason;
+import ru.eljke.driftguard.core.error.DriftGuardErrors;
+
 import java.time.Instant;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Одно наблюдаемое значение в потоке технических метрик.
@@ -28,11 +30,11 @@ public record MetricPoint(
         Map<String, Object> attributes
 ) {
     public MetricPoint {
-        key = Objects.requireNonNull(key, "key must not be null");
-        timestamp = Objects.requireNonNull(timestamp, "timestamp must not be null");
-        kind = Objects.requireNonNull(kind, "kind must not be null");
+        key = DriftGuardErrors.requireNonNull(key, "key");
+        timestamp = DriftGuardErrors.requireNonNull(timestamp, "timestamp");
+        kind = DriftGuardErrors.requireNonNull(kind, "kind");
         if (!Double.isFinite(value)) {
-            throw new IllegalArgumentException("value must be finite");
+            throw DriftGuardErrors.validation(CoreErrorReason.NON_FINITE_VALUE, "value");
         }
         tags = Map.copyOf(tags == null ? Map.of() : tags);
         attributes = Map.copyOf(attributes == null ? Map.of() : attributes);

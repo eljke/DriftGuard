@@ -1,8 +1,7 @@
 package ru.eljke.driftguard.core.detector;
 
 import ru.eljke.driftguard.core.domain.MetricKey;
-
-import java.util.Objects;
+import ru.eljke.driftguard.core.error.DriftGuardErrors;
 
 /**
  * Ключ для изоляции состояния detector-а по потоку метрик и detector definition.
@@ -15,10 +14,7 @@ public record DetectorInstanceKey(
         String detectorName
 ) {
     public DetectorInstanceKey {
-        metricKey = Objects.requireNonNull(metricKey, "metricKey must not be null");
-        if (detectorName == null || detectorName.isBlank()) {
-            throw new IllegalArgumentException("detectorName must not be blank");
-        }
-        detectorName = detectorName.trim();
+        metricKey = DriftGuardErrors.requireNonNull(metricKey, "metricKey");
+        detectorName = DriftGuardErrors.requireNonBlank(detectorName, "detectorName");
     }
 }

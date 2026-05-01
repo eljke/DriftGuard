@@ -4,13 +4,14 @@ import ru.eljke.driftguard.core.config.DetectorConfig;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricPoint;
+import ru.eljke.driftguard.core.error.CoreErrorReason;
+import ru.eljke.driftguard.core.error.DriftGuardErrors;
 import ru.eljke.driftguard.core.state.DetectorStateStore;
 import ru.eljke.driftguard.core.state.EmissionStateStore;
 import ru.eljke.driftguard.core.state.InMemoryEmissionStateStore;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Transport-agnostic оркестратор обнаружения drift-а в метриках.
@@ -41,9 +42,9 @@ public final class DriftDetectorEngine {
             EmissionStateStore emissionStateStore,
             List<DetectorDefinition> definitions
     ) {
-        this.registry = Objects.requireNonNull(registry, "registry must not be null");
-        this.stateStore = Objects.requireNonNull(stateStore, "stateStore must not be null");
-        this.emissionStateStore = Objects.requireNonNull(emissionStateStore, "emissionStateStore must not be null");
+        this.registry = DriftGuardErrors.requireNonNull(registry, "registry");
+        this.stateStore = DriftGuardErrors.requireNonNull(stateStore, "stateStore");
+        this.emissionStateStore = DriftGuardErrors.requireNonNull(emissionStateStore, "emissionStateStore");
         this.definitions = List.copyOf(definitions == null ? List.of() : definitions);
     }
 
@@ -54,7 +55,7 @@ public final class DriftDetectorEngine {
      * но может содержать несколько событий, если подошло несколько definitions
      */
     public List<DriftEvent> detect(MetricPoint point) {
-        Objects.requireNonNull(point, "point must not be null");
+        DriftGuardErrors.requireNonNull(point, "point");
         List<DriftEvent> events = new ArrayList<>();
         for (DetectorDefinition definition : definitions) {
             if (!definition.matches(point.key())) {
@@ -67,7 +68,7 @@ public final class DriftDetectorEngine {
 
     private List<DriftEvent> detectWithDefinition(MetricPoint point, DetectorDefinition definition) {
         DetectorAlgorithm<?, ?> rawAlgorithm = registry.find(definition.config().algorithm())
-                .orElseThrow(() -> new IllegalArgumentException("Unknown detector algorithm: " + definition.config().algorithm()));
+                .orElseThrow(() -> DriftGuardErrors.validation(CoreErrorReason.UNKNOWN_ALGORITHM, definition.config().algorithm()));
         return detectTyped(point, definition, rawAlgorithm);
     }
 
@@ -84,7 +85,7 @@ public final class DriftDetectorEngine {
             state = algorithm.initialState(config);
         } else {
             if (!existing.algorithm().equals(algorithm.name())) {
-                throw new IllegalStateException("Stored state algorithm mismatch for " + instanceKey);
+                throw DriftGuardErrors.validation(CoreErrorReason.STATE_ALGORITHM_MISMATCH, instanceKey);
             }
             state = castState(existing);
         }
