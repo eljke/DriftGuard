@@ -7,6 +7,7 @@ import ru.eljke.driftguard.algorithms.pagehinkley.PageHinkleyConfig;
 import ru.eljke.driftguard.algorithms.psi.PsiConfig;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
+import ru.eljke.driftguard.core.config.EmissionPolicyConfig;
 import ru.eljke.driftguard.core.domain.MetricKey;
 
 import java.util.ArrayList;
@@ -32,7 +33,12 @@ final class DetectorDefinitionFactory {
         String name = properties.getName() == null || properties.getName().isBlank()
                 ? config.algorithm() + "-detector"
                 : properties.getName().trim();
-        return new DetectorDefinition(name, config, selector(properties));
+        return new DetectorDefinition(name, config, selector(properties), emissionPolicy(properties));
+    }
+
+    private static EmissionPolicyConfig emissionPolicy(DriftGuardProperties.DetectorProperties properties) {
+        DriftGuardProperties.EmissionPolicyProperties policy = properties.getEmissionPolicy();
+        return new EmissionPolicyConfig(policy.getMinConsecutiveSignals(), policy.getCooldown());
     }
 
     private static DetectorConfig config(DriftGuardProperties.DetectorProperties properties) {
