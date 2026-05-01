@@ -1,0 +1,183 @@
+const elements = {
+    scenarioSelect: document.querySelector("#scenarioSelect"),
+    runButton: document.querySelector("#runButton"),
+    scenarioDescription: document.querySelector("#scenarioDescription"),
+    scenarioTitle: document.querySelector("#scenarioTitle"),
+    metricName: document.querySelector("#metricName"),
+    pointCount: document.querySelector("#pointCount"),
+    eventCount: document.querySelector("#eventCount"),
+    precision: document.querySelector("#precision"),
+    recall: document.querySelector("#recall"),
+    delay: document.querySelector("#delay"),
+    chart: document.querySelector("#metricChart"),
+    eventsTable: document.querySelector("#eventsTable"),
+    eventStatus: document.querySelector("#eventStatus"),
+    qualityStatus: document.querySelector("#qualityStatus"),
+    tp: document.querySelector("#tp"),
+    fp: document.querySelector("#fp"),
+    detectedIntervals: document.querySelector("#detectedIntervals"),
+    missedIntervals: document.querySelector("#missedIntervals")
+};
+
+let scenarios = [];
+
+async function init() {
+    scenarios = await fetchJson("/api/demo/scenarios");
+    elements.scenarioSelect.innerHTML = scenarios
+        .map(scenario => `<option value="${scenario.id}">${scenario.title}</option>`)
+        .join("");
+    elements.scenarioSelect.addEventListener("change", updateScenarioDescription);
+    elements.runButton.addEventListener("click", runSelectedScenario);
+    updateScenarioDescription();
+    render(await fetchJson("/api/demo"));
+}
+
+async function runSelectedScenario() {
+    elements.runButton.disabled = true;
+    try {
+        const scenario = elements.scenarioSelect.value;
+        render(await fetchJson(`/api/demo/run/${scenario}`, {method: "POST"}));
+    } finally {
+        elements.runButton.disabled = false;
+    }
+}
+
+function updateScenarioDescription() {
+    const selected = scenarios.find(scenario => scenario.id === elements.scenarioSelect.value);
+    elements.scenarioDescription.textContent = selected ? selected.description : "";
+}
+
+async function fetchJson(url, options = {}) {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+    }
+    return response.json();
+}
+
+function render(result) {
+    elements.scenarioTitle.textContent = result.title;
+    elements.metricName.textContent = result.samplePoints[0]?.key?.metric ?? "metric";
+    elements.pointCount.textContent = result.metricPoints;
+    elements.eventCount.textContent = result.events.length;
+    elements.precision.textContent = formatRatio(result.quality.precision);
+    elements.recall.textContent = formatRatio(result.quality.recall);
+    elements.delay.textContent = formatDelay(result.quality.firstDetectionDelay);
+    elements.tp.textContent = result.quality.truePositiveEvents;
+    elements.fp.textContent = result.quality.falsePositiveEvents;
+    elements.detectedIntervals.textContent = result.quality.detectedDriftIntervals;
+    elements.missedIntervals.textContent = result.quality.missedDriftIntervals;
+    elements.eventStatus.textContent = result.events.length === 0 ? "none" : `${result.events.length} event`;
+    elements.qualityStatus.textContent = result.quality.detected ? "drift detected" : "no expected drift";
+    elements.qualityStatus.className = result.quality.detected ? "badge status-ok" : "badge";
+    renderEvents(result.events);
+    drawChart(result.samplePoints, result.events, result.expectedDrifts);
+}
+
+function renderEvents(events) {
+    if (events.length === 0) {
+        elements.eventsTable.innerHTML = `<tr><td colspan="6">Событий нет</td></tr>`;
+        return;
+    }
+    elements.eventsTable.innerHTML = events.map(event => `
+        <tr>
+            <td>${formatTime(event.detectedAt)}</td>
+            <td>${event.detector}</td>
+            <td class="severity-${String(event.severity).toLowerCase()}">${event.severity}</td>
+            <td>${formatNumber(event.score)}</td>
+            <td>${formatNumber(event.currentValue)}</td>
+            <td>${formatNumber(event.baselineValue)}</td>
+        </tr>
+    `).join("");
+}
+
+function drawChart(points, events, intervals) {
+    const canvas = elements.chart;
+    const ctx = canvas.getContext("2d");
+    const width = canvas.width;
+    const height = canvas.height;
+    ctx.clearRect(0, 0, width, height);
+    if (!points.length) {
+        return;
+    }
+    const padding = {left: 54, right: 22, top: 24, bottom: 34};
+    const values = points.map(point => point.value);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const range = Math.max(1, max - min);
+    const startTime = Date.parse(points[0].timestamp);
+    const endTime = Date.parse(points[points.length - 1].timestamp);
+    const timeRange = Math.max(1, endTime - startTime);
+
+    const x = timestamp => padding.left + ((Date.parse(timestamp) - startTime) / timeRange) * (width - padding.left - padding.right);
+    const y = value => height - padding.bottom - ((value - min) / range) * (height - padding.top - padding.bottom);
+
+    ctx.strokeStyle = "#d9e1ea";
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+        const yy = padding.top + i * (height - padding.top - padding.bottom) / 4;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, yy);
+        ctx.lineTo(width - padding.right, yy);
+        ctx.stroke();
+    }
+
+    ctx.fillStyle = "rgba(194, 65, 12, 0.10)";
+    intervals.forEach(interval => {
+        const left = x(interval.start);
+        const right = x(interval.end);
+        ctx.fillRect(left, padding.top, Math.max(2, right - left), height - padding.top - padding.bottom);
+    });
+
+    ctx.strokeStyle = "#007c89";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    points.forEach((point, index) => {
+        const px = x(point.timestamp);
+        const py = y(point.value);
+        if (index === 0) {
+            ctx.moveTo(px, py);
+        } else {
+            ctx.lineTo(px, py);
+        }
+    });
+    ctx.stroke();
+
+    ctx.fillStyle = "#c2410c";
+    events.forEach(event => {
+        const px = x(event.detectedAt);
+        const py = y(event.currentValue);
+        ctx.beginPath();
+        ctx.arc(px, py, 5, 0, Math.PI * 2);
+        ctx.fill();
+    });
+
+    ctx.fillStyle = "#637083";
+    ctx.font = "13px Segoe UI, Arial";
+    ctx.fillText(formatNumber(max), 8, padding.top + 4);
+    ctx.fillText(formatNumber(min), 8, height - padding.bottom);
+}
+
+function formatRatio(value) {
+    return `${Math.round((value ?? 0) * 100)}%`;
+}
+
+function formatDelay(value) {
+    if (!value) {
+        return "-";
+    }
+    const match = String(value).match(/PT(\d+)S/);
+    return match ? `${match[1]}s` : value;
+}
+
+function formatNumber(value) {
+    return Number(value).toLocaleString("ru-RU", {maximumFractionDigits: 3});
+}
+
+function formatTime(value) {
+    return new Date(value).toLocaleTimeString("ru-RU", {hour: "2-digit", minute: "2-digit", second: "2-digit"});
+}
+
+init().catch(error => {
+    elements.scenarioDescription.textContent = error.message;
+});

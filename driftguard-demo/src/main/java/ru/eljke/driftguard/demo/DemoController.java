@@ -3,6 +3,7 @@ package ru.eljke.driftguard.demo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,10 +40,22 @@ public class DemoController {
         return service.lastResult().quality();
     }
 
+    @GetMapping("/scenarios")
+    @Operation(summary = "Возвращает доступные демонстрационные сценарии")
+    public List<DemoScenarioDescriptor> scenarios() {
+        return service.scenarios();
+    }
+
     @PostMapping("/run")
     @Operation(summary = "Перезапускает демонстрационный сценарий деградации latency")
     public DemoRunResult rerun() {
         return service.runLatencyDegradation();
+    }
+
+    @PostMapping("/run/{scenario}")
+    @Operation(summary = "Запускает выбранный демонстрационный сценарий")
+    public DemoRunResult runScenario(@PathVariable String scenario) {
+        return service.run(scenario);
     }
 
     @GetMapping("/help")
@@ -52,7 +65,9 @@ public class DemoController {
                 "overview", "GET /api/demo",
                 "events", "GET /api/demo/events",
                 "quality", "GET /api/demo/quality",
-                "rerun", "POST /api/demo/run"
+                "scenarios", "GET /api/demo/scenarios",
+                "rerun", "POST /api/demo/run",
+                "runScenario", "POST /api/demo/run/{scenario}"
         );
     }
 }

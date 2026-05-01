@@ -21,3 +21,36 @@ driftguard:
       emission-policy:
         min-consecutive-signals: 2
         cooldown: 10s
+    - name: error-rate-page-hinkley
+      algorithm: page-hinkley
+      metrics: [error-rate]
+      warmup-samples: 20
+      delta: 0.001
+      warning-threshold: 0.03
+      critical-threshold: 0.08
+      alpha: 0.05
+      emission-policy:
+        min-consecutive-signals: 2
+        cooldown: 10s
+    - name: throughput-page-hinkley
+      algorithm: page-hinkley
+      metrics: [throughput]
+      warmup-samples: 20
+      delta: 1.0
+      warning-threshold: 120.0
+      critical-threshold: 250.0
+      alpha: 0.05
+      emission-policy:
+        min-consecutive-signals: 2
+        cooldown: 10s
+    - name: queue-size-page-hinkley
+      algorithm: page-hinkley
+      metrics: [queue-size]
+      warmup-samples: 20
+      delta: 0.1
+      warning-threshold: 25.0
+      critical-threshold: 60.0
+      alpha: 0.05
+      emission-policy:
+        min-consecutive-signals: 2
+        cooldown: 10s

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DriftGuard Demo</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="topbar">
+    <div>
+        <h1>DriftGuard Demo</h1>
+        <p>Поток технических метрик, события drift-а и качество детекции.</p>
+    </div>
+    <nav>
+        <a href="/swagger-ui.html">Swagger</a>
+        <a href="/actuator/health">Health</a>
+    </nav>
+</header>
+
+<main class="layout">
+    <section class="panel controls">
+        <div class="control-row">
+            <label for="scenarioSelect">Сценарий</label>
+            <select id="scenarioSelect"></select>
+            <button id="runButton" type="button">Запустить</button>
+        </div>
+        <p id="scenarioDescription" class="muted"></p>
+    </section>
+
+    <section class="metric-strip" aria-live="polite">
+        <div class="metric">
+            <span>Точек</span>
+            <strong id="pointCount">0</strong>
+        </div>
+        <div class="metric">
+            <span>Событий</span>
+            <strong id="eventCount">0</strong>
+        </div>
+        <div class="metric">
+            <span>Precision</span>
+            <strong id="precision">0</strong>
+        </div>
+        <div class="metric">
+            <span>Recall</span>
+            <strong id="recall">0</strong>
+        </div>
+        <div class="metric">
+            <span>Задержка</span>
+            <strong id="delay">-</strong>
+        </div>
+    </section>
+
+    <section class="panel chart-panel">
+        <div class="section-head">
+            <h2 id="scenarioTitle">Scenario</h2>
+            <span id="metricName" class="badge">metric</span>
+        </div>
+        <canvas id="metricChart" width="1100" height="360"></canvas>
+    </section>
+
+    <section class="split">
+        <div class="panel">
+            <div class="section-head">
+                <h2>Drift Events</h2>
+                <span id="eventStatus" class="badge">none</span>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Detector</th>
+                        <th>Severity</th>
+                        <th>Score</th>
+                        <th>Current</th>
+                        <th>Baseline</th>
+                    </tr>
+                    </thead>
+                    <tbody id="eventsTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="section-head">
+                <h2>Quality</h2>
+                <span id="qualityStatus" class="badge">waiting</span>
+            </div>
+            <dl class="quality-grid">
+                <dt>True positive events</dt>
+                <dd id="tp">0</dd>
+                <dt>False positive events</dt>
+                <dd id="fp">0</dd>
+                <dt>Detected intervals</dt>
+                <dd id="detectedIntervals">0</dd>
+                <dt>Missed intervals</dt>
+                <dd id="missedIntervals">0</dd>
+            </dl>
+        </div>
+    </section>
+</main>
+
+<script src="/app.js"></script>
+</body>
+</html>

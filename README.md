@@ -72,21 +72,27 @@ mvn -f driftguard-demo/pom.xml spring-boot:run
 После старта доступны endpoints:
 
 ```text
+GET  http://localhost:8080/
 GET  http://localhost:8080/api/demo
 GET  http://localhost:8080/api/demo/events
 GET  http://localhost:8080/api/demo/quality
+GET  http://localhost:8080/api/demo/scenarios
 GET  http://localhost:8080/api/demo/help
 POST http://localhost:8080/api/demo/run
+POST http://localhost:8080/api/demo/run/{scenario}
 GET  http://localhost:8080/v3/api-docs
 GET  http://localhost:8080/swagger-ui.html
 ```
 
-Demo запускает synthetic latency degradation scenario:
+Demo UI позволяет запускать несколько synthetic scenarios:
 
-- первые точки имитируют стабильную latency около 100 ms;
-- затем происходит step degradation примерно до 260 ms;
-- DriftGuard обрабатывает поток через `DriftDetectorEngine`;
-- REST API показывает drift events и quality metrics.
+- `latency-step` - резкий рост latency;
+- `error-rate-spike` - кратковременный всплеск error rate;
+- `throughput-drop` - падение throughput;
+- `queue-growth` - плавный рост queue size;
+- `seasonal-latency` - сезонная latency без ожидаемого drift-а.
+
+Dashboard показывает график потока, ожидаемые drift-интервалы, события detector-ов и quality metrics.
 
 ## Использование Core Без Spring И Kafka
 
