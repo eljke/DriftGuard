@@ -9,6 +9,7 @@ import ru.eljke.driftguard.core.config.DetectorConfig;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
 import ru.eljke.driftguard.core.config.EmissionPolicyConfig;
 import ru.eljke.driftguard.core.domain.MetricKey;
+import ru.eljke.driftguard.core.error.DriftGuardValidationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +80,7 @@ final class DetectorDefinitionFactory {
                     properties.getCriticalPValue(),
                     properties.getMinExpectedCount()
             );
-            default -> throw new IllegalArgumentException("Unsupported DriftGuard algorithm: " + algorithm);
+            default -> throw new DriftGuardValidationException(SpringDriftGuardErrorReason.UNSUPPORTED_ALGORITHM, algorithm);
         };
     }
 
@@ -102,7 +103,7 @@ final class DetectorDefinitionFactory {
 
     private static String required(String value, String field) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(field + " must not be blank");
+            throw new DriftGuardValidationException(SpringDriftGuardErrorReason.REQUIRED_PROPERTY, field);
         }
         return value.trim();
     }

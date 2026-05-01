@@ -1,0 +1,15 @@
+package ru.eljke.driftguard.demo;
+
+import java.time.Instant;
+
+/**
+ * Единый JSON-ответ demo API при ошибке.
+ */
+public record ApiErrorResponse(
+        Instant timestamp,
+        int status,
+        String code,
+        String message,
+        String path
+) {
+}

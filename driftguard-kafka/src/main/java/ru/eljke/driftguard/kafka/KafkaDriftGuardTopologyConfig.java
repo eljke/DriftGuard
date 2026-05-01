@@ -1,5 +1,7 @@
 package ru.eljke.driftguard.kafka;
 
+import ru.eljke.driftguard.core.error.DriftGuardValidationException;
+
 import java.util.List;
 
 /**
@@ -15,10 +17,10 @@ public record KafkaDriftGuardTopologyConfig(
     public KafkaDriftGuardTopologyConfig {
         inputTopics = List.copyOf(inputTopics == null ? List.of() : inputTopics);
         if (inputTopics.isEmpty()) {
-            throw new IllegalArgumentException("inputTopics must not be empty");
+            throw new DriftGuardValidationException(KafkaDriftGuardErrorReason.EMPTY_INPUT_TOPICS);
         }
         if (outputTopic == null || outputTopic.isBlank()) {
-            throw new IllegalArgumentException("outputTopic must not be blank");
+            throw new DriftGuardValidationException(KafkaDriftGuardErrorReason.BLANK_OUTPUT_TOPIC);
         }
         outputTopic = outputTopic.trim();
     }

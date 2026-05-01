@@ -2,6 +2,7 @@ package ru.eljke.driftguard.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.serialization.Deserializer;
+import ru.eljke.driftguard.core.error.DriftGuardException;
 
 /**
  * Kafka JSON deserializer для конкретного DriftGuard-типа.
@@ -23,7 +24,7 @@ public final class JsonDeserializer<T> implements Deserializer<T> {
         try {
             return objectMapper.readValue(data, type);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to deserialize JSON from topic " + topic + " as " + type.getName(), e);
+            throw new DriftGuardException(KafkaDriftGuardErrorReason.JSON_DESERIALIZATION_FAILED, e, type.getName());
         }
     }
 }

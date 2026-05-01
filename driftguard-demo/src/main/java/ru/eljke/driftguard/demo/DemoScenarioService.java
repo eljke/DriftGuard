@@ -7,6 +7,7 @@ import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricKey;
 import ru.eljke.driftguard.core.domain.MetricKind;
 import ru.eljke.driftguard.core.domain.MetricPoint;
+import ru.eljke.driftguard.core.error.DriftGuardValidationException;
 import ru.eljke.driftguard.testkit.DetectionEvaluator;
 import ru.eljke.driftguard.testkit.DriftInterval;
 import ru.eljke.driftguard.testkit.GradualDriftScenario;
@@ -154,7 +155,7 @@ public class DemoScenarioService {
         return SCENARIOS.stream()
                 .filter(scenario -> scenario.id().equals(id))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown demo scenario: " + id));
+                .orElseThrow(() -> new DriftGuardValidationException(DemoErrorReason.UNKNOWN_SCENARIO, id));
     }
 
     private static MetricScenario createScenario(String scenarioId, String instance) {
@@ -200,7 +201,7 @@ public class DemoScenarioService {
                     45,
                     2.0
             );
-            default -> throw new IllegalArgumentException("Unknown demo scenario: " + scenarioId);
+            default -> throw new DriftGuardValidationException(DemoErrorReason.UNKNOWN_SCENARIO, scenarioId);
         };
     }
 

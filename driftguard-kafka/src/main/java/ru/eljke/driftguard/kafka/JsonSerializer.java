@@ -2,6 +2,7 @@ package ru.eljke.driftguard.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.serialization.Serializer;
+import ru.eljke.driftguard.core.error.DriftGuardException;
 
 /**
  * Kafka JSON serializer для DriftGuard DTO и record-типов.
@@ -21,7 +22,7 @@ public final class JsonSerializer<T> implements Serializer<T> {
         try {
             return objectMapper.writeValueAsBytes(data);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to serialize JSON for topic " + topic, e);
+            throw new DriftGuardException(KafkaDriftGuardErrorReason.JSON_SERIALIZATION_FAILED, e, data.getClass().getName());
         }
     }
 }
