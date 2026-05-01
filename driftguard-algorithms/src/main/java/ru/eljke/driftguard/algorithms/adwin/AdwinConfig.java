@@ -3,11 +3,11 @@ package ru.eljke.driftguard.algorithms.adwin;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 
 /**
- * Конфигурация MVP ADWIN-style detector-а с адаптивным окном.
+ * Конфигурация ADWIN-style detector-а с адаптивным окном.
  *
- * <p>Это практичная первая реализация на основе сравнения двух половин
- * sliding window через Hoeffding bound. Она сохраняет интеграционную форму
- * ADWIN и при этом не требует внешних зависимостей.</p>
+ * <p>Detector проверяет несколько возможных разрезов окна через Hoeffding
+ * bound. После подтверждённого drift-а старый фрагмент окна отбрасывается,
+ * а новое состояние продолжает работать с актуальной частью потока.</p>
  *
  * @param windowSize общий размер sliding window
  * @param minSubWindowSize минимальный размер каждого сравниваемого sub-window

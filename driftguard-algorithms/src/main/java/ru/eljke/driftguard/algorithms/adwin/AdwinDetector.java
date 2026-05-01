@@ -34,34 +34,66 @@ public final class AdwinDetector implements DetectorAlgorithm<AdwinConfig, Adwin
     @Override
     public DetectionResult<AdwinState> detect(MetricPoint point, AdwinState state, AdwinConfig config, DetectionContext context) {
         SlidingDoubleWindow window = state.window().add(point.value());
-        AdwinState next = new AdwinState(window);
-        if (!window.isFull()) {
-            return DetectionResult.noDrift(next);
+        if (window.size() < config.minSubWindowSize() * 2) {
+            return DetectionResult.noDrift(new AdwinState(window));
         }
-        double[] values = window.toArray();
-        int split = values.length / 2;
-        double[] left = Arrays.copyOfRange(values, 0, split);
-        double[] right = Arrays.copyOfRange(values, split, values.length);
-        double leftMean = Arrays.stream(left).average().orElse(0.0);
-        double rightMean = Arrays.stream(right).average().orElse(0.0);
-        double diff = Math.abs(rightMean - leftMean);
-        double epsilon = Math.sqrt(0.5 * Math.log(4.0 / config.delta()) * (1.0 / left.length + 1.0 / right.length));
-        if (left.length < config.minSubWindowSize() || right.length < config.minSubWindowSize() || diff <= epsilon) {
-            return DetectionResult.noDrift(next);
+        Cut best = findBestCut(window.toArray(), config);
+        if (best == null) {
+            return DetectionResult.noDrift(new AdwinState(window));
         }
-        DriftDirection direction = rightMean > leftMean ? DriftDirection.UP : DriftDirection.DOWN;
-        DriftSeverity severity = diff >= epsilon * config.criticalMultiplier() ? DriftSeverity.CRITICAL : DriftSeverity.WARNING;
+        double[] currentValues = Arrays.copyOfRange(window.toArray(), best.split(), window.size());
+        AdwinState next = new AdwinState(SlidingDoubleWindow.of(config.windowSize(), currentValues));
+        DriftDirection direction = best.rightMean() > best.leftMean() ? DriftDirection.UP : DriftDirection.DOWN;
+        DriftSeverity severity = best.score() >= config.criticalMultiplier() ? DriftSeverity.CRITICAL : DriftSeverity.WARNING;
         return DetectionResult.drift(next, DriftEvents.create(
                 point,
                 context,
                 name(),
                 direction,
                 severity,
-                diff / epsilon,
-                rightMean,
-                leftMean,
+                best.score(),
+                best.rightMean(),
+                best.leftMean(),
                 "ADWIN-style adaptive window mean difference exceeded Hoeffding bound",
-                Map.of("epsilon", epsilon, "leftMean", leftMean, "rightMean", rightMean)
+                Map.of(
+                        "epsilon", best.epsilon(),
+                        "leftMean", best.leftMean(),
+                        "rightMean", best.rightMean(),
+                        "split", best.split(),
+                        "windowSize", window.size()
+                )
         ));
+    }
+
+    private Cut findBestCut(double[] values, AdwinConfig config) {
+        Cut best = null;
+        for (int split = config.minSubWindowSize(); split <= values.length - config.minSubWindowSize(); split++) {
+            Cut candidate = evaluate(values, split, config);
+            if (candidate != null && (best == null || candidate.score() > best.score())) {
+                best = candidate;
+            }
+        }
+        return best;
+    }
+
+    private Cut evaluate(double[] values, int split, AdwinConfig config) {
+        double[] left = Arrays.copyOfRange(values, 0, split);
+        double[] right = Arrays.copyOfRange(values, split, values.length);
+        double leftMean = Arrays.stream(left).average().orElse(0.0);
+        double rightMean = Arrays.stream(right).average().orElse(0.0);
+        double diff = Math.abs(rightMean - leftMean);
+        double epsilon = Math.sqrt(0.5 * Math.log(4.0 / config.delta()) * (1.0 / left.length + 1.0 / right.length));
+        if (diff <= epsilon) {
+            return null;
+        }
+        return new Cut(split, leftMean, rightMean, epsilon, diff / epsilon);
+    }
+
+    private record Cut(int split, double leftMean, double rightMean, double epsilon, double score) {
+        private Cut {
+            if (split <= 0) {
+                throw new IllegalArgumentException("split must be positive");
+            }
+        }
     }
 }

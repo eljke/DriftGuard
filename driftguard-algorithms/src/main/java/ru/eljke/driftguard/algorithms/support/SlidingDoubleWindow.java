@@ -27,6 +27,14 @@ public final class SlidingDoubleWindow {
         this.values = values;
     }
 
+    public static SlidingDoubleWindow of(int capacity, double[] values) {
+        SlidingDoubleWindow window = new SlidingDoubleWindow(capacity);
+        for (double value : values == null ? new double[0] : values) {
+            window = window.add(value);
+        }
+        return window;
+    }
+
     public SlidingDoubleWindow add(double value) {
         ArrayDeque<Double> next = new ArrayDeque<>(values);
         if (next.size() == capacity) {

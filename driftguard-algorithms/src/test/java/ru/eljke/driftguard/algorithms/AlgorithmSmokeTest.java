@@ -41,6 +41,31 @@ class AlgorithmSmokeTest {
     }
 
     @Test
+    void adwinShrinksWindowAfterDetectedShift() {
+        DriftDetectorEngine engine = new DriftDetectorEngine(
+                DefaultAlgorithms.registry(),
+                new InMemoryDetectorStateStore(),
+                List.of(new DetectorDefinition("adwin-detector", new AdwinConfig(40, 10, 0.2, 2.0), key -> true))
+        );
+        MetricKey key = MetricKey.of("payments", "latency");
+        List<DriftEvent> lastEvents = List.of();
+        for (int i = 0; i < 70; i++) {
+            double value = i < 35 ? 100.0 : 180.0;
+            lastEvents = engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:00Z").plusSeconds(i), value));
+            if (!lastEvents.isEmpty()) {
+                break;
+            }
+        }
+
+        assertFalse(lastEvents.isEmpty());
+        Object split = lastEvents.getFirst().details().get("split");
+        Object windowSize = lastEvents.getFirst().details().get("windowSize");
+        assertTrue(split instanceof Integer);
+        assertTrue(windowSize instanceof Integer);
+        assertTrue((Integer) split < (Integer) windowSize);
+    }
+
+    @Test
     void psiDetectsDistributionShift() {
         assertDetects(new PsiConfig(30, 30, 5, 0.1, 0.25, 1e-4), stableThenShifted());
     }
