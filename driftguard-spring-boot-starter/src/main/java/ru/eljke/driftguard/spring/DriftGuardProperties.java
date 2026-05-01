@@ -37,8 +37,23 @@ public class DriftGuardProperties {
      */
     private List<DetectorProperties> detectors = new ArrayList<>();
 
+    /**
+     * Настройки Kafka Streams adapter-а.
+     *
+     * <p>Kafka-часть выключена по умолчанию, потому что не каждому Spring
+     * приложению нужен transport adapter. Если включить {@code kafka.enabled},
+     * starter создаст и запустит Kafka Streams topology, которая читает
+     * {@code MetricPoint} из input topic-ов и пишет {@code DriftEvent} в output
+     * topic.</p>
+     */
+    private KafkaProperties kafka = new KafkaProperties();
+
     public void setDetectors(List<DetectorProperties> detectors) {
         this.detectors = detectors == null ? new ArrayList<>() : detectors;
+    }
+
+    public void setKafka(KafkaProperties kafka) {
+        this.kafka = kafka == null ? new KafkaProperties() : kafka;
     }
 
     @Getter
@@ -174,5 +189,49 @@ public class DriftGuardProperties {
          * для одного потока метрик.
          */
         private Duration cooldown = Duration.ZERO;
+    }
+
+    @Getter
+    @Setter
+    public static class KafkaProperties {
+        /**
+         * Включает Kafka Streams topology DriftGuard.
+         */
+        private boolean enabled = false;
+
+        /**
+         * Kafka bootstrap servers, например {@code localhost:9092}.
+         */
+        private String bootstrapServers = "localhost:9092";
+
+        /**
+         * Kafka Streams application id.
+         */
+        private String applicationId = "driftguard";
+
+        /**
+         * Topic-и с JSON {@code MetricPoint}.
+         */
+        private List<String> inputTopics = new ArrayList<>();
+
+        /**
+         * Topic, куда topology пишет JSON {@code DriftEvent}.
+         */
+        private String outputTopic = "driftguard.drift-events";
+
+        /**
+         * Локальная директория state store-ов Kafka Streams. Если пусто,
+         * используется значение Kafka Streams по умолчанию.
+         */
+        private String stateDir;
+
+        /**
+         * Запускать ли topology автоматически при старте Spring context-а.
+         */
+        private boolean autoStartup = true;
+
+        public void setInputTopics(List<String> inputTopics) {
+            this.inputTopics = inputTopics == null ? new ArrayList<>() : inputTopics;
+        }
     }
 }

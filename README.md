@@ -188,6 +188,21 @@ Starter автоматически создаёт:
 - `List<DetectorDefinition>`;
 - `DriftDetectorEngine`.
 
+Если включить `driftguard.kafka.enabled`, starter также создаёт Kafka Streams topology для обработки `MetricPoint` из Kafka:
+
+```yaml
+driftguard:
+  kafka:
+    enabled: true
+    bootstrap-servers: localhost:9092
+    application-id: driftguard-prod
+    input-topics: [technical-metrics]
+    output-topic: drift-events
+    state-dir: ./target/kafka-streams-state
+```
+
+Topology запускается вместе со Spring context-ом и останавливается при shutdown. Для тестов или ручного запуска можно задать `driftguard.kafka.auto-startup=false`.
+
 ### Настройки `application.yml`
 
 | Property                                   | Назначение                                                                            |
@@ -212,6 +227,13 @@ Starter автоматически создаёт:
 | `min-expected-count`                       | Минимальная ожидаемая частота bucket-а в `chi-square`.                                |
 | `emission-policy.min-consecutive-signals`  | Сколько подряд сигналов нужно до публикации `DriftEvent`.                             |
 | `emission-policy.cooldown`                 | Минимальная пауза между опубликованными событиями одного detector-а по одному потоку. |
+| `driftguard.kafka.enabled`                 | Включает Kafka Streams topology DriftGuard.                                           |
+| `driftguard.kafka.bootstrap-servers`       | Kafka bootstrap servers.                                                              |
+| `driftguard.kafka.application-id`          | Kafka Streams application id.                                                         |
+| `driftguard.kafka.input-topics`            | Topic-и с JSON `MetricPoint`.                                                         |
+| `driftguard.kafka.output-topic`            | Topic для JSON `DriftEvent`.                                                          |
+| `driftguard.kafka.state-dir`               | Локальная директория state store-ов Kafka Streams.                                    |
+| `driftguard.kafka.auto-startup`            | Автоматически запускать topology при старте Spring context-а.                         |
 
 В приложении можно просто внедрить engine:
 
@@ -316,6 +338,8 @@ DetectionMetrics quality = DetectionEvaluator.evaluate(scenario, events);
 5. Добавить tests на stable stream, drift stream и шум.
 6. При необходимости добавить mapping в `DetectorDefinitionFactory` для Spring Boot starter.
 
-## Статус Kafka-Модуля
+## Kafka-Модуль
 
 Kafka-модуль содержит JSON SerDes для `MetricPoint` и `DriftEvent`, а также `KafkaDriftGuardTopologyBuilder`. Текущая topology читает `MetricPoint` из input topic-ов, вызывает `DriftDetectorEngine` и пишет `DriftEvent` в output topic.
+
+В Spring Boot приложениях эту topology можно запускать через starter и свойства `driftguard.kafka.*`.

@@ -132,6 +132,46 @@
       "type": "java.time.Duration",
       "description": "Минимальная пауза между опубликованными DriftEvent для одного detector-а и потока метрик.",
       "defaultValue": "0s"
+    },
+    {
+      "name": "driftguard.kafka.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Включает Kafka Streams topology DriftGuard.",
+      "defaultValue": false
+    },
+    {
+      "name": "driftguard.kafka.bootstrap-servers",
+      "type": "java.lang.String",
+      "description": "Kafka bootstrap servers для topology DriftGuard.",
+      "defaultValue": "localhost:9092"
+    },
+    {
+      "name": "driftguard.kafka.application-id",
+      "type": "java.lang.String",
+      "description": "Kafka Streams application id.",
+      "defaultValue": "driftguard"
+    },
+    {
+      "name": "driftguard.kafka.input-topics",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Topic-и с JSON MetricPoint."
+    },
+    {
+      "name": "driftguard.kafka.output-topic",
+      "type": "java.lang.String",
+      "description": "Topic, куда topology пишет JSON DriftEvent.",
+      "defaultValue": "driftguard.drift-events"
+    },
+    {
+      "name": "driftguard.kafka.state-dir",
+      "type": "java.lang.String",
+      "description": "Локальная директория state store-ов Kafka Streams."
+    },
+    {
+      "name": "driftguard.kafka.auto-startup",
+      "type": "java.lang.Boolean",
+      "description": "Запускать ли Kafka Streams topology автоматически при старте Spring context-а.",
+      "defaultValue": true
     }
   ]
 }
