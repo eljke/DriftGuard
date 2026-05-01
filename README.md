@@ -65,7 +65,8 @@ BUILD SUCCESS
 ## Запуск Demo
 
 ```bash
-mvn -pl driftguard-demo -am spring-boot:run
+mvn install -DskipTests
+mvn -f driftguard-demo/pom.xml spring-boot:run
 ```
 
 После старта доступны endpoints:
@@ -227,6 +228,12 @@ DetectionMetrics quality = DetectionEvaluator.evaluate(scenario, events);
 - Новый алгоритм добавляется через `DetectorAlgorithm<C, S>`.
 - Состояние detector-а должно храниться через `DetectorStateStore`.
 
+## Используемые Библиотеки
+
+- Lombok применяется в `driftguard-spring-boot-starter` для configuration properties, где он убирает однотипные getters/setters.
+- Apache Commons Math применяется в `driftguard-algorithms` для статистических тестов KS и хи-квадрат.
+- Jackson применяется в `driftguard-kafka` для JSON SerDes.
+
 ## Как Добавить Новый Алгоритм
 
 1. Создать immutable config, реализующий `DetectorConfig`.
@@ -238,4 +245,4 @@ DetectionMetrics quality = DetectionEvaluator.evaluate(scenario, events);
 
 ## Статус Kafka-Модуля
 
-Kafka-модуль уже содержит SerDes и topology builder. Текущая topology вызывает `DriftDetectorEngine` напрямую. Для production-сценариев следующий шаг - durable state через Kafka Streams state store и сериализация detector state.
+Kafka-модуль содержит JSON SerDes для `MetricPoint` и `DriftEvent`, а также `KafkaDriftGuardTopologyBuilder`. Текущая topology читает `MetricPoint` из input topic-ов, вызывает `DriftDetectorEngine` и пишет `DriftEvent` в output topic.
