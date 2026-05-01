@@ -1,0 +1,137 @@
+{
+  "properties": [
+    {
+      "name": "driftguard.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Включает создание DriftGuard bean-ов через auto-configuration.",
+      "defaultValue": true
+    },
+    {
+      "name": "driftguard.detectors",
+      "type": "java.util.List",
+      "description": "Список detector-ов, которые будут зарегистрированы в DriftDetectorEngine."
+    },
+    {
+      "name": "driftguard.detectors[].name",
+      "type": "java.lang.String",
+      "description": "Уникальное имя detector-а. Используется в DriftEvent.detector и ключе состояния."
+    },
+    {
+      "name": "driftguard.detectors[].algorithm",
+      "type": "java.lang.String",
+      "description": "Алгоритм detector-а: page-hinkley, adwin, psi, ks или chi-square."
+    },
+    {
+      "name": "driftguard.detectors[].services",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Фильтр по MetricKey.service. Пустой список означает любые сервисы."
+    },
+    {
+      "name": "driftguard.detectors[].metrics",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Фильтр по MetricKey.metric. Пустой список означает любые метрики."
+    },
+    {
+      "name": "driftguard.detectors[].baseline-window-size",
+      "type": "java.lang.Integer",
+      "description": "Размер baseline-окна для PSI, KS и chi-square.",
+      "defaultValue": 40
+    },
+    {
+      "name": "driftguard.detectors[].current-window-size",
+      "type": "java.lang.Integer",
+      "description": "Размер current-окна для PSI, KS и chi-square.",
+      "defaultValue": 40
+    },
+    {
+      "name": "driftguard.detectors[].window-size",
+      "type": "java.lang.Integer",
+      "description": "Размер адаптивного окна для ADWIN.",
+      "defaultValue": 40
+    },
+    {
+      "name": "driftguard.detectors[].min-sub-window-size",
+      "type": "java.lang.Integer",
+      "description": "Минимальный размер каждой части окна при поиске разреза в ADWIN.",
+      "defaultValue": 10
+    },
+    {
+      "name": "driftguard.detectors[].warmup-samples",
+      "type": "java.lang.Integer",
+      "description": "Число первых samples, используемых Page-Hinkley для прогрева baseline.",
+      "defaultValue": 20
+    },
+    {
+      "name": "driftguard.detectors[].buckets",
+      "type": "java.lang.Integer",
+      "description": "Количество bucket-ов для PSI и chi-square.",
+      "defaultValue": 5
+    },
+    {
+      "name": "driftguard.detectors[].warning-threshold",
+      "type": "java.lang.Double",
+      "description": "Warning-порог для PSI или Page-Hinkley, в зависимости от выбранного алгоритма.",
+      "defaultValue": 0.1
+    },
+    {
+      "name": "driftguard.detectors[].critical-threshold",
+      "type": "java.lang.Double",
+      "description": "Critical-порог для PSI или Page-Hinkley, в зависимости от выбранного алгоритма.",
+      "defaultValue": 0.25
+    },
+    {
+      "name": "driftguard.detectors[].warning-p-value",
+      "type": "java.lang.Double",
+      "description": "P-value граница warning-события для KS и chi-square.",
+      "defaultValue": 0.05
+    },
+    {
+      "name": "driftguard.detectors[].critical-p-value",
+      "type": "java.lang.Double",
+      "description": "P-value граница critical-события для KS и chi-square.",
+      "defaultValue": 0.01
+    },
+    {
+      "name": "driftguard.detectors[].delta",
+      "type": "java.lang.Double",
+      "description": "Sensitivity/confidence параметр для ADWIN и Page-Hinkley.",
+      "defaultValue": 0.1
+    },
+    {
+      "name": "driftguard.detectors[].alpha",
+      "type": "java.lang.Double",
+      "description": "Скорость адаптации среднего в Page-Hinkley.",
+      "defaultValue": 0.05
+    },
+    {
+      "name": "driftguard.detectors[].epsilon",
+      "type": "java.lang.Double",
+      "description": "Малое значение сглаживания для PSI, чтобы избежать деления на ноль.",
+      "defaultValue": 1.0E-4
+    },
+    {
+      "name": "driftguard.detectors[].critical-multiplier",
+      "type": "java.lang.Double",
+      "description": "Множитель score, после которого ADWIN помечает событие как critical.",
+      "defaultValue": 2.0
+    },
+    {
+      "name": "driftguard.detectors[].min-expected-count",
+      "type": "java.lang.Double",
+      "description": "Минимальная ожидаемая частота bucket-а для chi-square.",
+      "defaultValue": 1.0
+    },
+    {
+      "name": "driftguard.detectors[].emission-policy.min-consecutive-signals",
+      "type": "java.lang.Integer",
+      "description": "Сколько последовательных сигналов алгоритма нужно получить перед публикацией DriftEvent.",
+      "defaultValue": 1
+    },
+    {
+      "name": "driftguard.detectors[].emission-policy.cooldown",
+      "type": "java.time.Duration",
+      "description": "Минимальная пауза между опубликованными DriftEvent для одного detector-а и потока метрик.",
+      "defaultValue": "0s"
+    }
+  ]
+}

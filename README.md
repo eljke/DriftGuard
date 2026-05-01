@@ -154,6 +154,31 @@ Starter автоматически создаёт:
 - `List<DetectorDefinition>`;
 - `DriftDetectorEngine`.
 
+### Настройки `application.yml`
+
+| Property | Назначение |
+|----------|------------|
+| `driftguard.enabled` | Включает auto-configuration DriftGuard. |
+| `driftguard.detectors[].name` | Имя detector-а в событиях и state key. |
+| `driftguard.detectors[].algorithm` | Алгоритм: `page-hinkley`, `adwin`, `psi`, `ks`, `chi-square`. |
+| `driftguard.detectors[].services` | Фильтр по `MetricKey.service`; пусто означает любые сервисы. |
+| `driftguard.detectors[].metrics` | Фильтр по `MetricKey.metric`; пусто означает любые метрики. |
+| `baseline-window-size` | Размер baseline-окна для `psi`, `ks`, `chi-square`. |
+| `current-window-size` | Размер current-окна для `psi`, `ks`, `chi-square`. |
+| `window-size` | Размер окна для `adwin`. |
+| `min-sub-window-size` | Минимальная часть окна при поиске разреза в `adwin`. |
+| `warmup-samples` | Число samples для прогрева `page-hinkley`. |
+| `buckets` | Количество bucket-ов для `psi` и `chi-square`. |
+| `warning-threshold` / `critical-threshold` | Пороги для `psi` и `page-hinkley`. |
+| `warning-p-value` / `critical-p-value` | P-value границы для `ks` и `chi-square`. |
+| `delta` | Sensitivity/confidence параметр для `adwin` и `page-hinkley`. |
+| `alpha` | Скорость адаптации среднего в `page-hinkley`. |
+| `epsilon` | Сглаживание bucket-ов в `psi`. |
+| `critical-multiplier` | Множитель score для critical-события в `adwin`. |
+| `min-expected-count` | Минимальная ожидаемая частота bucket-а в `chi-square`. |
+| `emission-policy.min-consecutive-signals` | Сколько подряд сигналов нужно до публикации `DriftEvent`. |
+| `emission-policy.cooldown` | Минимальная пауза между опубликованными событиями одного detector-а по одному потоку. |
+
 В приложении можно просто внедрить engine:
 
 ```java
