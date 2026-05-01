@@ -1,10 +1,13 @@
 const elements = {
     scenarioSelect: document.querySelector("#scenarioSelect"),
     runButton: document.querySelector("#runButton"),
+    liveButton: document.querySelector("#liveButton"),
+    stopButton: document.querySelector("#stopButton"),
     scenarioDescription: document.querySelector("#scenarioDescription"),
     scenarioTitle: document.querySelector("#scenarioTitle"),
     metricName: document.querySelector("#metricName"),
     pointCount: document.querySelector("#pointCount"),
+    runMode: document.querySelector("#runMode"),
     eventCount: document.querySelector("#eventCount"),
     precision: document.querySelector("#precision"),
     recall: document.querySelector("#recall"),
@@ -20,6 +23,7 @@ const elements = {
 };
 
 let scenarios = [];
+let polling = null;
 
 async function init() {
     scenarios = await fetchJson("/api/demo/scenarios");
@@ -28,17 +32,52 @@ async function init() {
         .join("");
     elements.scenarioSelect.addEventListener("change", updateScenarioDescription);
     elements.runButton.addEventListener("click", runSelectedScenario);
+    elements.liveButton.addEventListener("click", startLiveScenario);
+    elements.stopButton.addEventListener("click", stopLiveScenario);
     updateScenarioDescription();
     render(await fetchJson("/api/demo"));
 }
 
 async function runSelectedScenario() {
+    stopPolling();
     elements.runButton.disabled = true;
     try {
         const scenario = elements.scenarioSelect.value;
         render(await fetchJson(`/api/demo/run/${scenario}`, {method: "POST"}));
     } finally {
         elements.runButton.disabled = false;
+    }
+}
+
+async function startLiveScenario() {
+    stopPolling();
+    elements.liveButton.disabled = true;
+    try {
+        const scenario = elements.scenarioSelect.value;
+        render(await fetchJson(`/api/demo/live/${scenario}`, {method: "POST"}));
+        polling = window.setInterval(refreshLiveResult, 500);
+    } finally {
+        elements.liveButton.disabled = false;
+    }
+}
+
+async function stopLiveScenario() {
+    stopPolling();
+    render(await fetchJson("/api/demo/live/stop", {method: "POST"}));
+}
+
+async function refreshLiveResult() {
+    const result = await fetchJson("/api/demo");
+    render(result);
+    if (!result.running) {
+        stopPolling();
+    }
+}
+
+function stopPolling() {
+    if (polling) {
+        window.clearInterval(polling);
+        polling = null;
     }
 }
 
@@ -58,7 +97,8 @@ async function fetchJson(url, options = {}) {
 function render(result) {
     elements.scenarioTitle.textContent = result.title;
     elements.metricName.textContent = result.samplePoints[0]?.key?.metric ?? "metric";
-    elements.pointCount.textContent = result.metricPoints;
+    elements.pointCount.textContent = `${result.processedPoints}/${result.metricPoints}`;
+    elements.runMode.textContent = result.running ? "LIVE" : String(result.mode).toUpperCase();
     elements.eventCount.textContent = result.events.length;
     elements.precision.textContent = formatRatio(result.quality.precision);
     elements.recall.textContent = formatRatio(result.quality.recall);
@@ -156,6 +196,10 @@ function drawChart(points, events, intervals) {
     ctx.font = "13px Segoe UI, Arial";
     ctx.fillText(formatNumber(max), 8, padding.top + 4);
     ctx.fillText(formatNumber(min), 8, height - padding.bottom);
+    ctx.fillText(formatTime(points[0].timestamp), padding.left, height - 10);
+    ctx.textAlign = "right";
+    ctx.fillText(formatTime(points[points.length - 1].timestamp), width - padding.right, height - 10);
+    ctx.textAlign = "left";
 }
 
 function formatRatio(value) {
@@ -175,7 +219,12 @@ function formatNumber(value) {
 }
 
 function formatTime(value) {
-    return new Date(value).toLocaleTimeString("ru-RU", {hour: "2-digit", minute: "2-digit", second: "2-digit"});
+    return new Date(value).toLocaleTimeString("ru-RU", {
+        timeZone: "Europe/Moscow",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    });
 }
 
 init().catch(error => {

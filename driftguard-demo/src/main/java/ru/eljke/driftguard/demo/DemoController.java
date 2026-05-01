@@ -58,6 +58,19 @@ public class DemoController {
         return service.run(scenario);
     }
 
+    @PostMapping("/live/{scenario}")
+    @Operation(summary = "Запускает live playback выбранного сценария")
+    public DemoRunResult startLiveScenario(@PathVariable("scenario") String scenario) {
+        return service.startLive(scenario);
+    }
+
+    @PostMapping("/live/stop")
+    @Operation(summary = "Останавливает live playback")
+    public DemoRunResult stopLiveScenario() {
+        service.stopLive();
+        return service.lastResult();
+    }
+
     @GetMapping("/help")
     @Operation(summary = "Возвращает краткий список доступных demo endpoint-ов")
     public Map<String, String> help() {
@@ -67,7 +80,9 @@ public class DemoController {
                 "quality", "GET /api/demo/quality",
                 "scenarios", "GET /api/demo/scenarios",
                 "rerun", "POST /api/demo/run",
-                "runScenario", "POST /api/demo/run/{scenario}"
+                "runScenario", "POST /api/demo/run/{scenario}",
+                "startLiveScenario", "POST /api/demo/live/{scenario}",
+                "stopLiveScenario", "POST /api/demo/live/stop"
         );
     }
 }

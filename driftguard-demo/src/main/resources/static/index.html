@@ -24,14 +24,21 @@
             <label for="scenarioSelect">Сценарий</label>
             <select id="scenarioSelect"></select>
             <button id="runButton" type="button">Запустить</button>
+            <button id="liveButton" type="button" class="secondary">Live</button>
+            <button id="stopButton" type="button" class="secondary">Стоп</button>
         </div>
         <p id="scenarioDescription" class="muted"></p>
+        <p class="muted">Время отображается в таймзоне Europe/Moscow. Instant-режим обрабатывает весь поток сразу, Live-режим проигрывает поток постепенно.</p>
     </section>
 
     <section class="metric-strip" aria-live="polite">
         <div class="metric">
             <span>Точек</span>
-            <strong id="pointCount">0</strong>
+            <strong id="pointCount">0/0</strong>
+        </div>
+        <div class="metric">
+            <span>Режим</span>
+            <strong id="runMode">-</strong>
         </div>
         <div class="metric">
             <span>Событий</span>
@@ -54,7 +61,10 @@
     <section class="panel chart-panel">
         <div class="section-head">
             <h2 id="scenarioTitle">Scenario</h2>
-            <span id="metricName" class="badge">metric</span>
+            <div class="badges">
+                <span id="metricName" class="badge">metric</span>
+                <span class="badge">Europe/Moscow</span>
+            </div>
         </div>
         <canvas id="metricChart" width="1100" height="360"></canvas>
     </section>

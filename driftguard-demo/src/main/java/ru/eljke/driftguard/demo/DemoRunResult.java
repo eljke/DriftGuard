@@ -13,6 +13,9 @@ import java.util.List;
 public record DemoRunResult(
         String scenario,
         String title,
+        String mode,
+        boolean running,
+        int processedPoints,
         int metricPoints,
         List<MetricPoint> samplePoints,
         List<DriftInterval> expectedDrifts,

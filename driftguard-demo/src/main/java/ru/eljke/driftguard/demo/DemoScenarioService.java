@@ -17,10 +17,16 @@ import ru.eljke.driftguard.testkit.SeasonalNoiseScenario;
 import ru.eljke.driftguard.testkit.StepDriftScenario;
 import ru.eljke.driftguard.testkit.ThroughputDropScenario;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -39,7 +45,13 @@ public class DemoScenarioService {
 
     private final DriftDetectorEngine engine;
     private final AtomicLong runSequence = new AtomicLong();
+    private final ScheduledExecutorService playbackExecutor = Executors.newSingleThreadScheduledExecutor(runnable -> {
+        Thread thread = new Thread(runnable, "driftguard-demo-playback");
+        thread.setDaemon(true);
+        return thread;
+    });
     private volatile DemoRunResult lastResult;
+    private volatile ScheduledFuture<?> playbackTask;
 
     public DemoScenarioService(DriftDetectorEngine engine) {
         this.engine = engine;
@@ -59,6 +71,7 @@ public class DemoScenarioService {
     }
 
     public DemoRunResult run(String scenarioId) {
+        stopLive();
         DemoScenarioDescriptor descriptor = findScenario(scenarioId);
         MetricScenario scenario = createScenario(descriptor.id(), "demo-run-" + runSequence.incrementAndGet());
         List<MetricPoint> points = scenario.generate();
@@ -70,6 +83,9 @@ public class DemoScenarioService {
         lastResult = new DemoRunResult(
                 scenario.name(),
                 descriptor.title(),
+                "instant",
+                false,
+                points.size(),
                 points.size(),
                 points,
                 scenario.expectedDrifts(),
@@ -79,11 +95,58 @@ public class DemoScenarioService {
         return lastResult;
     }
 
+    public synchronized DemoRunResult startLive(String scenarioId) {
+        stopLive();
+        DemoScenarioDescriptor descriptor = findScenario(scenarioId);
+        MetricScenario scenario = createScenario(descriptor.id(), "live-run-" + runSequence.incrementAndGet());
+        List<MetricPoint> points = scenario.generate();
+        List<MetricPoint> processed = new ArrayList<>();
+        List<DriftEvent> events = new ArrayList<>();
+        lastResult = liveResult(scenario, descriptor, points, processed, events, true);
+        playbackTask = playbackExecutor.scheduleAtFixedRate(new Runnable() {
+            private int index;
+
+            @Override
+            public void run() {
+                if (index >= points.size()) {
+                    lastResult = liveResult(scenario, descriptor, points, processed, events, false);
+                    stopLive();
+                    return;
+                }
+                MetricPoint point = points.get(index++);
+                processed.add(point);
+                events.addAll(engine.detect(point));
+                List<DriftEvent> representativeEvents = firstExpectedEventPerDetector(events, scenario.expectedDrifts());
+                lastResult = new DemoRunResult(
+                        scenario.name(),
+                        descriptor.title(),
+                        "live",
+                        index < points.size(),
+                        processed.size(),
+                        points.size(),
+                        List.copyOf(processed),
+                        scenario.expectedDrifts(),
+                        representativeEvents,
+                        DetectionEvaluator.evaluate(scenario, representativeEvents)
+                );
+            }
+        }, 0, 120, TimeUnit.MILLISECONDS);
+        return lastResult;
+    }
+
     public DemoRunResult lastResult() {
         if (lastResult == null) {
             return run("latency-step");
         }
         return lastResult;
+    }
+
+    public synchronized void stopLive() {
+        ScheduledFuture<?> task = playbackTask;
+        if (task != null) {
+            task.cancel(false);
+            playbackTask = null;
+        }
     }
 
     private static DemoScenarioDescriptor findScenario(String scenarioId) {
@@ -145,10 +208,33 @@ public class DemoScenarioService {
         return new ScenarioConfig(
                 new MetricKey(service, metric, instance, operation),
                 kind,
-                java.time.Instant.parse("2026-05-01T10:00:00Z"),
-                java.time.Duration.ofSeconds(1),
+                Instant.now().minusSeconds(samples),
+                Duration.ofSeconds(1),
                 samples,
                 42L
+        );
+    }
+
+    private static DemoRunResult liveResult(
+            MetricScenario scenario,
+            DemoScenarioDescriptor descriptor,
+            List<MetricPoint> points,
+            List<MetricPoint> processed,
+            List<DriftEvent> events,
+            boolean running
+    ) {
+        List<DriftEvent> representativeEvents = firstExpectedEventPerDetector(events, scenario.expectedDrifts());
+        return new DemoRunResult(
+                scenario.name(),
+                descriptor.title(),
+                "live",
+                running,
+                processed.size(),
+                points.size(),
+                List.copyOf(processed),
+                scenario.expectedDrifts(),
+                representativeEvents,
+                DetectionEvaluator.evaluate(scenario, representativeEvents)
         );
     }
 

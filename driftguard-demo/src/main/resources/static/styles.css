@@ -74,7 +74,7 @@ body {
 
 .control-row {
     display: grid;
-    grid-template-columns: 90px minmax(220px, 1fr) 130px;
+    grid-template-columns: 90px minmax(220px, 1fr) 130px 110px 90px;
     gap: 12px;
     align-items: center;
 }
@@ -109,6 +109,15 @@ button:hover {
     background: var(--accent-strong);
 }
 
+button.secondary {
+    background: #ffffff;
+    color: var(--accent);
+}
+
+button.secondary:hover {
+    background: #e8f6f7;
+}
+
 .muted {
     margin: 10px 0 0;
     color: var(--muted);
@@ -116,7 +125,7 @@ button:hover {
 
 .metric-strip {
     display: grid;
-    grid-template-columns: repeat(5, minmax(120px, 1fr));
+    grid-template-columns: repeat(6, minmax(120px, 1fr));
     gap: 12px;
     margin-bottom: 14px;
 }
@@ -163,6 +172,13 @@ button:hover {
     padding: 4px 10px;
     color: var(--muted);
     font-size: 13px;
+}
+
+.badges {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 canvas {

@@ -80,6 +80,8 @@ GET  http://localhost:8080/api/demo/scenarios
 GET  http://localhost:8080/api/demo/help
 POST http://localhost:8080/api/demo/run
 POST http://localhost:8080/api/demo/run/{scenario}
+POST http://localhost:8080/api/demo/live/{scenario}
+POST http://localhost:8080/api/demo/live/stop
 GET  http://localhost:8080/v3/api-docs
 GET  http://localhost:8080/swagger-ui.html
 ```
@@ -93,6 +95,8 @@ Demo UI позволяет запускать несколько synthetic scena
 - `seasonal-latency` - сезонная latency без ожидаемого drift-а.
 
 Dashboard показывает график потока, ожидаемые drift-интервалы, события detector-ов и quality metrics.
+Время в UI форматируется в таймзоне `Europe/Moscow`.
+Instant-режим обрабатывает весь сценарий сразу, Live-режим проигрывает поток постепенно и показывает прогресс обработки.
 
 ## Использование Core Без Spring И Kafka
 
