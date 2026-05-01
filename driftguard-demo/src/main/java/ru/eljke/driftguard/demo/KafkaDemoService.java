@@ -10,17 +10,13 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.StreamsConfig;
 import org.springframework.stereotype.Service;
-import ru.eljke.driftguard.core.detector.DriftDetectorEngine;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricPoint;
 import ru.eljke.driftguard.core.error.DriftGuardValidationException;
-import ru.eljke.driftguard.kafka.DriftGuardSerdes;
 import ru.eljke.driftguard.kafka.DriftGuardObjectMapper;
-import ru.eljke.driftguard.kafka.KafkaDriftGuardTopologyBuilder;
-import ru.eljke.driftguard.kafka.KafkaDriftGuardTopologyConfig;
+import ru.eljke.driftguard.kafka.DriftGuardSerdes;
+import ru.eljke.driftguard.spring.DriftGuardKafkaStreamsManager;
 import ru.eljke.driftguard.testkit.MetricScenario;
 
 import java.time.Duration;
@@ -38,15 +34,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Управляет реальным demo-контуром Kafka: создаёт topic-и, запускает Kafka
- * Streams topology DriftGuard, публикует тестовые метрики producer-ом и читает
- * найденные события drift-а consumer-ом для отображения в UI.
+ * Управляет реальным demo-контуром Kafka: создаёт topic-и, запускает topology
+ * через Spring Boot starter DriftGuard, публикует тестовые метрики producer-ом
+ * и читает найденные события drift-а consumer-ом для отображения в UI.
  */
 @Service
 public class KafkaDemoService {
     private final DemoKafkaProperties properties;
+    private final DriftGuardKafkaStreamsManager streamsManager;
     private final ObjectMapper objectMapper;
-    private final DriftDetectorEngine engine;
     private final AtomicLong runSequence = new AtomicLong();
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2, runnable -> {
         Thread thread = new Thread(runnable, "driftguard-kafka-demo");
@@ -57,7 +53,6 @@ public class KafkaDemoService {
     private final List<DriftEvent> consumedEvents = new CopyOnWriteArrayList<>();
     private final List<MetricPoint> producedSamples = new CopyOnWriteArrayList<>();
     private final AtomicBoolean consuming = new AtomicBoolean();
-    private volatile KafkaStreams streams;
     private volatile KafkaProducer<String, MetricPoint> producer;
     private volatile KafkaConsumer<String, DriftEvent> consumer;
     private volatile ScheduledFuture<?> producerTask;
@@ -66,10 +61,10 @@ public class KafkaDemoService {
     private volatile int totalPoints;
     private volatile String error;
 
-    public KafkaDemoService(DemoKafkaProperties properties, DriftDetectorEngine engine) {
+    public KafkaDemoService(DemoKafkaProperties properties, DriftGuardKafkaStreamsManager streamsManager) {
         this.properties = properties;
+        this.streamsManager = streamsManager;
         this.objectMapper = DriftGuardObjectMapper.create();
-        this.engine = engine;
     }
 
     public synchronized KafkaDemoStatus start(String scenario) {
@@ -89,12 +84,7 @@ public class KafkaDemoService {
 
         try {
             createTopics();
-            streams = new KafkaStreams(
-                    new KafkaDriftGuardTopologyBuilder(objectMapper, engine)
-                            .build(new KafkaDriftGuardTopologyConfig(List.of(properties.getInputTopic()), properties.getOutputTopic())),
-                    streamsProperties(run)
-            );
-            streams.start();
+            streamsManager.start();
 
             consumer = new KafkaConsumer<>(consumerProperties(run), Serdes.String().deserializer(),
                     DriftGuardSerdes.driftEvent(objectMapper).deserializer());
@@ -134,7 +124,7 @@ public class KafkaDemoService {
         cancelProducerTask();
         closeProducer();
         closeConsumer();
-        closeStreams();
+        streamsManager.stop();
         return status();
     }
 
@@ -203,14 +193,6 @@ public class KafkaDemoService {
         return props;
     }
 
-    private Properties streamsProperties(long run) {
-        Properties props = adminProperties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, properties.getApplicationId() + "-" + run);
-        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class.getName());
-        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.StringSerde.class.getName());
-        return props;
-    }
-
     private static void addMissingTopic(Collection<String> existing, List<NewTopic> missing, String topic) {
         if (!existing.contains(topic)) {
             missing.add(new NewTopic(topic, 1, (short) 1));
@@ -252,11 +234,4 @@ public class KafkaDemoService {
         }
     }
 
-    private void closeStreams() {
-        KafkaStreams current = streams;
-        streams = null;
-        if (current != null) {
-            current.close(Duration.ofSeconds(3));
-        }
-    }
 }

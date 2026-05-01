@@ -118,7 +118,7 @@ Instant-режим обрабатывает весь сценарий сразу
 test producer -> driftguard.demo.metrics -> Kafka Streams topology -> driftguard.demo.drift-events -> demo consumer -> UI
 ```
 
-В этом режиме demo producer публикует `MetricPoint` в Kafka, topology из `driftguard-kafka` вызывает `DriftDetectorEngine`, а demo consumer читает `DriftEvent` из output topic-а. Сообщения и consumer groups можно смотреть в Kafka UI.
+В этом режиме demo producer публикует `MetricPoint` в Kafka, topology запускается через `driftguard-spring-boot-starter` и использует `driftguard-kafka`, а demo consumer читает `DriftEvent` из output topic-а. Сообщения и consumer groups можно смотреть в Kafka UI.
 
 Раздел `Инструменты` содержит ссылки на Kafka UI, Prometheus, Grafana и Swagger.
 

@@ -24,6 +24,14 @@ demo:
 
 driftguard:
   enabled: true
+  kafka:
+    enabled: true
+    bootstrap-servers: localhost:9092
+    application-id: driftguard-demo-streams
+    input-topics: [driftguard.demo.metrics]
+    output-topic: driftguard.demo.drift-events
+    auto-startup: false
+    state-dir: ./target/driftguard-demo-kafka-state
   detectors:
     - name: latency-page-hinkley
       algorithm: page-hinkley

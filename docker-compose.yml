@@ -11,6 +11,7 @@ services:
     environment:
       SERVER_PORT: 8080
       DEMO_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DRIFTGUARD_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
 
   kafka:
     image: apache/kafka:4.0.0
