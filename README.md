@@ -62,6 +62,21 @@ mvn test
 BUILD SUCCESS
 ```
 
+## Инфраструктура Для Demo
+
+```bash
+docker compose up -d
+```
+
+Compose поднимает:
+
+- Kafka: `localhost:9092`;
+- Kafka UI: `http://localhost:8090`;
+- Prometheus: `http://localhost:9090`;
+- Grafana: `http://localhost:3000` (`admin` / `admin`).
+
+Prometheus собирает метрики demo-приложения с `/actuator/prometheus` на `8080` и `8081`.
+
 ## Запуск Demo
 
 ```bash
