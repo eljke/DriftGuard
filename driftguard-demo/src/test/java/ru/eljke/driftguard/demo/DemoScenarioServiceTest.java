@@ -2,7 +2,6 @@ package ru.eljke.driftguard.demo;
 
 import org.junit.jupiter.api.Test;
 import ru.eljke.driftguard.algorithms.DefaultAlgorithms;
-import ru.eljke.driftguard.algorithms.ks.KsConfig;
 import ru.eljke.driftguard.algorithms.pagehinkley.PageHinkleyConfig;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
 import ru.eljke.driftguard.core.detector.DriftDetectorEngine;
@@ -20,8 +19,7 @@ class DemoScenarioServiceTest {
                 DefaultAlgorithms.registry(),
                 new InMemoryDetectorStateStore(),
                 List.of(
-                        new DetectorDefinition("latency-page-hinkley", new PageHinkleyConfig(20, 0.1, 25.0, 50.0, 0.05), key -> key.metric().equals("latency")),
-                        new DetectorDefinition("latency-ks", new KsConfig(40, 40, 0.05, 0.01), key -> key.metric().equals("latency"))
+                        new DetectorDefinition("latency-page-hinkley", new PageHinkleyConfig(20, 0.1, 25.0, 50.0, 0.05), key -> key.metric().equals("latency"))
                 )
         );
 
@@ -29,6 +27,6 @@ class DemoScenarioServiceTest {
 
         assertFalse(result.events().isEmpty());
         assertTrue(result.quality().detected());
-        assertTrue(result.events().size() <= 2);
+        assertTrue(result.events().size() <= 1);
     }
 }

@@ -18,10 +18,3 @@ driftguard:
       warning-threshold: 25.0
       critical-threshold: 50.0
       alpha: 0.05
-    - name: latency-ks
-      algorithm: ks
-      metrics: [latency]
-      baseline-window-size: 40
-      current-window-size: 40
-      warning-p-value: 0.05
-      critical-p-value: 0.01

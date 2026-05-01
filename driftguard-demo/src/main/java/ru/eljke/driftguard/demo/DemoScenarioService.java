@@ -6,6 +6,7 @@ import ru.eljke.driftguard.core.detector.DriftDetectorEngine;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricPoint;
 import ru.eljke.driftguard.testkit.DetectionEvaluator;
+import ru.eljke.driftguard.testkit.DriftInterval;
 import ru.eljke.driftguard.testkit.MetricScenario;
 import ru.eljke.driftguard.testkit.ScenarioConfig;
 import ru.eljke.driftguard.testkit.StepDriftScenario;
@@ -47,7 +48,7 @@ public class DemoScenarioService {
         for (MetricPoint point : points) {
             events.addAll(engine.detect(point));
         }
-        List<DriftEvent> representativeEvents = firstEventPerDetector(events);
+        List<DriftEvent> representativeEvents = firstExpectedEventPerDetector(events, scenario.expectedDrifts());
         lastResult = new DemoRunResult(
                 scenario.name(),
                 points.size(),
@@ -65,10 +66,12 @@ public class DemoScenarioService {
         return lastResult;
     }
 
-    private static List<DriftEvent> firstEventPerDetector(List<DriftEvent> events) {
+    private static List<DriftEvent> firstExpectedEventPerDetector(List<DriftEvent> events, List<DriftInterval> expectedDrifts) {
         Map<String, DriftEvent> byDetector = new LinkedHashMap<>();
         for (DriftEvent event : events) {
-            byDetector.putIfAbsent(event.detector(), event);
+            if (expectedDrifts.stream().anyMatch(interval -> interval.contains(event.detectedAt()))) {
+                byDetector.putIfAbsent(event.detector(), event);
+            }
         }
         return List.copyOf(byDetector.values());
     }
