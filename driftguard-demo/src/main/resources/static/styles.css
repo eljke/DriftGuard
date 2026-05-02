@@ -194,6 +194,50 @@ canvas {
     background: #fbfcfd;
 }
 
+.stream-charts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.stream-chart {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    background: #fbfcfd;
+}
+
+.stream-chart-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.stream-chart-head strong,
+.stream-chart-head span {
+    display: block;
+}
+
+.stream-chart-head span {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.stream-chart canvas {
+    height: 220px;
+    background: #ffffff;
+}
+
+.empty-chart {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px;
+    color: var(--muted);
+    background: #fbfcfd;
+}
+
 .split {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
@@ -342,6 +386,7 @@ th {
     .control-row,
     .metric-strip,
     .split,
+    .stream-charts,
     .producer-grid,
     .tools-grid {
         grid-template-columns: 1fr;

@@ -29,7 +29,7 @@ const elements = {
     kafkaInputTopic: document.querySelector("#kafkaInputTopic"),
     kafkaOutputTopic: document.querySelector("#kafkaOutputTopic"),
     producerGrid: document.querySelector("#producerGrid"),
-    kafkaChart: document.querySelector("#kafkaChart"),
+    kafkaCharts: document.querySelector("#kafkaCharts"),
     kafkaEventsTable: document.querySelector("#kafkaEventsTable"),
     kafkaError: document.querySelector("#kafkaError"),
     toolsGrid: document.querySelector("#toolsGrid")
@@ -179,7 +179,59 @@ function renderKafka(status) {
     elements.kafkaError.textContent = status.error ? `Ошибка Kafka demo: ${status.error}` : "";
     renderProducers(status.producers);
     renderKafkaEvents(status.consumedEvents);
-    drawChartOn(elements.kafkaChart, status.samplePoints, status.consumedEvents, []);
+    renderKafkaCharts(status.samplePoints, status.consumedEvents);
+}
+
+function renderKafkaCharts(points = [], events = []) {
+    if (!points.length) {
+        elements.kafkaCharts.innerHTML = `<div class="empty-chart">Точки из Kafka пока не опубликованы</div>`;
+        return;
+    }
+    const groups = groupPointsByStream(points);
+    elements.kafkaCharts.innerHTML = groups.map((group, index) => `
+        <div class="stream-chart">
+            <div class="stream-chart-head">
+                <div>
+                    <strong>${group.service}</strong>
+                    <span>${group.metric} · ${group.operation ?? "-"}</span>
+                </div>
+                <span class="badge">${group.points.length} points · ${eventsForStream(events, group).length} events</span>
+            </div>
+            <canvas data-stream-index="${index}" width="1100" height="220"></canvas>
+        </div>
+    `).join("");
+    groups.forEach((group, index) => {
+        const canvas = elements.kafkaCharts.querySelector(`canvas[data-stream-index="${index}"]`);
+        drawChartOn(canvas, group.points, eventsForStream(events, group), []);
+    });
+}
+
+function groupPointsByStream(points) {
+    const byStream = new Map();
+    points.forEach(point => {
+        const id = streamId(point.key);
+        if (!byStream.has(id)) {
+            byStream.set(id, {
+                id,
+                service: point.key.service,
+                metric: point.key.metric,
+                operation: point.key.operation,
+                points: []
+            });
+        }
+        byStream.get(id).points.push(point);
+    });
+    return Array.from(byStream.values())
+        .map(group => ({...group, points: [...group.points].sort((left, right) => Date.parse(left.timestamp) - Date.parse(right.timestamp))}))
+        .sort((left, right) => left.id.localeCompare(right.id));
+}
+
+function eventsForStream(events, group) {
+    return events.filter(event => streamId(event.key) === group.id);
+}
+
+function streamId(key) {
+    return `${key.service}|${key.metric}|${key.operation ?? ""}`;
 }
 
 function renderProducers(producers = []) {
