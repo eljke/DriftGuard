@@ -16,8 +16,10 @@ import ru.eljke.driftguard.core.config.DetectorDefinitionProvider;
 import ru.eljke.driftguard.core.detector.DetectorAlgorithm;
 import ru.eljke.driftguard.core.detector.DriftDetectionListener;
 import ru.eljke.driftguard.core.detector.DetectorRegistry;
+import ru.eljke.driftguard.core.detector.DriftEventSinkListener;
 import ru.eljke.driftguard.core.detector.SimpleDetectorRegistry;
 import ru.eljke.driftguard.core.detector.DriftDetectorEngine;
+import ru.eljke.driftguard.core.sink.DriftEventSink;
 import ru.eljke.driftguard.core.state.DetectorStateStore;
 import ru.eljke.driftguard.core.state.InMemoryDetectorStateStore;
 import ru.eljke.driftguard.core.state.InMemoryEmissionStateStore;
@@ -86,6 +88,13 @@ public class DriftGuardAutoConfiguration {
     @ConditionalOnProperty(prefix = "driftguard.metrics", name = "enabled", havingValue = "true", matchIfMissing = true)
     public DriftDetectionListener driftGuardMicrometerDetectionListener(MeterRegistry meterRegistry) {
         return new MicrometerDriftDetectionListener(meterRegistry);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "driftGuardDriftEventSinkListener")
+    @ConditionalOnBean(DriftEventSink.class)
+    public DriftDetectionListener driftGuardDriftEventSinkListener(ObjectProvider<DriftEventSink> sinks) {
+        return new DriftEventSinkListener(sinks.orderedStream().toList());
     }
 
     @Bean
