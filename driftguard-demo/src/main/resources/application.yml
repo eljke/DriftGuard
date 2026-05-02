@@ -71,6 +71,7 @@ driftguard:
       warning-threshold: 120.0
       critical-threshold: 250.0
       alpha: 0.05
+      direction: DOWN
       emission-policy:
         min-consecutive-signals: 2
         cooldown: 10s

@@ -132,6 +132,12 @@
       "defaultValue": 0.05
     },
     {
+      "name": "driftguard.detectors[].direction",
+      "type": "ru.eljke.driftguard.core.domain.DriftDirection",
+      "description": "Направление сдвига среднего для Page-Hinkley: UP для роста, DOWN для падения.",
+      "defaultValue": "UP"
+    },
+    {
       "name": "driftguard.detectors[].epsilon",
       "type": "java.lang.Double",
       "description": "Малое значение сглаживания для PSI, чтобы избежать деления на ноль.",

@@ -3,6 +3,7 @@ package ru.eljke.driftguard.spring;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import ru.eljke.driftguard.core.domain.DriftDirection;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -172,6 +173,14 @@ public class DriftGuardProperties {
          * Скорость адаптации среднего в Page-Hinkley.
          */
         private double alpha = 0.05;
+
+        /**
+         * Направление сдвига среднего, которое ищет Page-Hinkley.
+         *
+         * <p>{@code UP} подходит для latency, error-rate и queue-size.
+         * {@code DOWN} подходит для throughput и других метрик, где опасно падение.</p>
+         */
+        private DriftDirection direction = DriftDirection.UP;
 
         /**
          * Сглаживание bucket-ов в PSI, защищающее от деления на ноль.

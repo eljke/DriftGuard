@@ -9,6 +9,7 @@ import ru.eljke.driftguard.algorithms.psi.PsiConfig;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
 import ru.eljke.driftguard.core.detector.DriftDetectorEngine;
+import ru.eljke.driftguard.core.domain.DriftDirection;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricKey;
 import ru.eljke.driftguard.core.domain.MetricPoint;
@@ -17,8 +18,7 @@ import ru.eljke.driftguard.core.state.InMemoryDetectorStateStore;
 import java.time.Instant;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class AlgorithmSmokeTest {
     @Test
@@ -31,8 +31,17 @@ class AlgorithmSmokeTest {
     }
 
     @Test
-    void pageHinkleyDetectsMeanShift() {
+    void pageHinkleyDetectsUpwardMeanShiftByDefault() {
         assertDetects(new PageHinkleyConfig(10, 0.1, 10.0, 20.0, 0.05), stableThenShifted());
+    }
+
+    @Test
+    void pageHinkleyDetectsDownwardMeanShiftWhenConfigured() {
+        assertDetects(
+                new PageHinkleyConfig(10, 0.1, 10.0, 20.0, 0.05, DriftDirection.DOWN),
+                stableThenDropped(),
+                DriftDirection.DOWN
+        );
     }
 
     @Test
@@ -60,8 +69,8 @@ class AlgorithmSmokeTest {
         assertFalse(lastEvents.isEmpty());
         Object split = lastEvents.getFirst().details().get("split");
         Object windowSize = lastEvents.getFirst().details().get("windowSize");
-        assertTrue(split instanceof Integer);
-        assertTrue(windowSize instanceof Integer);
+        assertInstanceOf(Integer.class, split);
+        assertInstanceOf(Integer.class, windowSize);
         assertTrue((Integer) split < (Integer) windowSize);
     }
 
@@ -81,18 +90,28 @@ class AlgorithmSmokeTest {
     }
 
     private static void assertDetects(DetectorConfig config, double[] values) {
+        assertDetects(config, values, null);
+    }
+
+    private static void assertDetects(DetectorConfig config, double[] values, DriftDirection expectedDirection) {
         DriftDetectorEngine engine = new DriftDetectorEngine(
                 DefaultAlgorithms.registry(),
                 new InMemoryDetectorStateStore(),
                 List.of(new DetectorDefinition(config.algorithm() + "-detector", config, key -> true))
         );
         MetricKey key = MetricKey.of("payments", "latency");
-        boolean drift = false;
+        DriftEvent detectedEvent = null;
         for (int i = 0; i < values.length; i++) {
             List<DriftEvent> events = engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:00Z").plusSeconds(i), values[i]));
-            drift = drift || !events.isEmpty();
+            if (!events.isEmpty()) {
+                detectedEvent = events.getFirst();
+                break;
+            }
         }
-        assertTrue(drift, "expected drift from " + config.algorithm());
+        assertNotNull(detectedEvent, "expected drift from " + config.algorithm());
+        if (expectedDirection != null) {
+            assertSame(detectedEvent.direction(), expectedDirection, "expected drift direction " + expectedDirection);
+        }
     }
 
     private static double[] stableThenShifted() {
@@ -102,6 +121,17 @@ class AlgorithmSmokeTest {
         }
         for (int i = 50; i < values.length; i++) {
             values[i] = 180.0 + (i % 5);
+        }
+        return values;
+    }
+
+    private static double[] stableThenDropped() {
+        double[] values = new double[100];
+        for (int i = 0; i < 50; i++) {
+            values[i] = 180.0 + (i % 5);
+        }
+        for (int i = 50; i < values.length; i++) {
+            values[i] = 100.0 + (i % 5);
         }
         return values;
     }

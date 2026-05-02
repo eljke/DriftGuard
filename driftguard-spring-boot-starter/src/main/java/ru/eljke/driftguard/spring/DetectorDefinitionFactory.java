@@ -70,7 +70,8 @@ final class DetectorDefinitionFactory {
                     properties.getDelta(),
                     properties.getWarningThreshold(),
                     properties.getCriticalThreshold(),
-                    properties.getAlpha()
+                    properties.getAlpha(),
+                    properties.getDirection()
             );
             case KsConfig.ALGORITHM -> new KsConfig(
                     properties.getBaselineWindowSize(),

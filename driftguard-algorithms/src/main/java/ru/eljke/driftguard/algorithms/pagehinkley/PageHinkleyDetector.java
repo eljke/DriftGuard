@@ -10,10 +10,10 @@ import ru.eljke.driftguard.core.domain.MetricPoint;
 import java.util.Map;
 
 /**
- * Онлайн detector для роста скользящего среднего.
+ * Онлайн detector для однонаправленного сдвига скользящего среднего.
  *
- * <p>Реализация полезна для latency, processing time, queue size, CPU, memory
- * и других метрик, где подозрителен устойчивый рост.</p>
+ * <p>По умолчанию detector ищет рост среднего. Для метрик вроде throughput,
+ * где опасно устойчивое падение, используйте {@link DriftDirection#DOWN}.</p>
  */
 public final class PageHinkleyDetector implements DetectorAlgorithm<PageHinkleyConfig, PageHinkleyState> {
     @Override
@@ -39,18 +39,19 @@ public final class PageHinkleyDetector implements DetectorAlgorithm<PageHinkleyC
             DetectionContext context
     ) {
         long count = state.count() + 1;
+        double observed = observedValue(point.value(), config.direction());
 
         if (count == 1) {
-            return DetectionResult.noDrift(new PageHinkleyState(1, point.value(), 0.0, 0.0));
+            return DetectionResult.noDrift(new PageHinkleyState(1, observed, 0.0, 0.0));
         }
 
-        double mean = state.mean() + config.alpha() * (point.value() - state.mean());
+        double mean = state.mean() + config.alpha() * (observed - state.mean());
 
         if (count <= config.warmupSamples()) {
             return DetectionResult.noDrift(new PageHinkleyState(count, mean, 0.0, 0.0));
         }
 
-        double cumulative = state.cumulative() + point.value() - mean - config.delta();
+        double cumulative = state.cumulative() + observed - mean - config.delta();
         double minCumulative = Math.min(state.minCumulative(), cumulative);
         double score = cumulative - minCumulative;
         PageHinkleyState next = new PageHinkleyState(count, mean, cumulative, minCumulative);
@@ -59,23 +60,37 @@ public final class PageHinkleyDetector implements DetectorAlgorithm<PageHinkleyC
             return DetectionResult.noDrift(next);
         }
 
+        double baseline = originalValue(mean, config.direction());
         return DetectionResult.drift(next, DriftEvents.create(
                 point,
                 context,
                 name(),
-                DriftDirection.UP,
+                config.direction(),
                 DriftEvents.severity(score, config.warningThreshold(), config.criticalThreshold()),
                 score,
                 point.value(),
-                mean,
+                baseline,
                 "Page-Hinkley cumulative mean shift exceeded threshold",
                 DriftEvents.standardDetails(
-                        mean,
+                        baseline,
                         point.value(),
                         config.warningThreshold(),
                         config.criticalThreshold(),
-                        Map.of("count", count, "delta", config.delta(), "cumulativeScore", score)
+                        Map.of(
+                                "count", count,
+                                "delta", config.delta(),
+                                "direction", config.direction().name(),
+                                "cumulativeScore", score
+                        )
                 )
         ));
+    }
+
+    private static double observedValue(double value, DriftDirection direction) {
+        return direction == DriftDirection.DOWN ? -value : value;
+    }
+
+    private static double originalValue(double value, DriftDirection direction) {
+        return direction == DriftDirection.DOWN ? -value : value;
     }
 }
