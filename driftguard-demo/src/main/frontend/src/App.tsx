@@ -82,7 +82,7 @@ export default function App() {
         <Header overview={overview.data} kafka={kafka.data} />
         {page === "overview" && <Overview result={overview.data} kafka={kafka.data} storedEvents={storedEvents.data ?? []} />}
         {page === "synthetic" && <SyntheticPage result={overview.data} scenarios={scenarios.data ?? []} />}
-        {page === "kafka" && <KafkaPage status={kafka.data} scenarios={scenarios.data ?? []} />}
+        {page === "kafka" && <KafkaPage status={kafka.data} scenarios={scenarios.data ?? []} configuration={configuration.data} />}
         {page === "configuration" && <ConfigurationPage configuration={configuration.data} />}
         {page === "tools" && <ToolsPage tools={tools.data ?? []} />}
       </main>
@@ -198,8 +198,19 @@ function SyntheticPage({ result, scenarios }: { result?: DemoRunResult; scenario
   );
 }
 
-function KafkaPage({ status, scenarios }: { status?: KafkaDemoStatus; scenarios: DemoScenarioDescriptor[] }) {
+function KafkaPage({
+  status,
+  scenarios,
+  configuration
+}: {
+  status?: KafkaDemoStatus;
+  scenarios: DemoScenarioDescriptor[];
+  configuration?: DemoConfigurationView;
+}) {
   const queryClient = useQueryClient();
+  const [replaySpeed, setReplaySpeed] = useState(2);
+  const [replayProfile, setReplayProfile] = useState("");
+  const [resetState, setResetState] = useState(true);
   const start = useMutation({
     mutationFn: api.startKafka,
     onSuccess: (data) => queryClient.setQueryData(["kafka"], data)
@@ -215,19 +226,36 @@ function KafkaPage({ status, scenarios }: { status?: KafkaDemoStatus; scenarios:
   const kafkaScenarios = scenarios.filter((scenario) => scenario.id !== "seasonal-latency");
   const busy = start.isPending || replay.isPending || stop.isPending;
   const error = start.error ?? replay.error ?? stop.error;
+  const profiles = configuration?.availableProfiles ?? [];
 
   return (
     <section className="stack">
       <Panel title="Kafka scenarios">
         {busy && <Notice tone="info" text="Kafka demo запускается. Создаются topic-и, topology, producer и consumer." />}
         {status?.running && <Notice tone="info" text="Kafka demo работает. График и таблица обновляются каждые 750 мс." />}
+        {status?.replay && <Notice tone="info" text={`Replay mode активен: скорость ${status.speed}x, detector state был сброшен перед запуском.`} />}
         {status?.error && <Notice tone="error" text={status.error} />}
         {error && <Notice tone="error" text={readableError(error)} />}
+        <ReplayControls
+          disabled={busy || Boolean(status?.running)}
+          profiles={profiles}
+          resetState={resetState}
+          selectedProfile={replayProfile}
+          speed={replaySpeed}
+          onProfileChange={setReplayProfile}
+          onResetStateChange={setResetState}
+          onSpeedChange={setReplaySpeed}
+        />
         <ScenarioButtons
           scenarios={kafkaScenarios}
           busy={busy || Boolean(status?.running)}
           onRun={(id) => start.mutate(id)}
-          onReplay={(id) => replay.mutate({ scenario: id, speed: 2.0, resetState: true })}
+          onReplay={(id) => replay.mutate({
+            scenario: id,
+            speed: replaySpeed,
+            resetState,
+            profile: replayProfile || undefined
+          })}
         />
         <div className="actions">
           <button className="secondary-button" disabled={!status?.running || stop.isPending} onClick={() => stop.mutate()} type="button">
@@ -358,6 +386,73 @@ function ToolsPage({ tools }: { tools: ToolLink[] }) {
         </a>
       ))}
     </section>
+  );
+}
+
+function ReplayControls({
+  disabled,
+  profiles,
+  resetState,
+  selectedProfile,
+  speed,
+  onProfileChange,
+  onResetStateChange,
+  onSpeedChange
+}: {
+  disabled: boolean;
+  profiles: string[];
+  resetState: boolean;
+  selectedProfile: string;
+  speed: number;
+  onProfileChange: (profile: string) => void;
+  onResetStateChange: (reset: boolean) => void;
+  onSpeedChange: (speed: number) => void;
+}) {
+  return (
+    <div className="replay-controls">
+      <label className="field">
+        <span>Replay speed</span>
+        <select
+          disabled={disabled}
+          value={speed}
+          onChange={(event) => onSpeedChange(Number(event.target.value))}
+        >
+          <option value={0.5}>0.5x</option>
+          <option value={1}>1x</option>
+          <option value={2}>2x</option>
+          <option value={5}>5x</option>
+          <option value={10}>10x</option>
+        </select>
+      </label>
+
+      <label className="field">
+        <span>Detector profile</span>
+        <select
+          disabled={disabled || profiles.length === 0}
+          value={selectedProfile}
+          onChange={(event) => onProfileChange(event.target.value)}
+        >
+          <option value="">Current profile</option>
+          {profiles.map((profile) => (
+            <option key={profile} value={profile}>{profile}</option>
+          ))}
+        </select>
+      </label>
+
+      <label className="checkbox-field">
+        <input
+          checked={resetState}
+          disabled={disabled}
+          type="checkbox"
+          onChange={(event) => onResetStateChange(event.target.checked)}
+        />
+        <span>Reset detector state before replay</span>
+      </label>
+
+      <p className="help-text">
+        Replay переигрывает тот же synthetic scenario через Kafka. Это удобно для сравнения профилей и скорости обнаружения на одинаковом потоке.
+      </p>
+    </div>
   );
 }
 
