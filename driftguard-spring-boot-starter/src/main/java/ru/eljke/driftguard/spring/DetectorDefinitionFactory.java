@@ -8,23 +8,25 @@ import ru.eljke.driftguard.algorithms.psi.PsiConfig;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
 import ru.eljke.driftguard.core.config.EmissionPolicyConfig;
-import ru.eljke.driftguard.core.domain.MetricKey;
+import ru.eljke.driftguard.core.config.MetricSelector;
 import ru.eljke.driftguard.core.error.DriftGuardValidationException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Predicate;
 
 final class DetectorDefinitionFactory {
     private DetectorDefinitionFactory() {
     }
 
     static List<DetectorDefinition> create(DriftGuardProperties properties) {
+        if (!properties.isDetectorsEnabled()) {
+            return List.of();
+        }
         if (properties.getDetectors().isEmpty()) {
             return defaultDefinitions();
         }
         return properties.getDetectors().stream()
+                .filter(DriftGuardProperties.DetectorProperties::isEnabled)
                 .map(DetectorDefinitionFactory::create)
                 .toList();
     }
@@ -88,21 +90,13 @@ final class DetectorDefinitionFactory {
         };
     }
 
-    private static Predicate<MetricKey> selector(DriftGuardProperties.DetectorProperties properties) {
-        List<String> services = normalized(properties.getServices());
-        List<String> metrics = normalized(properties.getMetrics());
-        return key -> (services.isEmpty() || services.contains(key.service()))
-                && (metrics.isEmpty() || metrics.contains(key.metric()));
-    }
-
-    private static List<String> normalized(List<String> values) {
-        List<String> result = new ArrayList<>();
-        for (String value : values == null ? List.<String>of() : values) {
-            if (value != null && !value.isBlank()) {
-                result.add(value.trim());
-            }
-        }
-        return List.copyOf(result);
+    private static MetricSelector selector(DriftGuardProperties.DetectorProperties properties) {
+        return MetricSelector.of(
+                properties.getServices(),
+                properties.getMetrics(),
+                properties.getOperations(),
+                properties.getInstances()
+        );
     }
 
     private static String required(String value, String field) {

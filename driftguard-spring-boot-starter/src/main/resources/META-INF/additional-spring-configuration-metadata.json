@@ -12,6 +12,18 @@
       "description": "Список detector-ов, которые будут зарегистрированы в DriftDetectorEngine."
     },
     {
+      "name": "driftguard.detectors-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Включает detector definitions, описанные через application.yml.",
+      "defaultValue": true
+    },
+    {
+      "name": "driftguard.detectors[].enabled",
+      "type": "java.lang.Boolean",
+      "description": "Включает или выключает отдельный detector definition без удаления конфигурации.",
+      "defaultValue": true
+    },
+    {
       "name": "driftguard.detectors[].name",
       "type": "java.lang.String",
       "description": "Уникальное имя detector-а. Используется в DriftEvent.detector и ключе состояния."
@@ -30,6 +42,16 @@
       "name": "driftguard.detectors[].metrics",
       "type": "java.util.List<java.lang.String>",
       "description": "Фильтр по MetricKey.metric. Пустой список означает любые метрики."
+    },
+    {
+      "name": "driftguard.detectors[].operations",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Фильтр по MetricKey.operation. Пустой список означает любые операции."
+    },
+    {
+      "name": "driftguard.detectors[].instances",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Фильтр по MetricKey.instance. Пустой список означает любые instance id."
     },
     {
       "name": "driftguard.detectors[].baseline-window-size",

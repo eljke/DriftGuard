@@ -32,10 +32,14 @@ driftguard:
     output-topic: driftguard.demo.drift-events
     auto-startup: false
     state-dir: ./target/driftguard-demo-kafka-state
+  detectors-enabled: true
   detectors:
     - name: latency-page-hinkley
+      enabled: true
       algorithm: page-hinkley
+      services: [checkout-service]
       metrics: [latency]
+      operations: ["POST /checkout"]
       warmup-samples: 20
       delta: 0.1
       warning-threshold: 25.0
@@ -44,7 +48,9 @@ driftguard:
       emission-policy:
         min-consecutive-signals: 2
         cooldown: 10s
+        recovery-consecutive-normal: 3
     - name: error-rate-page-hinkley
+      enabled: true
       algorithm: page-hinkley
       metrics: [error-rate]
       warmup-samples: 20
@@ -55,7 +61,9 @@ driftguard:
       emission-policy:
         min-consecutive-signals: 2
         cooldown: 10s
+        recovery-consecutive-normal: 3
     - name: throughput-page-hinkley
+      enabled: true
       algorithm: page-hinkley
       metrics: [throughput]
       warmup-samples: 20
@@ -66,7 +74,9 @@ driftguard:
       emission-policy:
         min-consecutive-signals: 2
         cooldown: 10s
+        recovery-consecutive-normal: 3
     - name: queue-size-page-hinkley
+      enabled: true
       algorithm: page-hinkley
       metrics: [queue-size]
       warmup-samples: 20
@@ -77,3 +87,4 @@ driftguard:
       emission-policy:
         min-consecutive-signals: 2
         cooldown: 10s
+        recovery-consecutive-normal: 3

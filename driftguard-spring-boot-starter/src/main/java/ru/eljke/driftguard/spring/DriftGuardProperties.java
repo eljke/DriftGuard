@@ -38,6 +38,11 @@ public class DriftGuardProperties {
     private List<DetectorProperties> detectors = new ArrayList<>();
 
     /**
+     * Глобальный флаг включения detector definitions из application.yml.
+     */
+    private boolean detectorsEnabled = true;
+
+    /**
      * Настройки Kafka Streams adapter-а.
      *
      * <p>Kafka-часть выключена по умолчанию, потому что не каждому Spring
@@ -60,6 +65,11 @@ public class DriftGuardProperties {
     @Setter
     public static class DetectorProperties {
         /**
+         * Позволяет временно выключить detector без удаления его конфигурации.
+         */
+        private boolean enabled = true;
+
+        /**
          * Имя detector-а в {@code DriftEvent.detector} и ключе состояния.
          */
         private String name;
@@ -81,6 +91,18 @@ public class DriftGuardProperties {
          * означает, что detector применяется к любой метрике.
          */
         private List<String> metrics = new ArrayList<>();
+
+        /**
+         * Разрешённые значения {@code MetricKey.operation}. Пустой список
+         * означает, что detector применяется к любой операции.
+         */
+        private List<String> operations = new ArrayList<>();
+
+        /**
+         * Разрешённые значения {@code MetricKey.instance}. Пустой список
+         * означает, что detector применяется к любому instance id.
+         */
+        private List<String> instances = new ArrayList<>();
 
         /**
          * Размер baseline-окна для PSI, KS и chi-square.
@@ -168,6 +190,14 @@ public class DriftGuardProperties {
 
         public void setMetrics(List<String> metrics) {
             this.metrics = metrics == null ? new ArrayList<>() : metrics;
+        }
+
+        public void setOperations(List<String> operations) {
+            this.operations = operations == null ? new ArrayList<>() : operations;
+        }
+
+        public void setInstances(List<String> instances) {
+            this.instances = instances == null ? new ArrayList<>() : instances;
         }
 
         public void setEmissionPolicy(EmissionPolicyProperties emissionPolicy) {
