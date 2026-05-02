@@ -20,8 +20,24 @@ import java.util.List;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class KafkaDriftGuardTopologyBuilderTest {
+
+    @Test
+    void repartitionsMetricsByStableMetricIdentityBeforeDetection() {
+        KafkaDriftGuardTopologyBuilder builder = new KafkaDriftGuardTopologyBuilder(
+                DriftGuardObjectMapper.create(),
+                point -> List.of()
+        );
+
+        String description = builder.build(new KafkaDriftGuardTopologyConfig(List.of("metrics"), "drift-events"))
+                .describe()
+                .toString();
+
+        assertTrue(description.contains("driftguard-metric-key-repartition"), description);
+    }
+
     @Test
     void routesDetectedEventsToOutputTopic() {
         DriftDetectorEngine engine = new DriftDetectorEngine(

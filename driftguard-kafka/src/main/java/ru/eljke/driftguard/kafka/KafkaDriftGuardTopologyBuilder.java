@@ -6,6 +6,7 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.kstream.Repartitioned;
 import ru.eljke.driftguard.core.detector.DriftDetectorEngine;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricPoint;
@@ -32,10 +33,17 @@ public final class KafkaDriftGuardTopologyBuilder {
 
     public Topology build(KafkaDriftGuardTopologyConfig config) {
         StreamsBuilder builder = new StreamsBuilder();
-        builder.stream(config.inputTopics(), Consumed.with(Serdes.String(), DriftGuardSerdes.metricPoint(objectMapper)))
+        var metricPointSerde = DriftGuardSerdes.metricPoint(objectMapper);
+        var driftEventSerde = DriftGuardSerdes.driftEvent(objectMapper);
+
+        builder.stream(config.inputTopics(), Consumed.with(Serdes.String(), metricPointSerde))
+                .filter((ignored, point) -> point != null)
+                .selectKey((ignored, point) -> KafkaMetricKeys.stateKey(point.key()))
+                .repartition(Repartitioned.with(Serdes.String(), metricPointSerde)
+                        .withName("driftguard-metric-key"))
                 .flatMapValues(detector::apply)
-                .selectKey((key, event) -> event.id())
-                .to(config.outputTopic(), Produced.with(Serdes.String(), DriftGuardSerdes.driftEvent(objectMapper)));
+                .selectKey((ignored, event) -> event.id())
+                .to(config.outputTopic(), Produced.with(Serdes.String(), driftEventSerde));
         return builder.build();
     }
 }
