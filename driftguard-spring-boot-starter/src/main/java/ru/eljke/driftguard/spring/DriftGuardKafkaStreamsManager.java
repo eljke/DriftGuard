@@ -66,7 +66,7 @@ public class DriftGuardKafkaStreamsManager implements SmartLifecycle {
         return streamsProperties(properties);
     }
 
-    static Properties streamsProperties(DriftGuardProperties.KafkaProperties properties) {
+    public static Properties streamsProperties(DriftGuardProperties.KafkaProperties properties) {
         Properties props = new Properties();
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getBootstrapServers());
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, properties.getApplicationId());

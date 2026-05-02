@@ -13,6 +13,7 @@ import java.util.List;
  */
 public record DemoConfigurationView(
         AggressivenessView aggressiveness,
+        List<String> availableProfiles,
         KafkaConfigurationView kafka,
         List<DetectorConfigurationView> detectors
 ) {

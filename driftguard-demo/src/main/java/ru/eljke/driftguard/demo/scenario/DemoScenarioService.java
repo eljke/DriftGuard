@@ -4,15 +4,14 @@ import jakarta.annotation.PostConstruct;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Service;
-import ru.eljke.driftguard.core.detector.DriftDetectorEngine;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricKey;
 import ru.eljke.driftguard.core.domain.MetricKind;
 import ru.eljke.driftguard.core.domain.MetricPoint;
 import ru.eljke.driftguard.core.error.DriftGuardValidationException;
+import ru.eljke.driftguard.demo.detection.DemoDetectionRuntime;
 import ru.eljke.driftguard.demo.error.DemoErrorReason;
 import ru.eljke.driftguard.testkit.DetectionEvaluator;
-import ru.eljke.driftguard.testkit.DriftInterval;
 import ru.eljke.driftguard.testkit.GradualDriftScenario;
 import ru.eljke.driftguard.testkit.MetricScenario;
 import ru.eljke.driftguard.testkit.PulseSpikeScenario;
@@ -48,7 +47,7 @@ public class DemoScenarioService {
             new DemoScenarioDescriptor("microservices-system", "Microservices system", "mixed", "Несколько сервисов одновременно публикуют latency, error rate и queue size.")
     );
 
-    private final DriftDetectorEngine engine;
+    private final DemoDetectionRuntime runtime;
     private final MeterRegistry meterRegistry;
     private final AtomicLong runSequence = new AtomicLong();
     private final ScheduledExecutorService playbackExecutor = Executors.newSingleThreadScheduledExecutor(runnable -> {
@@ -59,8 +58,8 @@ public class DemoScenarioService {
     private volatile DemoRunResult lastResult;
     private volatile ScheduledFuture<?> playbackTask;
 
-    public DemoScenarioService(DriftDetectorEngine engine, MeterRegistry meterRegistry) {
-        this.engine = engine;
+    public DemoScenarioService(DemoDetectionRuntime runtime, MeterRegistry meterRegistry) {
+        this.runtime = runtime;
         this.meterRegistry = meterRegistry;
     }
 
@@ -84,9 +83,9 @@ public class DemoScenarioService {
         List<MetricPoint> points = scenario.generate();
         List<DriftEvent> events = new ArrayList<>();
         for (MetricPoint point : points) {
-            events.addAll(engine.detect(point));
+            events.addAll(runtime.detect(point));
         }
-        List<DriftEvent> representativeEvents = firstExpectedEventPerDetector(events, scenario.expectedDrifts());
+        List<DriftEvent> representativeEvents = firstEventPerDetector(events);
         recordRunMetrics(descriptor.id(), "instant", points.size(), representativeEvents.size());
         lastResult = new DemoRunResult(
                 scenario.name(),
@@ -117,7 +116,7 @@ public class DemoScenarioService {
             @Override
             public void run() {
                 if (index >= points.size()) {
-                    List<DriftEvent> representativeEvents = firstExpectedEventPerDetector(events, scenario.expectedDrifts());
+                    List<DriftEvent> representativeEvents = firstEventPerDetector(events);
                     recordRunMetrics(descriptor.id(), "live", processed.size(), representativeEvents.size());
                     lastResult = liveResult(scenario, descriptor, points, processed, events, false);
                     stopLive();
@@ -125,8 +124,8 @@ public class DemoScenarioService {
                 }
                 MetricPoint point = points.get(index++);
                 processed.add(point);
-                events.addAll(engine.detect(point));
-                List<DriftEvent> representativeEvents = firstExpectedEventPerDetector(events, scenario.expectedDrifts());
+                events.addAll(runtime.detect(point));
+                List<DriftEvent> representativeEvents = firstEventPerDetector(events);
                 lastResult = new DemoRunResult(
                         scenario.name(),
                         descriptor.title(),
@@ -241,7 +240,7 @@ public class DemoScenarioService {
             List<DriftEvent> events,
             boolean running
     ) {
-        List<DriftEvent> representativeEvents = firstExpectedEventPerDetector(events, scenario.expectedDrifts());
+        List<DriftEvent> representativeEvents = firstEventPerDetector(events);
         return new DemoRunResult(
                 scenario.name(),
                 descriptor.title(),
@@ -256,15 +255,10 @@ public class DemoScenarioService {
         );
     }
 
-    private static List<DriftEvent> firstExpectedEventPerDetector(List<DriftEvent> events, List<DriftInterval> expectedDrifts) {
-        if (expectedDrifts.isEmpty()) {
-            return List.of();
-        }
+    private static List<DriftEvent> firstEventPerDetector(List<DriftEvent> events) {
         Map<String, DriftEvent> byDetector = new LinkedHashMap<>();
         for (DriftEvent event : events) {
-            if (expectedDrifts.stream().anyMatch(interval -> interval.contains(event.detectedAt()))) {
-                byDetector.putIfAbsent(event.detector(), event);
-            }
+            byDetector.putIfAbsent(event.detector(), event);
         }
         return List.copyOf(byDetector.values());
     }

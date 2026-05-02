@@ -8,9 +8,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.eljke.driftguard.core.domain.DriftEvent;
+import ru.eljke.driftguard.core.error.DriftGuardValidationException;
 import ru.eljke.driftguard.demo.config.DemoConfigurationService;
 import ru.eljke.driftguard.demo.config.DemoConfigurationView;
 import ru.eljke.driftguard.demo.config.DemoToolProperties;
+import ru.eljke.driftguard.demo.detection.DemoDetectorProfile;
+import ru.eljke.driftguard.demo.error.DemoErrorReason;
 import ru.eljke.driftguard.demo.kafka.KafkaDemoService;
 import ru.eljke.driftguard.demo.kafka.KafkaDemoStatus;
 import ru.eljke.driftguard.demo.scenario.DemoRunResult;
@@ -126,6 +129,16 @@ public class DemoController {
         return configurationService.current();
     }
 
+    @PostMapping("/configuration/profile/{profile}")
+    @Operation(summary = "Меняет runtime-профиль чувствительности detector-ов")
+    public DemoConfigurationView updateProfile(@PathVariable("profile") String profile) {
+        try {
+            return configurationService.updateProfile(DemoDetectorProfile.parse(profile));
+        } catch (IllegalArgumentException exception) {
+            throw new DriftGuardValidationException(DemoErrorReason.UNKNOWN_PROFILE, profile);
+        }
+    }
+
     @GetMapping("/help")
     @Operation(summary = "Возвращает краткий список доступных demo endpoint-ов")
     public Map<String, String> help() {
@@ -142,7 +155,8 @@ public class DemoController {
                 Map.entry("startKafkaScenario", "POST /api/demo/kafka/start/{scenario}"),
                 Map.entry("stopKafkaScenario", "POST /api/demo/kafka/stop"),
                 Map.entry("tools", "GET /api/demo/tools"),
-                Map.entry("configuration", "GET /api/demo/configuration")
+                Map.entry("configuration", "GET /api/demo/configuration"),
+                Map.entry("updateProfile", "POST /api/demo/configuration/profile/{profile}")
         );
     }
 }

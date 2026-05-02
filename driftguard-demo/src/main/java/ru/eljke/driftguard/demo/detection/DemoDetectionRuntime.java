@@ -1,0 +1,131 @@
+package ru.eljke.driftguard.demo.detection;
+
+import org.springframework.stereotype.Service;
+import ru.eljke.driftguard.algorithms.DefaultAlgorithms;
+import ru.eljke.driftguard.algorithms.ks.KsConfig;
+import ru.eljke.driftguard.algorithms.pagehinkley.PageHinkleyConfig;
+import ru.eljke.driftguard.core.config.DetectorDefinition;
+import ru.eljke.driftguard.core.config.EmissionPolicyConfig;
+import ru.eljke.driftguard.core.detector.DriftDetectorEngine;
+import ru.eljke.driftguard.core.domain.DriftEvent;
+import ru.eljke.driftguard.core.domain.MetricPoint;
+import ru.eljke.driftguard.core.state.InMemoryDetectorStateStore;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+/**
+ * Runtime-обёртка над {@link DriftDetectorEngine}, позволяющая demo UI менять
+ * профиль чувствительности без перезапуска Spring Boot приложения.
+ */
+@Service
+public class DemoDetectionRuntime {
+    private final AtomicReference<RuntimeState> state = new AtomicReference<>(create(DemoDetectorProfile.BALANCED));
+
+    public List<DriftEvent> detect(MetricPoint point) {
+        return state.get().engine().detect(point);
+    }
+
+    public DemoDetectorProfile profile() {
+        return state.get().profile();
+    }
+
+    public List<DetectorDefinition> definitions() {
+        return state.get().definitions();
+    }
+
+    public synchronized DemoDetectorProfile setProfile(DemoDetectorProfile profile) {
+        state.set(create(profile));
+        return profile;
+    }
+
+    private static RuntimeState create(DemoDetectorProfile profile) {
+        List<DetectorDefinition> definitions = definitions(profile);
+        return new RuntimeState(
+                profile,
+                definitions,
+                new DriftDetectorEngine(DefaultAlgorithms.registry(), new InMemoryDetectorStateStore(), definitions)
+        );
+    }
+
+    private static List<DetectorDefinition> definitions(DemoDetectorProfile profile) {
+        ProfileSettings settings = ProfileSettings.of(profile);
+        return List.of(
+                new DetectorDefinition(
+                        "latency-page-hinkley",
+                        new PageHinkleyConfig(20, 0.1, settings.latencyWarning(), settings.latencyCritical(), 0.05),
+                        key -> key.metric().equals("latency"),
+                        settings.emissionPolicy()
+                ),
+                new DetectorDefinition(
+                        "error-rate-page-hinkley",
+                        new PageHinkleyConfig(20, 0.001, settings.errorRateWarning(), settings.errorRateCritical(), 0.05),
+                        key -> key.metric().equals("error-rate"),
+                        settings.emissionPolicy()
+                ),
+                new DetectorDefinition(
+                        "queue-size-page-hinkley",
+                        new PageHinkleyConfig(20, 0.1, settings.queueWarning(), settings.queueCritical(), 0.05),
+                        key -> key.metric().equals("queue-size"),
+                        settings.emissionPolicy()
+                ),
+                new DetectorDefinition(
+                        "throughput-ks",
+                        new KsConfig(settings.ksBaselineWindow(), settings.ksCurrentWindow(), settings.warningPValue(), settings.criticalPValue()),
+                        key -> key.metric().equals("throughput"),
+                        settings.emissionPolicy()
+                )
+        );
+    }
+
+    private record RuntimeState(
+            DemoDetectorProfile profile,
+            List<DetectorDefinition> definitions,
+            DriftDetectorEngine engine
+    ) {
+    }
+
+    private record ProfileSettings(
+            double latencyWarning,
+            double latencyCritical,
+            double errorRateWarning,
+            double errorRateCritical,
+            double queueWarning,
+            double queueCritical,
+            double warningPValue,
+            double criticalPValue,
+            int ksBaselineWindow,
+            int ksCurrentWindow,
+            EmissionPolicyConfig emissionPolicy
+    ) {
+        private static ProfileSettings of(DemoDetectorProfile profile) {
+            return switch (profile) {
+                case AGGRESSIVE -> new ProfileSettings(
+                        25.0, 80.0,
+                        0.025, 0.09,
+                        25.0, 70.0,
+                        0.08, 0.02,
+                        30, 20,
+                        new EmissionPolicyConfig(2, Duration.ofSeconds(20))
+                );
+                case BALANCED -> new ProfileSettings(
+                        35.0, 115.0,
+                        0.045, 0.14,
+                        35.0, 110.0,
+                        0.04, 0.01,
+                        35, 25,
+                        new EmissionPolicyConfig(2, Duration.ofSeconds(45))
+                );
+                case CONSERVATIVE -> new ProfileSettings(
+                        70.0, 190.0,
+                        0.07, 0.20,
+                        75.0, 180.0,
+                        0.02, 0.005,
+                        45, 30,
+                        new EmissionPolicyConfig(4, Duration.ofSeconds(75))
+                );
+            };
+        }
+    }
+}
