@@ -1,4 +1,4 @@
-package ru.eljke.driftguard.demo;
+package ru.eljke.driftguard.demo.tool;
 
 /**
  * Ссылка на внешний инструмент локального demo-стенда.

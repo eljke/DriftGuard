@@ -1,4 +1,4 @@
-package ru.eljke.driftguard.demo;
+package ru.eljke.driftguard.demo.config;
 
 import lombok.Getter;
 import lombok.Setter;

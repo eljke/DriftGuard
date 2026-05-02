@@ -1,4 +1,4 @@
-package ru.eljke.driftguard.demo;
+package ru.eljke.driftguard.demo.scenario;
 
 import jakarta.annotation.PostConstruct;
 import io.micrometer.core.instrument.Counter;
@@ -10,6 +10,7 @@ import ru.eljke.driftguard.core.domain.MetricKey;
 import ru.eljke.driftguard.core.domain.MetricKind;
 import ru.eljke.driftguard.core.domain.MetricPoint;
 import ru.eljke.driftguard.core.error.DriftGuardValidationException;
+import ru.eljke.driftguard.demo.error.DemoErrorReason;
 import ru.eljke.driftguard.testkit.DetectionEvaluator;
 import ru.eljke.driftguard.testkit.DriftInterval;
 import ru.eljke.driftguard.testkit.GradualDriftScenario;
@@ -166,7 +167,7 @@ public class DemoScenarioService {
                 .orElseThrow(() -> new DriftGuardValidationException(DemoErrorReason.UNKNOWN_SCENARIO, id));
     }
 
-    static MetricScenario createScenario(String scenarioId, String instance) {
+    public static MetricScenario createScenario(String scenarioId, String instance) {
         return switch (scenarioId) {
             case "latency-step" -> new StepDriftScenario(
                 "latency-step-degradation",
@@ -221,7 +222,7 @@ public class DemoScenarioService {
         };
     }
 
-    static ScenarioConfig config(String service, String metric, String instance, String operation, MetricKind kind, int samples) {
+    public static ScenarioConfig config(String service, String metric, String instance, String operation, MetricKind kind, int samples) {
         return new ScenarioConfig(
                 new MetricKey(service, metric, instance, operation),
                 kind,

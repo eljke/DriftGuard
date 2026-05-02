@@ -1,4 +1,4 @@
-package ru.eljke.driftguard.demo;
+package ru.eljke.driftguard.demo.api;
 
 import io.swagger.v3.oas.models.media.Schema;
 import org.springdoc.core.customizers.OpenApiCustomizer;

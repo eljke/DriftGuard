@@ -1,4 +1,4 @@
-package ru.eljke.driftguard.demo;
+package ru.eljke.driftguard.demo.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -8,6 +8,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.eljke.driftguard.core.domain.DriftEvent;
+import ru.eljke.driftguard.demo.config.DemoToolProperties;
+import ru.eljke.driftguard.demo.kafka.KafkaDemoService;
+import ru.eljke.driftguard.demo.kafka.KafkaDemoStatus;
+import ru.eljke.driftguard.demo.scenario.DemoRunResult;
+import ru.eljke.driftguard.demo.scenario.DemoScenarioDescriptor;
+import ru.eljke.driftguard.demo.scenario.DemoScenarioService;
+import ru.eljke.driftguard.demo.tool.ToolLink;
 
 import java.util.List;
 import java.util.Map;

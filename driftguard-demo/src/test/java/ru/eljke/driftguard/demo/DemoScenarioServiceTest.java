@@ -7,6 +7,8 @@ import ru.eljke.driftguard.algorithms.pagehinkley.PageHinkleyConfig;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
 import ru.eljke.driftguard.core.detector.DriftDetectorEngine;
 import ru.eljke.driftguard.core.state.InMemoryDetectorStateStore;
+import ru.eljke.driftguard.demo.scenario.DemoRunResult;
+import ru.eljke.driftguard.demo.scenario.DemoScenarioService;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package ru.eljke.driftguard.demo;
+package ru.eljke.driftguard.demo.kafka;
 
 /**
  * Состояние тестового producer-а в Kafka demo.

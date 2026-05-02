@@ -1,4 +1,4 @@
-package ru.eljke.driftguard.demo;
+package ru.eljke.driftguard.demo.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PreDestroy;
@@ -16,6 +16,9 @@ import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricKind;
 import ru.eljke.driftguard.core.domain.MetricPoint;
 import ru.eljke.driftguard.core.error.DriftGuardValidationException;
+import ru.eljke.driftguard.demo.config.DemoKafkaProperties;
+import ru.eljke.driftguard.demo.error.DemoErrorReason;
+import ru.eljke.driftguard.demo.scenario.DemoScenarioService;
 import ru.eljke.driftguard.kafka.DriftGuardObjectMapper;
 import ru.eljke.driftguard.kafka.DriftGuardSerdes;
 import ru.eljke.driftguard.spring.DriftGuardKafkaStreamsManager;

@@ -1,4 +1,4 @@
-package ru.eljke.driftguard.demo;
+package ru.eljke.driftguard.demo.error;
 
 import ru.eljke.driftguard.core.error.ErrorReason;
 

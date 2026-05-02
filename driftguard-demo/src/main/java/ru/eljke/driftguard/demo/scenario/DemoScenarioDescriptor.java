@@ -1,4 +1,4 @@
-package ru.eljke.driftguard.demo;
+package ru.eljke.driftguard.demo.scenario;
 
 /**
  * Краткое описание demo-сценария для UI и REST API.
