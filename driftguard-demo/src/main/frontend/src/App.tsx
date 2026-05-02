@@ -20,6 +20,7 @@ import type {
   DemoConfigurationView,
   DetectionBenchmarkReport,
   DemoRunResult,
+  DemoStoredDriftEvent,
   DemoScenarioDescriptor,
   DriftEvent,
   KafkaDemoStatus,
@@ -45,6 +46,7 @@ export default function App() {
   const kafka = useQuery({ queryKey: ["kafka"], queryFn: api.kafkaStatus, refetchInterval: 750 });
   const tools = useQuery({ queryKey: ["tools"], queryFn: api.tools });
   const configuration = useQuery({ queryKey: ["configuration"], queryFn: api.configuration });
+  const storedEvents = useQuery({ queryKey: ["stored-events"], queryFn: api.storedEvents, refetchInterval: 750 });
 
   return (
     <div className="app-shell">
@@ -78,7 +80,7 @@ export default function App() {
 
       <main className="main">
         <Header overview={overview.data} kafka={kafka.data} />
-        {page === "overview" && <Overview result={overview.data} kafka={kafka.data} />}
+        {page === "overview" && <Overview result={overview.data} kafka={kafka.data} storedEvents={storedEvents.data ?? []} />}
         {page === "synthetic" && <SyntheticPage result={overview.data} scenarios={scenarios.data ?? []} />}
         {page === "kafka" && <KafkaPage status={kafka.data} scenarios={scenarios.data ?? []} />}
         {page === "configuration" && <ConfigurationPage configuration={configuration.data} />}
@@ -103,7 +105,7 @@ function Header({ overview, kafka }: { overview?: DemoRunResult; kafka?: KafkaDe
   );
 }
 
-function Overview({ result, kafka }: { result?: DemoRunResult; kafka?: KafkaDemoStatus }) {
+function Overview({ result, kafka, storedEvents }: { result?: DemoRunResult; kafka?: KafkaDemoStatus; storedEvents: DemoStoredDriftEvent[] }) {
   const critical = countSeverity([...(result?.events ?? []), ...(kafka?.consumedEvents ?? [])], "CRITICAL");
   return (
     <section className="page-grid">
@@ -120,6 +122,9 @@ function Overview({ result, kafka }: { result?: DemoRunResult; kafka?: KafkaDemo
       </Panel>
       <Panel className="wide" title="Kafka streams">
         <StreamGrid points={kafka?.samplePoints ?? []} events={kafka?.consumedEvents ?? []} running={Boolean(kafka?.running)} />
+      </Panel>
+      <Panel className="wide" title="Recent stored drift events">
+        <StoredEventsTable storedEvents={storedEvents} />
       </Panel>
     </section>
   );
@@ -587,6 +592,50 @@ function BenchmarkPanel({
         </div>
       )}
     </Panel>
+  );
+}
+
+function StoredEventsTable({ storedEvents }: { storedEvents: DemoStoredDriftEvent[] }) {
+  if (storedEvents.length === 0) {
+    return <div className="empty-state compact">Сохранённых drift events пока нет.</div>;
+  }
+
+  return (
+    <div className="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Received MSK</th>
+            <th>Source</th>
+            <th>Run</th>
+            <th>Severity</th>
+            <th>Phase</th>
+            <th>Service</th>
+            <th>Metric</th>
+            <th>Detector</th>
+            <th>Explanation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {storedEvents.map((stored) => {
+            const event = stored.event;
+            return (
+              <tr key={`${stored.source}-${stored.runId}-${event.id}`}>
+                <td>{formatMoscow(stored.receivedAt)}</td>
+                <td><span className="badge">{stored.source}</span></td>
+                <td>{stored.runId}</td>
+                <td><span className={`severity ${event.severity.toLowerCase()}`}>{event.severity}</span></td>
+                <td><span className={`phase ${event.phase.toLowerCase()}`}>{event.phase}</span></td>
+                <td>{event.key.service}</td>
+                <td>{event.key.metric}</td>
+                <td>{event.detector}</td>
+                <td className="event-explanation">{eventExplanation(event)}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
