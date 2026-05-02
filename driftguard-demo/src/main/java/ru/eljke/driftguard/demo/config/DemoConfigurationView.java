@@ -81,7 +81,8 @@ public record DemoConfigurationView(
      *
      * @param minConsecutiveSignals сколько подряд сигналов нужно перед событием
      * @param cooldown минимальная пауза между событиями одного detector-а
+     * @param recoveryConsecutiveNormal сколько нормальных точек подряд закрывают drift episode
      */
-    public record EmissionPolicyView(int minConsecutiveSignals, Duration cooldown) {
+    public record EmissionPolicyView(int minConsecutiveSignals, Duration cooldown, int recoveryConsecutiveNormal) {
     }
 }

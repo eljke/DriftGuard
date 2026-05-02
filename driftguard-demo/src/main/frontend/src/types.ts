@@ -3,32 +3,35 @@ export type Severity = "INFO" | "WARNING" | "CRITICAL";
 export interface MetricKey {
   service: string;
   metric: string;
-  instance: string;
+  instance?: string;
   operation?: string;
-  tags: Record<string, string>;
 }
 
 export interface MetricPoint {
   key: MetricKey;
   timestamp: string;
   value: number;
-  unit?: string;
-  kind?: string;
-  metadata: Record<string, string>;
+  kind: string;
+  tags: Record<string, string>;
+  attributes: Record<string, unknown>;
 }
 
 export interface DriftEvent {
   id: string;
   key: MetricKey;
   detectedAt: string;
+  windowStart: string;
+  windowEnd: string;
+  direction: string;
   detector: string;
   algorithm: string;
   severity: Severity;
   score: number;
-  baselineSummary?: string;
-  currentSummary?: string;
+  currentValue: number;
+  baselineValue: number;
   reason: string;
-  metadata: Record<string, string>;
+  tags: Record<string, string>;
+  details: Record<string, unknown>;
 }
 
 export interface DetectionMetrics {
@@ -74,7 +77,7 @@ export interface KafkaProducerStatus {
   operation?: string;
   producedPoints: number;
   totalPoints: number;
-  completed: boolean;
+  running: boolean;
 }
 
 export interface KafkaDemoStatus {
@@ -104,6 +107,7 @@ export interface DemoConfigurationView {
     level: string;
     description: string;
   };
+  availableProfiles: string[];
   kafka: {
     demoEnabled: boolean;
     bootstrapServers: string;
@@ -128,6 +132,7 @@ export interface DetectorConfigurationView {
   emissionPolicy: {
     minConsecutiveSignals: number;
     cooldown: string;
+    recoveryConsecutiveNormal: number;
   };
   sensitivity: string;
 }

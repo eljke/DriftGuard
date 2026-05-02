@@ -93,7 +93,7 @@ public final class DriftDetectorEngine {
         DetectionResult<S> result = algorithm.detect(point, state, config, new DetectionContext(definition.name()));
         stateStore.put(instanceKey, result.state());
         if (result.eventValue().isEmpty()) {
-            resetConsecutiveSignals(instanceKey);
+            observeNormalPoint(instanceKey, definition);
             return List.of();
         }
         return result.eventValue()
@@ -102,25 +102,47 @@ public final class DriftDetectorEngine {
                 .toList();
     }
 
-    private void resetConsecutiveSignals(DetectorInstanceKey instanceKey) {
+    private void observeNormalPoint(DetectorInstanceKey instanceKey, DetectorDefinition definition) {
         EmissionState previous = emissionStateStore.get(instanceKey).orElse(EmissionState.EMPTY);
-        if (previous.consecutiveSignals() > 0) {
-            emissionStateStore.put(instanceKey, new EmissionState(0, previous.lastEmittedAt()));
+        if (previous.activeEpisode()) {
+            int consecutiveNormal = previous.consecutiveNormal() + 1;
+            boolean recovered = consecutiveNormal >= definition.emissionPolicy().recoveryConsecutiveNormal();
+            emissionStateStore.put(instanceKey, new EmissionState(
+                    recovered ? 0 : previous.consecutiveSignals(),
+                    previous.lastEmittedAt(),
+                    !recovered,
+                    recovered ? 0 : consecutiveNormal
+            ));
+            return;
+        }
+        if (previous.consecutiveSignals() > 0 || previous.consecutiveNormal() > 0) {
+            emissionStateStore.put(instanceKey, new EmissionState(0, previous.lastEmittedAt(), false, 0));
         }
     }
 
     private boolean shouldEmit(DetectorInstanceKey instanceKey, DetectorDefinition definition, DriftEvent event) {
         EmissionState previous = emissionStateStore.get(instanceKey).orElse(EmissionState.EMPTY);
+        if (previous.activeEpisode()) {
+            emissionStateStore.put(instanceKey, new EmissionState(
+                    previous.consecutiveSignals() + 1,
+                    previous.lastEmittedAt(),
+                    true,
+                    0
+            ));
+            return false;
+        }
+
         int consecutiveSignals = previous.consecutiveSignals() + 1;
         boolean enoughSignals = consecutiveSignals >= definition.emissionPolicy().minConsecutiveSignals();
         boolean cooldownElapsed = previous.lastEmittedAtValue()
                 .map(last -> !event.detectedAt().isBefore(last.plus(definition.emissionPolicy().cooldown())))
                 .orElse(true);
-        boolean episodeStart = consecutiveSignals == definition.emissionPolicy().minConsecutiveSignals();
-        boolean emit = episodeStart && cooldownElapsed;
+        boolean emit = enoughSignals && cooldownElapsed;
         emissionStateStore.put(instanceKey, new EmissionState(
                 consecutiveSignals,
-                emit ? event.detectedAt() : previous.lastEmittedAt()
+                emit ? event.detectedAt() : previous.lastEmittedAt(),
+                emit,
+                0
         ));
         return emit;
     }

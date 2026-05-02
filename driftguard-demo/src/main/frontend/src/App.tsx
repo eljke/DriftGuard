@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
+  AlertCircle,
   BarChart3,
   Boxes,
   Cable,
   Gauge,
+  Loader2,
   Play,
   Settings,
   Square,
@@ -37,9 +39,9 @@ const navigation: Array<{ page: Page; label: string; icon: typeof Activity }> = 
 
 export default function App() {
   const [page, setPage] = useState<Page>("overview");
-  const overview = useQuery({ queryKey: ["overview"], queryFn: api.overview, refetchInterval: 2500 });
+  const overview = useQuery({ queryKey: ["overview"], queryFn: api.overview, refetchInterval: 750 });
   const scenarios = useQuery({ queryKey: ["scenarios"], queryFn: api.scenarios });
-  const kafka = useQuery({ queryKey: ["kafka"], queryFn: api.kafkaStatus, refetchInterval: 1500 });
+  const kafka = useQuery({ queryKey: ["kafka"], queryFn: api.kafkaStatus, refetchInterval: 750 });
   const tools = useQuery({ queryKey: ["tools"], queryFn: api.tools });
   const configuration = useQuery({ queryKey: ["configuration"], queryFn: api.configuration });
 
@@ -116,7 +118,7 @@ function Overview({ result, kafka }: { result?: DemoRunResult; kafka?: KafkaDemo
         <ScenarioSummary result={result} />
       </Panel>
       <Panel className="wide" title="Kafka streams">
-        <StreamGrid points={kafka?.samplePoints ?? []} events={kafka?.consumedEvents ?? []} />
+        <StreamGrid points={kafka?.samplePoints ?? []} events={kafka?.consumedEvents ?? []} running={Boolean(kafka?.running)} />
       </Panel>
     </section>
   );
@@ -136,23 +138,28 @@ function SyntheticPage({ result, scenarios }: { result?: DemoRunResult; scenario
     mutationFn: api.stopLive,
     onSuccess: (data) => queryClient.setQueryData(["overview"], data)
   });
+  const busy = run.isPending || live.isPending || stopLive.isPending;
+  const error = run.error ?? live.error ?? stopLive.error;
 
   return (
     <section className="stack">
       <Panel title="Synthetic scenarios">
-        <ScenarioButtons scenarios={scenarios} onRun={(id) => run.mutate(id)} onLive={(id) => live.mutate(id)} />
+        {busy && <Notice tone="info" text="Команда выполняется. Результат обновится автоматически." />}
+        {error && <Notice tone="error" text={readableError(error)} />}
+        <ScenarioButtons scenarios={scenarios} busy={busy} onRun={(id) => run.mutate(id)} onLive={(id) => live.mutate(id)} />
       </Panel>
       <Panel title="Result">
         <ScenarioSummary result={result} />
+        {result?.running && <Notice tone="info" text="Live playback активен: точки и события появляются по мере обработки." />}
         <div className="actions">
-          <button className="secondary-button" disabled={!result?.running} onClick={() => stopLive.mutate()} type="button">
+          <button className="secondary-button" disabled={!result?.running || stopLive.isPending} onClick={() => stopLive.mutate()} type="button">
             <Square size={16} />
             Stop live
           </button>
         </div>
       </Panel>
       <Panel title="Synthetic chart">
-        <StreamGrid points={result?.samplePoints ?? []} events={result?.events ?? []} />
+        <StreamGrid points={result?.samplePoints ?? []} events={result?.events ?? []} running={Boolean(result?.running)} />
       </Panel>
       <EventsTable events={result?.events ?? []} />
     </section>
@@ -170,13 +177,19 @@ function KafkaPage({ status, scenarios }: { status?: KafkaDemoStatus; scenarios:
     onSuccess: (data) => queryClient.setQueryData(["kafka"], data)
   });
   const kafkaScenarios = scenarios.filter((scenario) => scenario.id !== "seasonal-latency");
+  const busy = start.isPending || stop.isPending;
+  const error = start.error ?? stop.error;
 
   return (
     <section className="stack">
       <Panel title="Kafka scenarios">
-        <ScenarioButtons scenarios={kafkaScenarios} onRun={(id) => start.mutate(id)} />
+        {busy && <Notice tone="info" text="Kafka demo запускается. Создаются topic-и, topology, producer и consumer." />}
+        {status?.running && <Notice tone="info" text="Kafka demo работает. График и таблица обновляются каждые 750 мс." />}
+        {status?.error && <Notice tone="error" text={status.error} />}
+        {error && <Notice tone="error" text={readableError(error)} />}
+        <ScenarioButtons scenarios={kafkaScenarios} busy={busy || Boolean(status?.running)} onRun={(id) => start.mutate(id)} />
         <div className="actions">
-          <button className="secondary-button" disabled={!status?.running} onClick={() => stop.mutate()} type="button">
+          <button className="secondary-button" disabled={!status?.running || stop.isPending} onClick={() => stop.mutate()} type="button">
             <Square size={16} />
             Stop Kafka demo
           </button>
@@ -194,7 +207,7 @@ function KafkaPage({ status, scenarios }: { status?: KafkaDemoStatus; scenarios:
         ))}
       </div>
       <Panel title="Kafka metric streams">
-        <StreamGrid points={status?.samplePoints ?? []} events={status?.consumedEvents ?? []} />
+        <StreamGrid points={status?.samplePoints ?? []} events={status?.consumedEvents ?? []} running={Boolean(status?.running)} />
       </Panel>
       <EventsTable events={status?.consumedEvents ?? []} />
     </section>
@@ -202,9 +215,16 @@ function KafkaPage({ status, scenarios }: { status?: KafkaDemoStatus; scenarios:
 }
 
 function ConfigurationPage({ configuration }: { configuration?: DemoConfigurationView }) {
+  const queryClient = useQueryClient();
+  const updateProfile = useMutation({
+    mutationFn: api.updateProfile,
+    onSuccess: (data) => queryClient.setQueryData(["configuration"], data)
+  });
+
   if (!configuration) {
     return <Panel title="Configuration">Загрузка конфигурации...</Panel>;
   }
+
   return (
     <section className="stack">
       <div className="page-grid">
@@ -213,6 +233,30 @@ function ConfigurationPage({ configuration }: { configuration?: DemoConfiguratio
         <MetricCard title="Kafka output" value={configuration.kafka.outputTopic} helper={configuration.kafka.applicationId} />
         <MetricCard title="Playback" value={configuration.kafka.playbackInterval} helper="Интервал публикации точек" />
       </div>
+      <Panel title="Runtime detector profile">
+        {updateProfile.isPending && <Notice tone="info" text="Профиль применяется: engine пересоздаётся, состояние detector-ов сбрасывается." />}
+        {updateProfile.error && <Notice tone="error" text={readableError(updateProfile.error)} />}
+        <div className="actions">
+          {configuration.availableProfiles.map((profile) => {
+            const active = configuration.aggressiveness.level.toUpperCase() === profile;
+            return (
+              <button
+                className={active ? "primary-button" : "secondary-button"}
+                disabled={updateProfile.isPending || active}
+                key={profile}
+                onClick={() => updateProfile.mutate(profile)}
+                type="button"
+              >
+                {updateProfile.isPending ? <Loader2 className="spin" size={16} /> : null}
+                {profile}
+              </button>
+            );
+          })}
+        </div>
+        <p className="help-text">
+          Профиль реально меняет runtime DriftDetectorEngine. Kafka topology не пересобирается: она вызывает runtime.detect(), поэтому следующие сообщения сразу идут через новый engine.
+        </p>
+      </Panel>
       <Panel title="Detector definitions">
         <div className="detector-grid">
           {configuration.detectors.map((detector) => (
@@ -231,7 +275,9 @@ function ConfigurationPage({ configuration }: { configuration?: DemoConfiguratio
                 <dt>Critical</dt>
                 <dd>{detector.criticalThreshold} / p={detector.criticalPValue}</dd>
                 <dt>Emission</dt>
-                <dd>{detector.emissionPolicy.minConsecutiveSignals} signals, {detector.emissionPolicy.cooldown}</dd>
+                <dd>
+                  {detector.emissionPolicy.minConsecutiveSignals} signals, {detector.emissionPolicy.cooldown}, recovery {detector.emissionPolicy.recoveryConsecutiveNormal}
+                </dd>
               </dl>
             </article>
           ))}
@@ -257,10 +303,12 @@ function ToolsPage({ tools }: { tools: ToolLink[] }) {
 
 function ScenarioButtons({
   scenarios,
+  busy,
   onRun,
   onLive
 }: {
   scenarios: DemoScenarioDescriptor[];
+  busy?: boolean;
   onRun: (scenario: string) => void;
   onLive?: (scenario: string) => void;
 }) {
@@ -273,12 +321,12 @@ function ScenarioButtons({
             <span>{scenario.description}</span>
           </div>
           <div className="scenario-actions">
-            <button className="primary-button" onClick={() => onRun(scenario.id)} type="button">
-              <Play size={16} />
+            <button className="primary-button" disabled={busy} onClick={() => onRun(scenario.id)} type="button">
+              {busy ? <Loader2 className="spin" size={16} /> : <Play size={16} />}
               Run
             </button>
             {onLive && (
-              <button className="secondary-button" onClick={() => onLive(scenario.id)} type="button">
+              <button className="secondary-button" disabled={busy} onClick={() => onLive(scenario.id)} type="button">
                 Live
               </button>
             )}
@@ -289,7 +337,7 @@ function ScenarioButtons({
   );
 }
 
-function StreamGrid({ points, events }: { points: MetricPoint[]; events: DriftEvent[] }) {
+function StreamGrid({ points, events, running = false }: { points: MetricPoint[]; events: DriftEvent[]; running?: boolean }) {
   const groups = useMemo(() => groupStreams(points), [points]);
   if (groups.length === 0) {
     return <div className="empty-state">Метрики пока не опубликованы.</div>;
@@ -307,6 +355,9 @@ function StreamGrid({ points, events }: { points: MetricPoint[]; events: DriftEv
               </div>
               <span className="badge">{group.points.length} points · {streamEvents.length} events</span>
             </div>
+            {running && streamEvents.length === 0 && (
+              <div className="inline-hint">Поток идёт, detector ждёт достаточное окно и подтверждение сигнала.</div>
+            )}
             <TimeSeriesChart points={group.points} events={streamEvents} />
           </article>
         );
@@ -389,6 +440,15 @@ function Panel({ title, children, className = "" }: { title: string; children: R
   );
 }
 
+function Notice({ tone, text }: { tone: "info" | "error"; text: string }) {
+  return (
+    <div className={`notice ${tone}`}>
+      {tone === "error" ? <AlertCircle size={16} /> : <Activity size={16} />}
+      <span>{text}</span>
+    </div>
+  );
+}
+
 function StatusPill({ label, active }: { label: string; active: boolean }) {
   return <span className={active ? "status-pill active" : "status-pill"}>{label}: {active ? "running" : "idle"}</span>;
 }
@@ -445,4 +505,8 @@ function formatMoscow(value: string) {
     minute: "2-digit",
     second: "2-digit"
   }).format(new Date(value));
+}
+
+function readableError(error: unknown) {
+  return error instanceof Error ? error.message : "Unknown error";
 }

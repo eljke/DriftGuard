@@ -85,9 +85,10 @@ public class DemoConfigurationService {
                 warmupSamples,
                 new DemoConfigurationView.EmissionPolicyView(
                         definition.emissionPolicy().minConsecutiveSignals(),
-                        definition.emissionPolicy().cooldown()
+                        definition.emissionPolicy().cooldown(),
+                        definition.emissionPolicy().recoveryConsecutiveNormal()
                 ),
-                runtime.profile().name()
+                runtime.profile().name() + " / v" + runtime.version()
         );
     }
 

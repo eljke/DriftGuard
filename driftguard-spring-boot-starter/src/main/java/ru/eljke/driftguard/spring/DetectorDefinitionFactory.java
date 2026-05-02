@@ -39,7 +39,11 @@ final class DetectorDefinitionFactory {
 
     private static EmissionPolicyConfig emissionPolicy(DriftGuardProperties.DetectorProperties properties) {
         DriftGuardProperties.EmissionPolicyProperties policy = properties.getEmissionPolicy();
-        return new EmissionPolicyConfig(policy.getMinConsecutiveSignals(), policy.getCooldown());
+        return new EmissionPolicyConfig(
+                policy.getMinConsecutiveSignals(),
+                policy.getCooldown(),
+                policy.getRecoveryConsecutiveNormal()
+        );
     }
 
     private static DetectorConfig config(DriftGuardProperties.DetectorProperties properties) {

@@ -189,6 +189,12 @@ public class DriftGuardProperties {
          * для одного потока метрик.
          */
         private Duration cooldown = Duration.ZERO;
+
+        /**
+         * Сколько нормальных точек подряд должно прийти, чтобы текущий drift
+         * episode считался завершённым и detector снова мог публиковать событие.
+         */
+        private int recoveryConsecutiveNormal = 1;
     }
 
     @Getter

@@ -107,7 +107,7 @@
       "name": "driftguard.detectors[].epsilon",
       "type": "java.lang.Double",
       "description": "Малое значение сглаживания для PSI, чтобы избежать деления на ноль.",
-      "defaultValue": 1.0E-4
+      "defaultValue": 0.0001
     },
     {
       "name": "driftguard.detectors[].critical-multiplier",
@@ -132,6 +132,12 @@
       "type": "java.time.Duration",
       "description": "Минимальная пауза между опубликованными DriftEvent для одного detector-а и потока метрик.",
       "defaultValue": "0s"
+    },
+    {
+      "name": "driftguard.detectors[].emission-policy.recovery-consecutive-normal",
+      "type": "java.lang.Integer",
+      "description": "Сколько нормальных точек подряд закрывает drift episode и разрешает новое событие.",
+      "defaultValue": 1
     },
     {
       "name": "driftguard.kafka.enabled",

@@ -6,6 +6,14 @@ import type {
   ToolLink
 } from "../types";
 
+interface ApiErrorResponse {
+  timestamp: string;
+  status: number;
+  code: string;
+  message: string;
+  path: string;
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, {
     headers: {
@@ -15,10 +23,22 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     ...init
   });
   if (!response.ok) {
-    const body = await response.text();
-    throw new Error(body || `Request failed: ${response.status}`);
+    throw new Error(await errorMessage(response));
   }
   return response.json() as Promise<T>;
+}
+
+async function errorMessage(response: Response) {
+  const body = await response.text();
+  if (!body) {
+    return `Request failed: ${response.status}`;
+  }
+  try {
+    const error = JSON.parse(body) as Partial<ApiErrorResponse>;
+    return error.message ? `${error.code ?? response.status}: ${error.message}` : body;
+  } catch {
+    return body;
+  }
 }
 
 export const api = {
@@ -31,5 +51,6 @@ export const api = {
   startKafka: (scenario: string) => request<KafkaDemoStatus>(`/api/demo/kafka/start/${scenario}`, { method: "POST" }),
   stopKafka: () => request<KafkaDemoStatus>("/api/demo/kafka/stop", { method: "POST" }),
   tools: () => request<ToolLink[]>("/api/demo/tools"),
-  configuration: () => request<DemoConfigurationView>("/api/demo/configuration")
+  configuration: () => request<DemoConfigurationView>("/api/demo/configuration"),
+  updateProfile: (profile: string) => request<DemoConfigurationView>(`/api/demo/configuration/profile/${profile}`, { method: "POST" })
 };

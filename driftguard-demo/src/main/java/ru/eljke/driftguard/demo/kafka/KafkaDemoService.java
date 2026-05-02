@@ -231,20 +231,30 @@ public class KafkaDemoService {
 
     private void scheduleProducer(ProducerPlayback playback) {
         ScheduledFuture<?> task = executor.scheduleAtFixedRate(() -> {
-            if (!playback.publishNext()) {
-                playback.cancel();
-                if (producerPlaybacks.stream().noneMatch(ProducerPlayback::running)) {
-                    running = false;
+            try {
+                if (!playback.publishNext()) {
+                    playback.cancel();
+                    if (producerPlaybacks.stream().noneMatch(ProducerPlayback::running)) {
+                        running = false;
+                    }
                 }
+            } catch (RuntimeException exception) {
+                error = exception.getMessage();
+                running = false;
+                playback.cancel();
             }
         }, 0, Math.max(20, properties.getPlaybackInterval().toMillis()), TimeUnit.MILLISECONDS);
         playback.setTask(task);
     }
 
     private void consumeEvents() {
+        KafkaConsumer<String, DriftEvent> current = consumer;
+        if (current == null) {
+            return;
+        }
         try {
             while (consuming.get()) {
-                consumer.poll(Duration.ofMillis(250)).forEach(record -> consumedEvents.add(record.value()));
+                current.poll(Duration.ofMillis(250)).forEach(record -> consumedEvents.add(record.value()));
             }
         } catch (WakeupException exception) {
             if (consuming.get()) {
@@ -336,7 +346,12 @@ public class KafkaDemoService {
             }
             MetricPoint point = points.get(current);
             producedSamples.add(point);
-            producer.send(new ProducerRecord<>(properties.getInputTopic(), metricKey(point), point));
+            producer.send(new ProducerRecord<>(properties.getInputTopic(), metricKey(point), point), (metadata, exception) -> {
+                if (exception != null) {
+                    error = exception.getMessage();
+                    running = false;
+                }
+            });
             producer.flush();
             return current + 1 < points.size();
         }
