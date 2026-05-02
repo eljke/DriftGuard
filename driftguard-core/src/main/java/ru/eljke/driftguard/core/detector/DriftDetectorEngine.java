@@ -12,6 +12,8 @@ import ru.eljke.driftguard.core.state.InMemoryEmissionStateStore;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Transport-agnostic оркестратор обнаружения drift-а в метриках.
@@ -99,19 +101,18 @@ public final class DriftDetectorEngine {
     ) {
         C config = algorithm.configType().cast(definition.config());
         DetectorInstanceKey instanceKey = new DetectorInstanceKey(point.key(), definition.name());
-        S state;
-        DetectorState existing = stateStore.get(instanceKey).orElse(null);
-        if (existing == null) {
-            state = algorithm.initialState(config);
-        } else {
-            if (!existing.algorithm().equals(algorithm.name())) {
+        AtomicReference<DetectionResult<S>> resultReference = new AtomicReference<>();
+        stateStore.update(instanceKey, () -> algorithm.initialState(config), currentState -> {
+            if (!currentState.algorithm().equals(algorithm.name())) {
                 throw DriftGuardErrors.validation(CoreErrorReason.STATE_ALGORITHM_MISMATCH, instanceKey);
             }
-            state = castState(existing);
-        }
+            S typedState = castState(currentState);
+            DetectionResult<S> result = algorithm.detect(point, typedState, config, new DetectionContext(definition.name()));
+            resultReference.set(result);
+            return result.state();
+        });
 
-        DetectionResult<S> result = algorithm.detect(point, state, config, new DetectionContext(definition.name()));
-        stateStore.put(instanceKey, result.state());
+        DetectionResult<S> result = resultReference.get();
         if (result.eventValue().isEmpty()) {
             return observeNormalPoint(point, instanceKey, definition);
         }
@@ -126,56 +127,62 @@ public final class DriftDetectorEngine {
             DetectorInstanceKey instanceKey,
             DetectorDefinition definition
     ) {
-        EmissionState previous = emissionStateStore.get(instanceKey).orElse(EmissionState.EMPTY);
-        if (previous.activeEpisode()) {
-            int consecutiveNormal = previous.consecutiveNormal() + 1;
-            boolean recovered = consecutiveNormal >= definition.emissionPolicy().recoveryConsecutiveNormal();
-            DriftEvent recoveryEvent = recovered
-                    ? previous.lastEmittedEventValue()
-                    .map(event -> event.recoveredAt(point.timestamp(), definition.emissionPolicy().recoveryConsecutiveNormal()))
-                    .orElse(null)
-                    : null;
-            emissionStateStore.put(instanceKey, new EmissionState(
-                    recovered ? 0 : previous.consecutiveSignals(),
-                    previous.lastEmittedAt(),
-                    !recovered,
-                    recovered ? 0 : consecutiveNormal,
-                    recovered ? null : previous.lastEmittedEvent()
-            ));
-            return recoveryEvent == null ? List.of() : List.of(recoveryEvent);
-        }
-        if (previous.consecutiveSignals() > 0 || previous.consecutiveNormal() > 0) {
-            emissionStateStore.put(instanceKey, new EmissionState(0, previous.lastEmittedAt(), false, 0, previous.lastEmittedEvent()));
-        }
-        return List.of();
+        AtomicReference<DriftEvent> recoveryEventReference = new AtomicReference<>();
+        emissionStateStore.update(instanceKey, previous -> {
+            if (previous.activeEpisode()) {
+                int consecutiveNormal = previous.consecutiveNormal() + 1;
+                boolean recovered = consecutiveNormal >= definition.emissionPolicy().recoveryConsecutiveNormal();
+                DriftEvent recoveryEvent = recovered
+                        ? previous.lastEmittedEventValue()
+                        .map(event -> event.recoveredAt(point.timestamp(), definition.emissionPolicy().recoveryConsecutiveNormal()))
+                        .orElse(null)
+                        : null;
+                recoveryEventReference.set(recoveryEvent);
+                return new EmissionState(
+                        recovered ? 0 : previous.consecutiveSignals(),
+                        previous.lastEmittedAt(),
+                        !recovered,
+                        recovered ? 0 : consecutiveNormal,
+                        recovered ? null : previous.lastEmittedEvent()
+                );
+            }
+            if (previous.consecutiveSignals() > 0 || previous.consecutiveNormal() > 0) {
+                return new EmissionState(0, previous.lastEmittedAt(), false, 0, previous.lastEmittedEvent());
+            }
+            return previous;
+        });
+        DriftEvent recoveryEvent = recoveryEventReference.get();
+        return recoveryEvent == null ? List.of() : List.of(recoveryEvent);
     }
 
     private boolean shouldEmit(DetectorInstanceKey instanceKey, DetectorDefinition definition, DriftEvent event) {
-        EmissionState previous = emissionStateStore.get(instanceKey).orElse(EmissionState.EMPTY);
-        if (previous.activeEpisode()) {
-            emissionStateStore.put(instanceKey, new EmissionState(
-                    previous.consecutiveSignals() + 1,
-                    previous.lastEmittedAt(),
-                    true,
-                    0
-            ));
-            return false;
-        }
+        AtomicBoolean emitReference = new AtomicBoolean(false);
+        emissionStateStore.update(instanceKey, previous -> {
+            if (previous.activeEpisode()) {
+                return new EmissionState(
+                        previous.consecutiveSignals() + 1,
+                        previous.lastEmittedAt(),
+                        true,
+                        0
+                );
+            }
 
-        int consecutiveSignals = previous.consecutiveSignals() + 1;
-        boolean enoughSignals = consecutiveSignals >= definition.emissionPolicy().minConsecutiveSignals();
-        boolean cooldownElapsed = previous.lastEmittedAtValue()
-                .map(last -> !event.detectedAt().isBefore(last.plus(definition.emissionPolicy().cooldown())))
-                .orElse(true);
-        boolean emit = enoughSignals && cooldownElapsed;
-        emissionStateStore.put(instanceKey, new EmissionState(
-                consecutiveSignals,
-                emit ? event.detectedAt() : previous.lastEmittedAt(),
-                emit,
-                0,
-                emit ? event : previous.lastEmittedEvent()
-        ));
-        return emit;
+            int consecutiveSignals = previous.consecutiveSignals() + 1;
+            boolean enoughSignals = consecutiveSignals >= definition.emissionPolicy().minConsecutiveSignals();
+            boolean cooldownElapsed = previous.lastEmittedAtValue()
+                    .map(last -> !event.detectedAt().isBefore(last.plus(definition.emissionPolicy().cooldown())))
+                    .orElse(true);
+            boolean emit = enoughSignals && cooldownElapsed;
+            emitReference.set(emit);
+            return new EmissionState(
+                    consecutiveSignals,
+                    emit ? event.detectedAt() : previous.lastEmittedAt(),
+                    emit,
+                    0,
+                    emit ? event : previous.lastEmittedEvent()
+            );
+        });
+        return emitReference.get();
     }
 
     private void notifyCompleted(MetricPoint point, List<DriftEvent> events, long durationNanos) {
