@@ -1,7 +1,9 @@
 package ru.eljke.driftguard.spring;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import org.apache.kafka.streams.KafkaStreams;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -12,11 +14,13 @@ import ru.eljke.driftguard.algorithms.DefaultAlgorithms;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
 import ru.eljke.driftguard.core.config.DetectorDefinitionProvider;
 import ru.eljke.driftguard.core.detector.DetectorAlgorithm;
+import ru.eljke.driftguard.core.detector.DriftDetectionListener;
 import ru.eljke.driftguard.core.detector.DetectorRegistry;
 import ru.eljke.driftguard.core.detector.SimpleDetectorRegistry;
 import ru.eljke.driftguard.core.detector.DriftDetectorEngine;
 import ru.eljke.driftguard.core.state.DetectorStateStore;
 import ru.eljke.driftguard.core.state.InMemoryDetectorStateStore;
+import ru.eljke.driftguard.core.state.InMemoryEmissionStateStore;
 import ru.eljke.driftguard.kafka.DriftGuardObjectMapper;
 import ru.eljke.driftguard.kafka.KafkaDriftGuardTopologyBuilder;
 import ru.eljke.driftguard.kafka.KafkaDriftGuardTopologyConfig;
@@ -63,9 +67,25 @@ public class DriftGuardAutoConfiguration {
     public DriftDetectorEngine driftGuardDetectorEngine(
             DetectorRegistry registry,
             DetectorStateStore stateStore,
-            List<DetectorDefinition> detectorDefinitions
+            List<DetectorDefinition> detectorDefinitions,
+            ObjectProvider<DriftDetectionListener> listeners
     ) {
-        return new DriftDetectorEngine(registry, stateStore, detectorDefinitions);
+        return new DriftDetectorEngine(
+                registry,
+                stateStore,
+                new InMemoryEmissionStateStore(),
+                detectorDefinitions,
+                listeners.orderedStream().toList()
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnClass(MeterRegistry.class)
+    @ConditionalOnBean(MeterRegistry.class)
+    @ConditionalOnProperty(prefix = "driftguard.metrics", name = "enabled", havingValue = "true", matchIfMissing = true)
+    public DriftDetectionListener driftGuardMicrometerDetectionListener(MeterRegistry meterRegistry) {
+        return new MicrometerDriftDetectionListener(meterRegistry);
     }
 
     @Bean

@@ -43,6 +43,11 @@ public class DriftGuardProperties {
     private boolean detectorsEnabled = true;
 
     /**
+     * Настройки runtime-метрик DriftGuard.
+     */
+    private MetricsProperties metrics = new MetricsProperties();
+
+    /**
      * Настройки Kafka Streams adapter-а.
      *
      * <p>Kafka-часть выключена по умолчанию, потому что не каждому Spring
@@ -59,6 +64,10 @@ public class DriftGuardProperties {
 
     public void setKafka(KafkaProperties kafka) {
         this.kafka = kafka == null ? new KafkaProperties() : kafka;
+    }
+
+    public void setMetrics(MetricsProperties metrics) {
+        this.metrics = metrics == null ? new MetricsProperties() : metrics;
     }
 
     @Getter
@@ -225,6 +234,18 @@ public class DriftGuardProperties {
          * episode считался завершённым и detector снова мог публиковать событие.
          */
         private int recoveryConsecutiveNormal = 1;
+    }
+
+    @Getter
+    @Setter
+    public static class MetricsProperties {
+        /**
+         * Включает Micrometer listener для runtime-метрик detection pipeline.
+         *
+         * <p>Listener создаётся только если в приложении есть {@code MeterRegistry}.
+         * Например, в Spring Boot приложении его обычно добавляет Actuator.</p>
+         */
+        private boolean enabled = true;
     }
 
     @Getter

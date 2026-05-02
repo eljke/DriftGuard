@@ -27,13 +27,14 @@ public final class DriftDetectorEngine {
     private final DetectorStateStore stateStore;
     private final EmissionStateStore emissionStateStore;
     private final List<DetectorDefinition> definitions;
+    private final List<DriftDetectionListener> listeners;
 
     public DriftDetectorEngine(
             DetectorRegistry registry,
             DetectorStateStore stateStore,
             List<DetectorDefinition> definitions
     ) {
-        this(registry, stateStore, new InMemoryEmissionStateStore(), definitions);
+        this(registry, stateStore, new InMemoryEmissionStateStore(), definitions, List.of());
     }
 
     public DriftDetectorEngine(
@@ -42,10 +43,21 @@ public final class DriftDetectorEngine {
             EmissionStateStore emissionStateStore,
             List<DetectorDefinition> definitions
     ) {
+        this(registry, stateStore, emissionStateStore, definitions, List.of());
+    }
+
+    public DriftDetectorEngine(
+            DetectorRegistry registry,
+            DetectorStateStore stateStore,
+            EmissionStateStore emissionStateStore,
+            List<DetectorDefinition> definitions,
+            List<DriftDetectionListener> listeners
+    ) {
         this.registry = DriftGuardErrors.requireNonNull(registry, "registry");
         this.stateStore = DriftGuardErrors.requireNonNull(stateStore, "stateStore");
         this.emissionStateStore = DriftGuardErrors.requireNonNull(emissionStateStore, "emissionStateStore");
         this.definitions = List.copyOf(definitions == null ? List.of() : definitions);
+        this.listeners = List.copyOf(listeners == null ? List.of() : listeners);
     }
 
     /**
@@ -56,14 +68,22 @@ public final class DriftDetectorEngine {
      */
     public List<DriftEvent> detect(MetricPoint point) {
         DriftGuardErrors.requireNonNull(point, "point");
-        List<DriftEvent> events = new ArrayList<>();
-        for (DetectorDefinition definition : definitions) {
-            if (!definition.matches(point.key())) {
-                continue;
+        long startedNanos = System.nanoTime();
+        try {
+            List<DriftEvent> events = new ArrayList<>();
+            for (DetectorDefinition definition : definitions) {
+                if (!definition.matches(point.key())) {
+                    continue;
+                }
+                events.addAll(detectWithDefinition(point, definition));
             }
-            events.addAll(detectWithDefinition(point, definition));
+            List<DriftEvent> result = List.copyOf(events);
+            notifyCompleted(point, result, System.nanoTime() - startedNanos);
+            return result;
+        } catch (RuntimeException exception) {
+            notifyFailed(point, exception, System.nanoTime() - startedNanos);
+            throw exception;
         }
-        return List.copyOf(events);
     }
 
     private List<DriftEvent> detectWithDefinition(MetricPoint point, DetectorDefinition definition) {
@@ -156,6 +176,26 @@ public final class DriftDetectorEngine {
                 emit ? event : previous.lastEmittedEvent()
         ));
         return emit;
+    }
+
+    private void notifyCompleted(MetricPoint point, List<DriftEvent> events, long durationNanos) {
+        for (DriftDetectionListener listener : listeners) {
+            try {
+                listener.onDetectionCompleted(point, events, durationNanos);
+            } catch (RuntimeException ignored) {
+                // Listener-ошибка не должна ломать detection pipeline.
+            }
+        }
+    }
+
+    private void notifyFailed(MetricPoint point, RuntimeException exception, long durationNanos) {
+        for (DriftDetectionListener listener : listeners) {
+            try {
+                listener.onDetectionFailed(point, exception, durationNanos);
+            } catch (RuntimeException ignored) {
+                // Listener-ошибка не должна маскировать исходную ошибку detection-а.
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")

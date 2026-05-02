@@ -54,6 +54,12 @@
       "description": "Фильтр по MetricKey.instance. Пустой список означает любые instance id."
     },
     {
+      "name": "driftguard.metrics.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Включает Micrometer listener для runtime-метрик detection pipeline при наличии MeterRegistry.",
+      "defaultValue": true
+    },
+    {
       "name": "driftguard.detectors[].baseline-window-size",
       "type": "java.lang.Integer",
       "description": "Размер baseline-окна для PSI, KS и chi-square.",
