@@ -106,7 +106,13 @@ function Header({ overview, kafka }: { overview?: DemoRunResult; kafka?: KafkaDe
 }
 
 function Overview({ result, kafka, storedEvents }: { result?: DemoRunResult; kafka?: KafkaDemoStatus; storedEvents: DemoStoredDriftEvent[] }) {
+  const queryClient = useQueryClient();
   const critical = countSeverity([...(result?.events ?? []), ...(kafka?.consumedEvents ?? [])], "CRITICAL");
+  const clearStoredEvents = useMutation({
+    mutationFn: api.clearStoredEvents,
+    onSuccess: () => queryClient.setQueryData(["stored-events"], [])
+  });
+
   return (
     <section className="page-grid">
       <MetricCard title="Synthetic events" value={result?.events.length ?? 0} helper={result?.title ?? "Нет данных"} />
@@ -124,6 +130,19 @@ function Overview({ result, kafka, storedEvents }: { result?: DemoRunResult; kaf
         <StreamGrid points={kafka?.samplePoints ?? []} events={kafka?.consumedEvents ?? []} running={Boolean(kafka?.running)} />
       </Panel>
       <Panel className="wide" title="Recent stored drift events">
+        <div className="panel-toolbar">
+          <span className="help-text">Общий recent stream из synthetic, live и Kafka demo.</span>
+          <button
+            className="secondary-button"
+            disabled={storedEvents.length === 0 || clearStoredEvents.isPending}
+            onClick={() => clearStoredEvents.mutate()}
+            type="button"
+          >
+            {clearStoredEvents.isPending ? <Loader2 className="spin" size={16} /> : null}
+            Clear stored events
+          </button>
+        </div>
+        {clearStoredEvents.error && <Notice tone="error" text={readableError(clearStoredEvents.error)} />}
         <StoredEventsTable storedEvents={storedEvents} />
       </Panel>
     </section>

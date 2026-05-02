@@ -71,6 +71,13 @@ public class DemoController {
         return eventRepository.recent(200);
     }
 
+    @PostMapping("/events/clear")
+    @Operation(summary = "Очищает demo-хранилище сохранённых drift events")
+    public Map<String, Object> clearStoredEvents() {
+        eventRepository.clear();
+        return Map.of("cleared", true);
+    }
+
     @GetMapping("/quality")
     @Operation(summary = "Возвращает оценку качества детекции из последнего запуска")
     public Object quality() {
@@ -173,6 +180,7 @@ public class DemoController {
                 Map.entry("events", "GET /api/demo/events"),
                 Map.entry("quality", "GET /api/demo/quality"),
                 Map.entry("storedEvents", "GET /api/demo/events/stored"),
+                Map.entry("clearStoredEvents", "POST /api/demo/events/clear"),
                 Map.entry("scenarios", "GET /api/demo/scenarios"),
                 Map.entry("rerun", "POST /api/demo/run"),
                 Map.entry("runScenario", "POST /api/demo/run/{scenario}"),

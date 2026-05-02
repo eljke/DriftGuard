@@ -49,6 +49,7 @@ export const api = {
     overview: () => request<DemoRunResult>("/api/demo"),
     events: () => request<DriftEvent[]>("/api/demo/events"),
     storedEvents: () => request<DemoStoredDriftEvent[]>("/api/demo/events/stored"),
+    clearStoredEvents: () => request<{ cleared: boolean }>("/api/demo/events/clear", { method: "POST" }),
     quality: () => request<DetectionMetrics>("/api/demo/quality"),
     scenarios: () => request<DemoScenarioDescriptor[]>("/api/demo/scenarios"),
     runScenario: (scenario: string) => request<DemoRunResult>(`/api/demo/run/${scenario}`, {method: "POST"}),
