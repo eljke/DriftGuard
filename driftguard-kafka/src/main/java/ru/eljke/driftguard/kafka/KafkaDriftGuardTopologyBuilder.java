@@ -21,14 +21,24 @@ import java.util.function.Function;
 public final class KafkaDriftGuardTopologyBuilder {
     private final ObjectMapper objectMapper;
     private final Function<MetricPoint, List<DriftEvent>> detector;
+    private final KafkaDetectionErrorHandler detectionErrorHandler;
 
     public KafkaDriftGuardTopologyBuilder(ObjectMapper objectMapper, DriftDetectorEngine detectorEngine) {
         this(objectMapper, detectorEngine::detect);
     }
 
     public KafkaDriftGuardTopologyBuilder(ObjectMapper objectMapper, Function<MetricPoint, List<DriftEvent>> detector) {
+        this(objectMapper, detector, KafkaDetectionErrorHandler.failFast());
+    }
+
+    public KafkaDriftGuardTopologyBuilder(
+            ObjectMapper objectMapper,
+            Function<MetricPoint, List<DriftEvent>> detector,
+            KafkaDetectionErrorHandler detectionErrorHandler
+    ) {
         this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper must not be null");
         this.detector = Objects.requireNonNull(detector, "detector must not be null");
+        this.detectionErrorHandler = Objects.requireNonNull(detectionErrorHandler, "detectionErrorHandler must not be null");
     }
 
     public Topology build(KafkaDriftGuardTopologyConfig config) {
@@ -41,9 +51,21 @@ public final class KafkaDriftGuardTopologyBuilder {
                 .selectKey((ignored, point) -> KafkaMetricKeys.stateKey(point.key()))
                 .repartition(Repartitioned.with(Serdes.String(), metricPointSerde)
                         .withName("driftguard-metric-key"))
-                .flatMapValues(detector::apply)
+                .flatMapValues(this::detectSafely)
                 .selectKey((ignored, event) -> event.id())
                 .to(config.outputTopic(), Produced.with(Serdes.String(), driftEventSerde));
         return builder.build();
+    }
+
+    private List<DriftEvent> detectSafely(MetricPoint point) {
+        try {
+            return emptyIfNull(detector.apply(point));
+        } catch (RuntimeException exception) {
+            return emptyIfNull(detectionErrorHandler.handle(point, exception));
+        }
+    }
+
+    private static List<DriftEvent> emptyIfNull(List<DriftEvent> events) {
+        return events == null ? List.of() : events;
     }
 }
