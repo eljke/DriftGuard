@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.eljke.driftguard.core.domain.DriftEvent;
+import ru.eljke.driftguard.demo.config.DemoConfigurationService;
+import ru.eljke.driftguard.demo.config.DemoConfigurationView;
 import ru.eljke.driftguard.demo.config.DemoToolProperties;
 import ru.eljke.driftguard.demo.kafka.KafkaDemoService;
 import ru.eljke.driftguard.demo.kafka.KafkaDemoStatus;
@@ -26,11 +28,18 @@ public class DemoController {
     private final DemoScenarioService service;
     private final KafkaDemoService kafkaDemoService;
     private final DemoToolProperties toolProperties;
+    private final DemoConfigurationService configurationService;
 
-    public DemoController(DemoScenarioService service, KafkaDemoService kafkaDemoService, DemoToolProperties toolProperties) {
+    public DemoController(
+            DemoScenarioService service,
+            KafkaDemoService kafkaDemoService,
+            DemoToolProperties toolProperties,
+            DemoConfigurationService configurationService
+    ) {
         this.service = service;
         this.kafkaDemoService = kafkaDemoService;
         this.toolProperties = toolProperties;
+        this.configurationService = configurationService;
     }
 
     @GetMapping
@@ -111,6 +120,12 @@ public class DemoController {
         );
     }
 
+    @GetMapping("/configuration")
+    @Operation(summary = "Возвращает runtime-конфигурацию demo и DriftGuard detector-ов")
+    public DemoConfigurationView configuration() {
+        return configurationService.current();
+    }
+
     @GetMapping("/help")
     @Operation(summary = "Возвращает краткий список доступных demo endpoint-ов")
     public Map<String, String> help() {
@@ -126,7 +141,8 @@ public class DemoController {
                 Map.entry("kafkaStatus", "GET /api/demo/kafka"),
                 Map.entry("startKafkaScenario", "POST /api/demo/kafka/start/{scenario}"),
                 Map.entry("stopKafkaScenario", "POST /api/demo/kafka/stop"),
-                Map.entry("tools", "GET /api/demo/tools")
+                Map.entry("tools", "GET /api/demo/tools"),
+                Map.entry("configuration", "GET /api/demo/configuration")
         );
     }
 }
