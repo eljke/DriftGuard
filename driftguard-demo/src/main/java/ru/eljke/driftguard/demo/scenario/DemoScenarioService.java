@@ -3,6 +3,7 @@ package ru.eljke.driftguard.demo.scenario;
 import jakarta.annotation.PostConstruct;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricKey;
@@ -11,6 +12,8 @@ import ru.eljke.driftguard.core.domain.MetricPoint;
 import ru.eljke.driftguard.core.error.DriftGuardValidationException;
 import ru.eljke.driftguard.demo.detection.DemoDetectionRuntime;
 import ru.eljke.driftguard.demo.error.DemoErrorReason;
+import ru.eljke.driftguard.demo.event.DemoDriftEventRepository;
+import ru.eljke.driftguard.demo.event.InMemoryDemoDriftEventRepository;
 import ru.eljke.driftguard.testkit.DetectionEvaluator;
 import ru.eljke.driftguard.testkit.GradualDriftScenario;
 import ru.eljke.driftguard.testkit.DetectionBenchmarkReport;
@@ -33,6 +36,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -52,6 +56,7 @@ public class DemoScenarioService {
 
     private final DemoDetectionRuntime runtime;
     private final MeterRegistry meterRegistry;
+    private final DemoDriftEventRepository eventRepository;
     private final AtomicLong runSequence = new AtomicLong();
     private final ScheduledExecutorService playbackExecutor = Executors.newSingleThreadScheduledExecutor(runnable -> {
         Thread thread = new Thread(runnable, "driftguard-demo-playback");
@@ -61,9 +66,15 @@ public class DemoScenarioService {
     private volatile DemoRunResult lastResult;
     private volatile ScheduledFuture<?> playbackTask;
 
+    @Autowired
     public DemoScenarioService(DemoDetectionRuntime runtime, MeterRegistry meterRegistry) {
+        this(runtime, meterRegistry, new InMemoryDemoDriftEventRepository());
+    }
+
+    public DemoScenarioService(DemoDetectionRuntime runtime, MeterRegistry meterRegistry, DemoDriftEventRepository eventRepository) {
         this.runtime = runtime;
         this.meterRegistry = meterRegistry;
+        this.eventRepository = eventRepository;
     }
 
     @PostConstruct
@@ -85,8 +96,11 @@ public class DemoScenarioService {
         MetricScenario scenario = createScenario(descriptor.id(), "demo-run-" + runSequence.incrementAndGet());
         List<MetricPoint> points = scenario.generate();
         List<DriftEvent> events = new ArrayList<>();
+        String runId = scenario.name();
         for (MetricPoint point : points) {
-            events.addAll(runtime.detect(point));
+            List<DriftEvent> detected = runtime.detect(point);
+            events.addAll(detected);
+            eventRepository.appendAll("synthetic", runId, detected);
         }
         List<DriftEvent> representativeEvents = representativeEvents(scenario, events);
         recordRunMetrics(descriptor.id(), "instant", points.size(), representativeEvents.size());
@@ -112,6 +126,8 @@ public class DemoScenarioService {
         List<MetricPoint> points = scenario.generate();
         List<MetricPoint> processed = new ArrayList<>();
         List<DriftEvent> events = new ArrayList<>();
+        String runId = scenario.name();
+        AtomicInteger index = new AtomicInteger();
         lastResult = liveResult(scenario, descriptor, points, processed, events, true);
         playbackTask = playbackExecutor.scheduleAtFixedRate(new Runnable() {
             private int index;
@@ -127,7 +143,9 @@ public class DemoScenarioService {
                 }
                 MetricPoint point = points.get(index++);
                 processed.add(point);
-                events.addAll(runtime.detect(point));
+                List<DriftEvent> detected = runtime.detect(point);
+                events.addAll(detected);
+                eventRepository.appendAll("live", runId, detected);
                 List<DriftEvent> representativeEvents = representativeEvents(scenario, events);
                 lastResult = new DemoRunResult(
                         scenario.name(),

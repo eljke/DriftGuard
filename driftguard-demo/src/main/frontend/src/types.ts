@@ -36,6 +36,13 @@ export interface DriftEvent {
     details: Record<string, unknown>;
 }
 
+export interface DemoStoredDriftEvent {
+  source: string;
+  runId: string;
+  receivedAt: string;
+  event: DriftEvent;
+}
+
 export interface DetectionMetrics {
   detected: boolean;
   events: number;

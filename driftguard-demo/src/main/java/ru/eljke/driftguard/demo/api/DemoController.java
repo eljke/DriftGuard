@@ -18,6 +18,8 @@ import ru.eljke.driftguard.demo.error.DemoErrorReason;
 import ru.eljke.driftguard.demo.kafka.KafkaDemoService;
 import ru.eljke.driftguard.demo.kafka.KafkaDemoStatus;
 import ru.eljke.driftguard.demo.kafka.KafkaReplayRequest;
+import ru.eljke.driftguard.demo.event.DemoDriftEventRepository;
+import ru.eljke.driftguard.demo.event.DemoStoredDriftEvent;
 import ru.eljke.driftguard.demo.scenario.DemoRunResult;
 import ru.eljke.driftguard.demo.scenario.DemoScenarioDescriptor;
 import ru.eljke.driftguard.demo.scenario.DemoScenarioService;
@@ -35,17 +37,20 @@ public class DemoController {
     private final KafkaDemoService kafkaDemoService;
     private final DemoToolProperties toolProperties;
     private final DemoConfigurationService configurationService;
+    private final DemoDriftEventRepository eventRepository;
 
     public DemoController(
             DemoScenarioService service,
             KafkaDemoService kafkaDemoService,
             DemoToolProperties toolProperties,
-            DemoConfigurationService configurationService
+            DemoConfigurationService configurationService,
+            DemoDriftEventRepository eventRepository
     ) {
         this.service = service;
         this.kafkaDemoService = kafkaDemoService;
         this.toolProperties = toolProperties;
         this.configurationService = configurationService;
+        this.eventRepository = eventRepository;
     }
 
     @GetMapping
@@ -57,7 +62,13 @@ public class DemoController {
     @GetMapping("/events")
     @Operation(summary = "Возвращает события дрейфа из последнего запуска")
     public List<DriftEvent> events() {
-        return service.lastResult().events();
+        return eventRepository.recentEvents(200);
+    }
+
+    @GetMapping("/events/stored")
+    @Operation(summary = "Возвращает последние сохранённые события drift-а с demo metadata")
+    public List<DemoStoredDriftEvent> storedEvents() {
+        return eventRepository.recent(200);
     }
 
     @GetMapping("/quality")
@@ -161,6 +172,7 @@ public class DemoController {
                 Map.entry("overview", "GET /api/demo"),
                 Map.entry("events", "GET /api/demo/events"),
                 Map.entry("quality", "GET /api/demo/quality"),
+                Map.entry("storedEvents", "GET /api/demo/events/stored"),
                 Map.entry("scenarios", "GET /api/demo/scenarios"),
                 Map.entry("rerun", "POST /api/demo/run"),
                 Map.entry("runScenario", "POST /api/demo/run/{scenario}"),

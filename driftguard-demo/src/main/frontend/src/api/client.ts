@@ -1,11 +1,13 @@
 import type {
-  DemoConfigurationView,
-  DetectionBenchmarkReport,
-  DemoRunResult,
-  DemoScenarioDescriptor,
-  KafkaDemoStatus,
-  KafkaReplayRequest,
-  ToolLink
+    DemoConfigurationView,
+    DetectionBenchmarkReport,
+    DemoRunResult,
+    DemoScenarioDescriptor,
+    DemoStoredDriftEvent,
+    DriftEvent,
+    KafkaDemoStatus,
+    KafkaReplayRequest,
+    ToolLink, DetectionMetrics
 } from "../types";
 
 interface ApiErrorResponse {
@@ -44,21 +46,24 @@ async function errorMessage(response: Response) {
 }
 
 export const api = {
-  overview: () => request<DemoRunResult>("/api/demo"),
-  scenarios: () => request<DemoScenarioDescriptor[]>("/api/demo/scenarios"),
-  runScenario: (scenario: string) => request<DemoRunResult>(`/api/demo/run/${scenario}`, { method: "POST" }),
-  startLive: (scenario: string) => request<DemoRunResult>(`/api/demo/live/${scenario}`, { method: "POST" }),
-  stopLive: () => request<DemoRunResult>("/api/demo/live/stop", { method: "POST" }),
-  benchmark: () => request<DetectionBenchmarkReport>("/api/demo/benchmark"),
-  kafkaStatus: () => request<KafkaDemoStatus>("/api/demo/kafka"),
-  startKafka: (scenario: string) => request<KafkaDemoStatus>(`/api/demo/kafka/start/${scenario}`, { method: "POST" }),
-  replayKafka: (body: KafkaReplayRequest) => request<KafkaDemoStatus>("/api/demo/kafka/replay", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
-  }),
-  stopKafka: () => request<KafkaDemoStatus>("/api/demo/kafka/stop", { method: "POST" }),
-  tools: () => request<ToolLink[]>("/api/demo/tools"),
-  configuration: () => request<DemoConfigurationView>("/api/demo/configuration"),
-  updateProfile: (profile: string) => request<DemoConfigurationView>(`/api/demo/configuration/profile/${profile}`, { method: "POST" })
+    overview: () => request<DemoRunResult>("/api/demo"),
+    events: () => request<DriftEvent[]>("/api/demo/events"),
+    storedEvents: () => request<DemoStoredDriftEvent[]>("/api/demo/events/stored"),
+    quality: () => request<DetectionMetrics>("/api/demo/quality"),
+    scenarios: () => request<DemoScenarioDescriptor[]>("/api/demo/scenarios"),
+    runScenario: (scenario: string) => request<DemoRunResult>(`/api/demo/run/${scenario}`, {method: "POST"}),
+    startLive: (scenario: string) => request<DemoRunResult>(`/api/demo/live/${scenario}`, {method: "POST"}),
+    stopLive: () => request<DemoRunResult>("/api/demo/live/stop", {method: "POST"}),
+    benchmark: () => request<DetectionBenchmarkReport>("/api/demo/benchmark"),
+    kafkaStatus: () => request<KafkaDemoStatus>("/api/demo/kafka"),
+    startKafka: (scenario: string) => request<KafkaDemoStatus>(`/api/demo/kafka/start/${scenario}`, {method: "POST"}),
+    replayKafka: (body: KafkaReplayRequest) => request<KafkaDemoStatus>("/api/demo/kafka/replay", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body)
+    }),
+    stopKafka: () => request<KafkaDemoStatus>("/api/demo/kafka/stop", {method: "POST"}),
+    tools: () => request<ToolLink[]>("/api/demo/tools"),
+    configuration: () => request<DemoConfigurationView>("/api/demo/configuration"),
+    updateProfile: (profile: string) => request<DemoConfigurationView>(`/api/demo/configuration/profile/${profile}`, {method: "POST"})
 };

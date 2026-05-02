@@ -20,6 +20,7 @@ import ru.eljke.driftguard.demo.config.DemoKafkaProperties;
 import ru.eljke.driftguard.demo.error.DemoErrorReason;
 import ru.eljke.driftguard.demo.detection.DemoDetectionRuntime;
 import ru.eljke.driftguard.demo.detection.DemoDetectorProfile;
+import ru.eljke.driftguard.demo.event.DemoDriftEventRepository;
 import ru.eljke.driftguard.demo.scenario.DemoScenarioService;
 import ru.eljke.driftguard.kafka.DriftGuardObjectMapper;
 import ru.eljke.driftguard.kafka.DriftGuardSerdes;
@@ -55,6 +56,7 @@ public class KafkaDemoService {
     private final DemoKafkaProperties properties;
     private final DriftGuardKafkaStreamsManager streamsManager;
     private final DemoDetectionRuntime detectionRuntime;
+    private final DemoDriftEventRepository eventRepository;
     private final ObjectMapper objectMapper;
     private final AtomicLong runSequence = new AtomicLong();
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(8, runnable -> {
@@ -78,11 +80,13 @@ public class KafkaDemoService {
     public KafkaDemoService(
             DemoKafkaProperties properties,
             DriftGuardKafkaStreamsManager streamsManager,
-            DemoDetectionRuntime detectionRuntime
+            DemoDetectionRuntime detectionRuntime,
+            DemoDriftEventRepository eventRepository
     ) {
         this.properties = properties;
         this.streamsManager = streamsManager;
         this.detectionRuntime = detectionRuntime;
+        this.eventRepository = eventRepository;
         this.objectMapper = DriftGuardObjectMapper.create();
     }
 
@@ -305,7 +309,11 @@ public class KafkaDemoService {
         }
         try {
             while (consuming.get()) {
-                current.poll(Duration.ofMillis(250)).forEach(record -> consumedEvents.add(record.value()));
+                current.poll(Duration.ofMillis(250)).forEach(record -> {
+                    DriftEvent event = record.value();
+                    consumedEvents.add(event);
+                    eventRepository.append("kafka", scenarioId, event);
+                });
             }
         } catch (WakeupException exception) {
             if (consuming.get()) {
