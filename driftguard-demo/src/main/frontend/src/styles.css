@@ -120,6 +120,10 @@ button {
   min-width: 0;
 }
 
+.incident-layout {
+    grid-template-columns: 1fr;
+}
+
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -349,6 +353,10 @@ h2 {
   min-height: 220px;
 }
 
+.empty-state.compact {
+  padding: 16px;
+}
+
 .table-wrap {
   overflow-x: auto;
 }
@@ -474,6 +482,96 @@ th {
 
 .tool-card:hover {
   border-color: var(--accent);
+}
+
+.incident-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.incident-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.incident-column h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.incident-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.incident-card {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 14px;
+  background: var(--surface-muted);
+}
+
+.incident-card.active {
+  border-color: #fecaca;
+  background: #fff7f7;
+}
+
+.incident-card.recovered {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.incident-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.incident-head div,
+.incident-meta {
+  min-width: 0;
+}
+
+.incident-head strong {
+  display: block;
+  color: var(--text);
+}
+
+.incident-head span:not(.severity) {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 3px;
+}
+
+.incident-meta {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 5px 10px;
+  margin: 0 0 10px;
+  font-size: 13px;
+}
+
+.incident-meta dt {
+  color: var(--muted);
+}
+
+.incident-meta dd {
+  margin: 0;
+  color: var(--text);
+}
+
+.incident-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .empty-state {

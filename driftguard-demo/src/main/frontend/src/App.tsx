@@ -161,6 +161,7 @@ function SyntheticPage({ result, scenarios }: { result?: DemoRunResult; scenario
       <Panel title="Synthetic chart">
         <StreamGrid points={result?.samplePoints ?? []} events={result?.events ?? []} running={Boolean(result?.running)} />
       </Panel>
+      <IncidentsPanel events={result?.events ?? []} />
       <EventsTable events={result?.events ?? []} />
     </section>
   );
@@ -209,6 +210,7 @@ function KafkaPage({ status, scenarios }: { status?: KafkaDemoStatus; scenarios:
       <Panel title="Kafka metric streams">
         <StreamGrid points={status?.samplePoints ?? []} events={status?.consumedEvents ?? []} running={Boolean(status?.running)} />
       </Panel>
+      <IncidentsPanel events={status?.consumedEvents ?? []} />
       <EventsTable events={status?.consumedEvents ?? []} />
     </section>
   );
@@ -421,6 +423,59 @@ function EventsTable({ events }: { events: DriftEvent[] }) {
   );
 }
 
+function IncidentsPanel({ events }: { events: DriftEvent[] }) {
+  const incidents = buildIncidents(events);
+  const active = incidents.filter((incident) => !incident.recoveredAt);
+  const recovered = incidents.filter((incident) => incident.recoveredAt);
+
+  return (
+    <Panel title="Drift incidents">
+      {incidents.length === 0 ? (
+        <div className="empty-state">Активных или завершённых drift episodes пока нет.</div>
+      ) : (
+        <div className="incident-layout">
+          <IncidentColumn title="Active incidents" incidents={active} emptyText="Активных incident-ов нет." />
+          <IncidentColumn title="Recovered incidents" incidents={recovered} emptyText="Завершённых incident-ов нет." />
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+function IncidentColumn({ title, incidents, emptyText }: { title: string; incidents: DriftIncident[]; emptyText: string }) {
+  return (
+    <div className="incident-column">
+      <h3>{title}</h3>
+      {incidents.length === 0 ? (
+        <div className="empty-state compact">{emptyText}</div>
+      ) : (
+        <div className="incident-list">
+          {incidents.map((incident) => (
+            <article className={incident.recoveredAt ? "incident-card recovered" : "incident-card active"} key={incident.id}>
+              <div className="incident-head">
+                <div>
+                  <strong>{incident.service}</strong>
+                  <span>{incident.metric} · {incident.operation || "-"}</span>
+                </div>
+                <span className={`severity ${incident.severity.toLowerCase()}`}>{incident.severity}</span>
+              </div>
+              <dl className="incident-meta">
+                <dt>Detector</dt>
+                <dd>{incident.detector}</dd>
+                <dt>Started</dt>
+                <dd>{formatMoscow(incident.startedAt)}</dd>
+                <dt>Duration</dt>
+                <dd>{formatDuration(incident.startedAt, incident.recoveredAt)}</dd>
+              </dl>
+              <p>{incident.explanation}</p>
+            </article>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ScenarioSummary({ result }: { result?: DemoRunResult }) {
   if (!result) {
     return <div className="empty-state">Результат ещё не загружен.</div>;
@@ -509,6 +564,73 @@ function countSeverity(events: DriftEvent[], severity: string) {
   return events.filter((event) => event.severity === severity).length;
 }
 
+interface DriftIncident {
+  id: string;
+  service: string;
+  metric: string;
+  operation?: string;
+  detector: string;
+  severity: string;
+  startedAt: string;
+  recoveredAt?: string;
+  explanation: string;
+}
+
+function buildIncidents(events: DriftEvent[]) {
+  const incidents = new Map<string, DriftIncident>();
+
+  for (const event of events.slice().sort((left, right) => left.detectedAt.localeCompare(right.detectedAt))) {
+    const id = incidentId(event);
+    const current = incidents.get(id);
+
+    if (event.phase === "RECOVERED") {
+      if (current) {
+        incidents.set(id, { ...current, recoveredAt: event.detectedAt });
+      } else {
+        incidents.set(id, eventToIncident(event, event.detectedAt));
+      }
+      continue;
+    }
+
+    if (!current) {
+      incidents.set(id, eventToIncident(event));
+      continue;
+    }
+
+    if (severityRank(event.severity) > severityRank(current.severity)) {
+      incidents.set(id, {
+        ...current,
+        severity: event.severity,
+        explanation: eventExplanation(event)
+      });
+    }
+  }
+
+  return [...incidents.values()].sort((left, right) => right.startedAt.localeCompare(left.startedAt));
+}
+
+function eventToIncident(event: DriftEvent, recoveredAt?: string): DriftIncident {
+  return {
+    id: incidentId(event),
+    service: event.key.service,
+    metric: event.key.metric,
+    operation: event.key.operation,
+    detector: event.detector,
+    severity: event.severity,
+    startedAt: event.detectedAt,
+    recoveredAt,
+    explanation: eventExplanation(event)
+  };
+}
+
+function incidentId(event: DriftEvent) {
+  return `${streamId(event.key)}|${event.detector}`;
+}
+
+function severityRank(severity: string) {
+  return severity === "CRITICAL" ? 3 : severity === "WARNING" ? 2 : severity === "INFO" ? 1 : 0;
+}
+
 function eventExplanation(event: DriftEvent) {
   const current = detailNumber(event, "currentMean") ?? event.currentValue;
   const baseline = detailNumber(event, "baselineMean") ?? event.baselineValue;
@@ -548,6 +670,20 @@ function formatMoscow(value: string) {
     minute: "2-digit",
     second: "2-digit"
   }).format(new Date(value));
+}
+
+function formatDuration(start: string, end?: string) {
+  const endTime = end ? new Date(end).getTime() : Date.now();
+  const seconds = Math.max(0, Math.round((endTime - new Date(start).getTime()) / 1000));
+  if (seconds < 60) {
+    return `${seconds}s`;
+  }
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  if (minutes < 60) {
+    return `${minutes}m ${rest}s`;
+  }
+  return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
 }
 
 function readableError(error: unknown) {
