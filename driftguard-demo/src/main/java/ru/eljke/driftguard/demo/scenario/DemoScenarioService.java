@@ -85,7 +85,7 @@ public class DemoScenarioService {
         for (MetricPoint point : points) {
             events.addAll(runtime.detect(point));
         }
-        List<DriftEvent> representativeEvents = firstEventPerDetector(events);
+        List<DriftEvent> representativeEvents = representativeEvents(scenario, events);
         recordRunMetrics(descriptor.id(), "instant", points.size(), representativeEvents.size());
         lastResult = new DemoRunResult(
                 scenario.name(),
@@ -97,7 +97,7 @@ public class DemoScenarioService {
                 points,
                 scenario.expectedDrifts(),
                 representativeEvents,
-                DetectionEvaluator.evaluate(scenario, representativeEvents)
+                DetectionEvaluator.evaluate(scenario, events)
         );
         return lastResult;
     }
@@ -116,7 +116,7 @@ public class DemoScenarioService {
             @Override
             public void run() {
                 if (index >= points.size()) {
-                    List<DriftEvent> representativeEvents = firstEventPerDetector(events);
+                    List<DriftEvent> representativeEvents = representativeEvents(scenario, events);
                     recordRunMetrics(descriptor.id(), "live", processed.size(), representativeEvents.size());
                     lastResult = liveResult(scenario, descriptor, points, processed, events, false);
                     stopLive();
@@ -125,7 +125,7 @@ public class DemoScenarioService {
                 MetricPoint point = points.get(index++);
                 processed.add(point);
                 events.addAll(runtime.detect(point));
-                List<DriftEvent> representativeEvents = firstEventPerDetector(events);
+                List<DriftEvent> representativeEvents = representativeEvents(scenario, events);
                 lastResult = new DemoRunResult(
                         scenario.name(),
                         descriptor.title(),
@@ -136,7 +136,7 @@ public class DemoScenarioService {
                         List.copyOf(processed),
                         scenario.expectedDrifts(),
                         representativeEvents,
-                        DetectionEvaluator.evaluate(scenario, representativeEvents)
+                        DetectionEvaluator.evaluate(scenario, events)
                 );
             }
         }, 0, 120, TimeUnit.MILLISECONDS);
@@ -240,7 +240,7 @@ public class DemoScenarioService {
             List<DriftEvent> events,
             boolean running
     ) {
-        List<DriftEvent> representativeEvents = firstEventPerDetector(events);
+        List<DriftEvent> representativeEvents = representativeEvents(scenario, events);
         return new DemoRunResult(
                 scenario.name(),
                 descriptor.title(),
@@ -251,16 +251,33 @@ public class DemoScenarioService {
                 List.copyOf(processed),
                 scenario.expectedDrifts(),
                 representativeEvents,
-                DetectionEvaluator.evaluate(scenario, representativeEvents)
+                DetectionEvaluator.evaluate(scenario, events)
         );
     }
 
-    private static List<DriftEvent> firstEventPerDetector(List<DriftEvent> events) {
+    private static List<DriftEvent> representativeEvents(MetricScenario scenario, List<DriftEvent> events) {
         Map<String, DriftEvent> byDetector = new LinkedHashMap<>();
         for (DriftEvent event : events) {
-            byDetector.putIfAbsent(event.detector(), event);
+            String key = representativeKey(event);
+            DriftEvent current = byDetector.get(key);
+            if (current == null || shouldReplaceRepresentative(scenario, current, event)) {
+                byDetector.put(key, event);
+            }
         }
         return List.copyOf(byDetector.values());
+    }
+
+    private static String representativeKey(DriftEvent event) {
+        return event.key().service() + "|" + event.key().metric() + "|" + event.key().operation() + "|" + event.detector();
+    }
+
+    private static boolean shouldReplaceRepresentative(MetricScenario scenario, DriftEvent current, DriftEvent candidate) {
+        return !isInsideExpectedDrift(scenario, current) && isInsideExpectedDrift(scenario, candidate);
+    }
+
+    private static boolean isInsideExpectedDrift(MetricScenario scenario, DriftEvent event) {
+        return scenario.expectedDrifts().stream()
+                .anyMatch(interval -> interval.contains(event.detectedAt()));
     }
 
     private void recordRunMetrics(String scenario, String mode, int points, int events) {
