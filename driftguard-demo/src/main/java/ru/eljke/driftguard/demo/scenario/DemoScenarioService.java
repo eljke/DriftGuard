@@ -11,6 +11,7 @@ import ru.eljke.driftguard.core.domain.MetricKind;
 import ru.eljke.driftguard.core.domain.MetricPoint;
 import ru.eljke.driftguard.core.error.DriftGuardValidationException;
 import ru.eljke.driftguard.demo.detection.DemoDetectionRuntime;
+import ru.eljke.driftguard.demo.detection.DemoDetectorProfile;
 import ru.eljke.driftguard.demo.error.DemoErrorReason;
 import ru.eljke.driftguard.demo.event.DemoDriftEventRepository;
 import ru.eljke.driftguard.demo.event.InMemoryDemoDriftEventRepository;
@@ -184,6 +185,22 @@ public class DemoScenarioService {
         }
         runtime.reset();
         return DetectionBenchmarkRunner.report(runtime.profile().name(), results);
+    }
+
+    public List<DetectionBenchmarkReport> benchmarkProfiles() {
+        stopLive();
+        DemoDetectorProfile originalProfile = runtime.profile();
+        List<DetectionBenchmarkReport> reports = new ArrayList<>();
+
+        try {
+            for (DemoDetectorProfile profile : DemoDetectorProfile.values()) {
+                runtime.setProfile(profile);
+                reports.add(benchmark());
+            }
+            return List.copyOf(reports);
+        } finally {
+            runtime.setProfile(originalProfile);
+        }
     }
 
     public synchronized void stopLive() {

@@ -698,6 +698,24 @@ th {
     line-height: 1.45;
 }
 
+.profile-benchmark {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+}
+
+.profile-benchmark h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: 15px;
+}
+
+.profile-benchmark .help-text {
+    margin: 0;
+}
+
 .spin {
     animation: spin 0.9s linear infinite;
 }

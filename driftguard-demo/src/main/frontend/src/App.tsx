@@ -164,6 +164,7 @@ function SyntheticPage({ result, scenarios }: { result?: DemoRunResult; scenario
     onSuccess: (data) => queryClient.setQueryData(["overview"], data)
   });
   const benchmark = useQuery({ queryKey: ["benchmark"], queryFn: api.benchmark, enabled: false });
+  const profileBenchmark = useQuery({ queryKey: ["profile-benchmark"], queryFn: api.benchmarkProfiles, enabled: false });
   const busy = run.isPending || live.isPending || stopLive.isPending;
   const error = run.error ?? live.error ?? stopLive.error;
 
@@ -176,8 +177,11 @@ function SyntheticPage({ result, scenarios }: { result?: DemoRunResult; scenario
       </Panel>
       <BenchmarkPanel
         benchmark={benchmark.data}
+        profileBenchmark={profileBenchmark.data ?? []}
         loading={benchmark.isFetching}
+        profileLoading={profileBenchmark.isFetching}
         onRun={() => benchmark.refetch()}
+        onCompareProfiles={() => profileBenchmark.refetch()}
       />
       <Panel title="Result">
         <ScenarioSummary result={result} />
@@ -642,12 +646,18 @@ function ScenarioSummary({ result }: { result?: DemoRunResult }) {
 
 function BenchmarkPanel({
   benchmark,
+  profileBenchmark,
   loading,
-  onRun
+  profileLoading,
+  onRun,
+  onCompareProfiles
 }: {
   benchmark?: DetectionBenchmarkReport;
+  profileBenchmark: DetectionBenchmarkReport[];
   loading: boolean;
+  profileLoading: boolean;
   onRun: () => void;
+  onCompareProfiles: () => void;
 }) {
   return (
     <Panel title="Synthetic benchmark">
@@ -655,6 +665,10 @@ function BenchmarkPanel({
         <button className="secondary-button" disabled={loading} onClick={onRun} type="button">
           {loading ? <Loader2 className="spin" size={16} /> : <BarChart3 size={16} />}
           Run benchmark
+        </button>
+        <button className="secondary-button" disabled={profileLoading} onClick={onCompareProfiles} type="button">
+          {profileLoading ? <Loader2 className="spin" size={16} /> : <BarChart3 size={16} />}
+          Compare profiles
         </button>
       </div>
       {!benchmark ? (
@@ -703,6 +717,44 @@ function BenchmarkPanel({
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+      {profileBenchmark.length > 0 && (
+        <div className="profile-benchmark">
+          <h3>Profile comparison</h3>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Profile</th>
+                  <th>Detected</th>
+                  <th>Events</th>
+                  <th>False positives</th>
+                  <th>Missed</th>
+                  <th>Precision</th>
+                  <th>Recall</th>
+                  <th>Mean delay</th>
+                </tr>
+              </thead>
+              <tbody>
+                {profileBenchmark.map((report) => (
+                  <tr key={report.label}>
+                    <td><span className="badge">{report.label}</span></td>
+                    <td>{report.summary.detectedScenarios}/{report.summary.scenarios}</td>
+                    <td>{report.summary.events}</td>
+                    <td>{report.summary.falsePositiveEvents}</td>
+                    <td>{report.summary.missedDriftIntervals}</td>
+                    <td>{formatPercent(report.summary.precision)}</td>
+                    <td>{formatPercent(report.summary.recall)}</td>
+                    <td>{report.summary.meanFirstDetectionDelay}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="help-text">
+            Сравнение профилей помогает увидеть компромисс: раннее обнаружение обычно увеличивает риск false positives, а консервативный профиль может повысить задержку или пропуски.
+          </p>
         </div>
       )}
     </Panel>

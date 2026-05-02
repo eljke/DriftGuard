@@ -90,6 +90,12 @@ public class DemoController {
         return service.benchmark();
     }
 
+    @GetMapping("/benchmark/profiles")
+    @Operation(summary = "Сравнивает synthetic benchmark для всех runtime detector profile")
+    public List<DetectionBenchmarkReport> benchmarkProfiles() {
+        return service.benchmarkProfiles();
+    }
+
     @GetMapping("/scenarios")
     @Operation(summary = "Возвращает доступные демонстрационные сценарии")
     public List<DemoScenarioDescriptor> scenarios() {
@@ -181,6 +187,7 @@ public class DemoController {
                 Map.entry("quality", "GET /api/demo/quality"),
                 Map.entry("storedEvents", "GET /api/demo/events/stored"),
                 Map.entry("clearStoredEvents", "POST /api/demo/events/clear"),
+                Map.entry("benchmarkProfiles", "GET /api/demo/benchmark/profiles"),
                 Map.entry("scenarios", "GET /api/demo/scenarios"),
                 Map.entry("rerun", "POST /api/demo/run"),
                 Map.entry("runScenario", "POST /api/demo/run/{scenario}"),

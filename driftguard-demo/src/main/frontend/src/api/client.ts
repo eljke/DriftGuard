@@ -56,6 +56,7 @@ export const api = {
     startLive: (scenario: string) => request<DemoRunResult>(`/api/demo/live/${scenario}`, {method: "POST"}),
     stopLive: () => request<DemoRunResult>("/api/demo/live/stop", {method: "POST"}),
     benchmark: () => request<DetectionBenchmarkReport>("/api/demo/benchmark"),
+    benchmarkProfiles: () => request<DetectionBenchmarkReport[]>("/api/demo/benchmark/profiles"),
     kafkaStatus: () => request<KafkaDemoStatus>("/api/demo/kafka"),
     startKafka: (scenario: string) => request<KafkaDemoStatus>(`/api/demo/kafka/start/${scenario}`, {method: "POST"}),
     replayKafka: (body: KafkaReplayRequest) => request<KafkaDemoStatus>("/api/demo/kafka/replay", {
