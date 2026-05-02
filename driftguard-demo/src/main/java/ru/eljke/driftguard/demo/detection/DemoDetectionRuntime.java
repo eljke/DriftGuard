@@ -9,7 +9,7 @@ import ru.eljke.driftguard.core.config.EmissionPolicyConfig;
 import ru.eljke.driftguard.core.detector.DriftDetectorEngine;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricPoint;
-import ru.eljke.driftguard.core.state.InMemoryDetectorStateStore;
+import ru.eljke.driftguard.core.state.InMemoryDetectorRuntimeStateStore;
 
 import java.time.Duration;
 import java.util.List;
@@ -56,7 +56,7 @@ public class DemoDetectionRuntime {
                 profile,
                 version,
                 definitions,
-                new DriftDetectorEngine(DefaultAlgorithms.registry(), new InMemoryDetectorStateStore(), definitions)
+                new DriftDetectorEngine(DefaultAlgorithms.registry(), new InMemoryDetectorRuntimeStateStore(), definitions)
         );
     }
 

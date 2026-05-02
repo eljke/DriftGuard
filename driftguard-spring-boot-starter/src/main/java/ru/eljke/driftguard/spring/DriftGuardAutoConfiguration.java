@@ -20,9 +20,11 @@ import ru.eljke.driftguard.core.detector.DriftEventSinkListener;
 import ru.eljke.driftguard.core.detector.SimpleDetectorRegistry;
 import ru.eljke.driftguard.core.detector.DriftDetectorEngine;
 import ru.eljke.driftguard.core.sink.DriftEventSink;
+import ru.eljke.driftguard.core.state.DetectorRuntimeStateStore;
 import ru.eljke.driftguard.core.state.DetectorStateStore;
 import ru.eljke.driftguard.core.state.InMemoryDetectorStateStore;
 import ru.eljke.driftguard.core.state.InMemoryEmissionStateStore;
+import ru.eljke.driftguard.core.state.SplitDetectorRuntimeStateStore;
 import ru.eljke.driftguard.kafka.DriftGuardObjectMapper;
 import ru.eljke.driftguard.kafka.KafkaDriftGuardTopologyBuilder;
 import ru.eljke.driftguard.kafka.KafkaDriftGuardTopologyConfig;
@@ -53,6 +55,12 @@ public class DriftGuardAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public DetectorRuntimeStateStore driftGuardDetectorRuntimeStateStore(DetectorStateStore detectorStateStore) {
+        return new SplitDetectorRuntimeStateStore(detectorStateStore, new InMemoryEmissionStateStore());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public List<DetectorDefinition> driftGuardDetectorDefinitions(
             DriftGuardProperties properties,
             ObjectProvider<DetectorDefinitionProvider> providers
@@ -68,14 +76,13 @@ public class DriftGuardAutoConfiguration {
     @ConditionalOnMissingBean
     public DriftDetectorEngine driftGuardDetectorEngine(
             DetectorRegistry registry,
-            DetectorStateStore stateStore,
+            DetectorRuntimeStateStore runtimeStateStore,
             List<DetectorDefinition> detectorDefinitions,
             ObjectProvider<DriftDetectionListener> listeners
     ) {
         return new DriftDetectorEngine(
                 registry,
-                stateStore,
-                new InMemoryEmissionStateStore(),
+                runtimeStateStore,
                 detectorDefinitions,
                 listeners.orderedStream().toList()
         );

@@ -50,6 +50,33 @@ class InMemoryStateStoreTest {
         assertEquals(8_000, state.consecutiveSignals());
     }
 
+
+    @Test
+    void updatesRuntimeStateAtomicallyPerKey() throws InterruptedException {
+        InMemoryDetectorRuntimeStateStore store = new InMemoryDetectorRuntimeStateStore();
+        DetectorInstanceKey key = new DetectorInstanceKey(MetricKey.of("orders", "latency"), "counting");
+
+        runConcurrently(8, 1_000, () -> store.update(
+                key,
+                () -> DetectorRuntimeState.initial(new CountingState(0)),
+                state -> state.advance(
+                        new CountingState(((CountingState) state.detectorState()).count() + 1),
+                        new EmissionState(
+                                state.emissionState().consecutiveSignals() + 1,
+                                state.emissionState().lastEmittedAt(),
+                                state.emissionState().activeEpisode(),
+                                state.emissionState().consecutiveNormal(),
+                                state.emissionState().lastEmittedEvent()
+                        )
+                )
+        ));
+
+        DetectorRuntimeState state = store.get(key).orElseThrow();
+        assertEquals(8_000, ((CountingState) state.detectorState()).count());
+        assertEquals(8_000, state.emissionState().consecutiveSignals());
+        assertEquals(8_000, state.version());
+    }
+
     @SuppressWarnings("SameParameterValue")
     private static void runConcurrently(int threads, int iterationsPerThread, Runnable action) throws InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(threads);
