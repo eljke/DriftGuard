@@ -104,6 +104,40 @@ public class OpenApiSchemaConfiguration {
                     "url", "URL инструмента.",
                     "description", "Назначение инструмента."
             ));
+            describe(schemas, "DemoConfigurationView", "Runtime-конфигурация demo и DriftGuard detector-ов для UI.", Map.of(
+                    "aggressiveness", "Агрегированная оценка чувствительности detector-ов.",
+                    "kafka", "Kafka-настройки demo и Kafka Streams adapter-а.",
+                    "detectors", "Активные detector definitions из текущего Spring context-а."
+            ));
+            describe(schemas, "AggressivenessView", "Пояснение текущей чувствительности detector-ов.", Map.of(
+                    "level", "Уровень чувствительности: Aggressive, Balanced или Conservative.",
+                    "description", "Как этот уровень влияет на раннее обнаружение и риск ложных тревог."
+            ));
+            describe(schemas, "KafkaConfigurationView", "Kafka-настройки, отображаемые в разделе Configuration.", Map.of(
+                    "demoEnabled", "Включены ли Kafka demo endpoints.",
+                    "bootstrapServers", "Kafka bootstrap servers.",
+                    "inputTopic", "Topic входных MetricPoint.",
+                    "outputTopic", "Topic выходных DriftEvent.",
+                    "applicationId", "Kafka Streams application id.",
+                    "playbackInterval", "Интервал публикации synthetic points producer-ами."
+            ));
+            describe(schemas, "DetectorConfigurationView", "UI-представление одного detector definition.", Map.ofEntries(
+                    Map.entry("name", "Имя detector-а."),
+                    Map.entry("algorithm", "Алгоритм detector-а."),
+                    Map.entry("services", "Фильтр по сервисам."),
+                    Map.entry("metrics", "Фильтр по метрикам."),
+                    Map.entry("warningThreshold", "Warning-порог score."),
+                    Map.entry("criticalThreshold", "Critical-порог score."),
+                    Map.entry("warningPValue", "Warning-порог p-value."),
+                    Map.entry("criticalPValue", "Critical-порог p-value."),
+                    Map.entry("warmupSamples", "Число samples для прогрева."),
+                    Map.entry("emissionPolicy", "Политика публикации событий."),
+                    Map.entry("sensitivity", "Оценка чувствительности detector-а.")
+            ));
+            describe(schemas, "EmissionPolicyView", "Политика сглаживания и подавления повторяющихся событий.", Map.of(
+                    "minConsecutiveSignals", "Сколько подряд сигналов нужно перед публикацией события.",
+                    "cooldown", "Минимальная пауза между событиями одного detector-а по одному stream-у."
+            ));
         };
     }
 

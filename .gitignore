@@ -18,6 +18,12 @@ dependency-reduced-pom.xml
 hs_err_pid*
 replay_pid*
 
+### Frontend ###
+node_modules/
+**/node_modules/
+**/src/main/frontend/dist/
+**/src/main/frontend/*.tsbuildinfo
+
 ### IntelliJ IDEA ###
 .idea/
 .idea/modules.xml

@@ -29,6 +29,8 @@ class OpenApiEndpointTest {
                 .andExpect(jsonPath("$.components.schemas.DemoRunResult.properties.quality.description").exists())
                 .andExpect(jsonPath("$.components.schemas.KafkaDemoStatus.properties.inputTopic.description").exists())
                 .andExpect(jsonPath("$.components.schemas.KafkaProducerStatus.properties.service.description").exists())
+                .andExpect(jsonPath("$.components.schemas.DemoConfigurationView.properties.aggressiveness.description").exists())
+                .andExpect(jsonPath("$.components.schemas.DetectorConfigurationView.properties.sensitivity.description").exists())
                 .andExpect(jsonPath("$.components.schemas.ToolLink.properties.url.description").exists());
     }
 }
