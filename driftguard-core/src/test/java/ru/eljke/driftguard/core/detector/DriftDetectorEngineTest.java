@@ -61,7 +61,7 @@ class DriftDetectorEngineTest {
         assertTrue(engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:00Z"), 100)).isEmpty());
         assertEquals(1, engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:01Z"), 101)).size());
         assertTrue(engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:02Z"), 102)).isEmpty());
-        assertEquals(1, engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:12Z"), 103)).size());
+        assertTrue(engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:12Z"), 103)).isEmpty());
     }
 
     private record CountingConfig(int emitAt) implements DetectorConfig {

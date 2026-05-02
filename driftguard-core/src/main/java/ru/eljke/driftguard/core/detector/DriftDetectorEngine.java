@@ -116,7 +116,8 @@ public final class DriftDetectorEngine {
         boolean cooldownElapsed = previous.lastEmittedAtValue()
                 .map(last -> !event.detectedAt().isBefore(last.plus(definition.emissionPolicy().cooldown())))
                 .orElse(true);
-        boolean emit = enoughSignals && cooldownElapsed;
+        boolean episodeStart = consecutiveSignals == definition.emissionPolicy().minConsecutiveSignals();
+        boolean emit = episodeStart && cooldownElapsed;
         emissionStateStore.put(instanceKey, new EmissionState(
                 consecutiveSignals,
                 emit ? event.detectedAt() : previous.lastEmittedAt()
