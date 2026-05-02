@@ -58,6 +58,8 @@ public final class ChiSquareDetector implements DetectorAlgorithm<ChiSquareConfi
             return DetectionResult.noDrift(next);
         }
         DriftSeverity severity = score.pValue() <= config.criticalPValue() ? DriftSeverity.CRITICAL : DriftSeverity.WARNING;
+        double baselineMean = next.baseline().mean();
+        double currentMean = next.current().mean();
         return DetectionResult.drift(next, DriftEvents.create(
                 point,
                 context,
@@ -65,10 +67,16 @@ public final class ChiSquareDetector implements DetectorAlgorithm<ChiSquareConfi
                 DriftDirection.DISTRIBUTION,
                 severity,
                 1.0 - score.pValue(),
-                next.current().mean(),
-                next.baseline().mean(),
+                currentMean,
+                baselineMean,
                 "Chi-square binned distribution test exceeded p-value threshold",
-                Map.of("chiSquare", score.statistic(), "pValue", score.pValue(), "degreesOfFreedom", score.degreesOfFreedom())
+                DriftEvents.standardDetails(
+                        baselineMean,
+                        currentMean,
+                        config.warningPValue(),
+                        config.criticalPValue(),
+                        Map.of("chiSquare", score.statistic(), "pValue", score.pValue(), "degreesOfFreedom", score.degreesOfFreedom())
+                )
         ));
     }
 

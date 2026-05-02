@@ -392,7 +392,9 @@ function EventsTable({ events }: { events: DriftEvent[] }) {
                 <th>Metric</th>
                 <th>Algorithm</th>
                 <th>Score</th>
-                <th>Reason</th>
+                <th>Current</th>
+                <th>Baseline</th>
+                <th>Explanation</th>
               </tr>
             </thead>
             <tbody>
@@ -403,8 +405,10 @@ function EventsTable({ events }: { events: DriftEvent[] }) {
                   <td>{event.key.service}</td>
                   <td>{event.key.metric}</td>
                   <td>{event.algorithm}</td>
-                  <td>{event.score.toFixed(3)}</td>
-                  <td>{event.reason}</td>
+                  <td>{formatNumber(event.score)}</td>
+                  <td>{formatNumber(event.currentValue)}</td>
+                  <td>{formatNumber(event.baselineValue)}</td>
+                  <td className="event-explanation">{eventExplanation(event)}</td>
                 </tr>
               ))}
             </tbody>
@@ -506,6 +510,38 @@ function streamId(key: MetricKey) {
 
 function countSeverity(events: DriftEvent[], severity: string) {
   return events.filter((event) => event.severity === severity).length;
+}
+
+function eventExplanation(event: DriftEvent) {
+  const current = detailNumber(event, "currentMean") ?? event.currentValue;
+  const baseline = detailNumber(event, "baselineMean") ?? event.baselineValue;
+  const relative = detailNumber(event, "relativeChangePercent");
+  const pValue = detailNumber(event, "pValue");
+  const statistic = detailNumber(event, "statistic") ?? detailNumber(event, "chiSquare");
+  const threshold = event.severity === "CRITICAL"
+    ? detailNumber(event, "criticalThreshold")
+    : detailNumber(event, "warningThreshold");
+
+  const parts = [
+    `Current ${formatNumber(current)} vs baseline ${formatNumber(baseline)}`,
+    relative === undefined ? undefined : `${relative >= 0 ? "+" : ""}${formatNumber(relative)}%`,
+    threshold === undefined ? undefined : `threshold ${formatNumber(threshold)}`,
+    pValue === undefined ? undefined : `p-value ${formatNumber(pValue)}`,
+    statistic === undefined ? undefined : `statistic ${formatNumber(statistic)}`
+  ].filter(Boolean);
+
+  return `${parts.join(" · ")}. ${event.reason}`;
+}
+
+function detailNumber(event: DriftEvent, key: string) {
+  const value = event.details?.[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function formatNumber(value: number) {
+  return Number.isFinite(value)
+    ? new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 3 }).format(value)
+    : "—";
 }
 
 function formatMoscow(value: string) {

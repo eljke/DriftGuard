@@ -7,6 +7,7 @@ import ru.eljke.driftguard.core.domain.DriftSeverity;
 import ru.eljke.driftguard.core.domain.MetricPoint;
 
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 /**
  * Общий helper для единообразного создания drift events из кода алгоритмов.
@@ -44,6 +45,30 @@ public final class DriftEvents {
                 point.tags(),
                 details
         );
+    }
+
+    public static Map<String, Object> standardDetails(
+            double baselineMean,
+            double currentMean,
+            double warningThreshold,
+            double criticalThreshold,
+            Map<String, Object> algorithmDetails
+    ) {
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("baselineMean", baselineMean);
+        details.put("currentMean", currentMean);
+        details.put("absoluteChange", currentMean - baselineMean);
+        details.put("relativeChangePercent", relativeChangePercent(baselineMean, currentMean));
+        details.put("warningThreshold", warningThreshold);
+        details.put("criticalThreshold", criticalThreshold);
+        if (algorithmDetails != null) {
+            details.putAll(algorithmDetails);
+        }
+        return Map.copyOf(details);
+    }
+
+    private static double relativeChangePercent(double baseline, double current) {
+        return Math.abs(baseline) < 1.0e-9 ? 0.0 : ((current - baseline) / Math.abs(baseline)) * 100.0;
     }
 
     public static DriftSeverity severity(double score, double warningThreshold, double criticalThreshold) {

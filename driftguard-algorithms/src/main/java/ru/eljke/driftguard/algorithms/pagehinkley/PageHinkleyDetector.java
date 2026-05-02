@@ -39,14 +39,26 @@ public final class PageHinkleyDetector implements DetectorAlgorithm<PageHinkleyC
             DetectionContext context
     ) {
         long count = state.count() + 1;
+
+        if (count == 1) {
+            return DetectionResult.noDrift(new PageHinkleyState(1, point.value(), 0.0, 0.0));
+        }
+
         double mean = state.mean() + config.alpha() * (point.value() - state.mean());
+
+        if (count <= config.warmupSamples()) {
+            return DetectionResult.noDrift(new PageHinkleyState(count, mean, 0.0, 0.0));
+        }
+
         double cumulative = state.cumulative() + point.value() - mean - config.delta();
         double minCumulative = Math.min(state.minCumulative(), cumulative);
         double score = cumulative - minCumulative;
         PageHinkleyState next = new PageHinkleyState(count, mean, cumulative, minCumulative);
-        if (count < config.warmupSamples() || score < config.warningThreshold()) {
+
+        if (score < config.warningThreshold()) {
             return DetectionResult.noDrift(next);
         }
+
         return DetectionResult.drift(next, DriftEvents.create(
                 point,
                 context,
@@ -57,7 +69,13 @@ public final class PageHinkleyDetector implements DetectorAlgorithm<PageHinkleyC
                 point.value(),
                 mean,
                 "Page-Hinkley cumulative mean shift exceeded threshold",
-                Map.of("count", count, "delta", config.delta())
+                DriftEvents.standardDetails(
+                        mean,
+                        point.value(),
+                        config.warningThreshold(),
+                        config.criticalThreshold(),
+                        Map.of("count", count, "delta", config.delta(), "cumulativeScore", score)
+                )
         ));
     }
 }

@@ -46,6 +46,8 @@ public final class PsiDetector implements DetectorAlgorithm<PsiConfig, PsiState>
         if (psi < config.warningThreshold()) {
             return DetectionResult.noDrift(next);
         }
+        double baselineMean = next.baseline().mean();
+        double currentMean = next.current().mean();
         return DetectionResult.drift(next, DriftEvents.create(
                 point,
                 context,
@@ -53,10 +55,16 @@ public final class PsiDetector implements DetectorAlgorithm<PsiConfig, PsiState>
                 DriftDirection.DISTRIBUTION,
                 DriftEvents.severity(psi, config.warningThreshold(), config.criticalThreshold()),
                 psi,
-                next.current().mean(),
-                next.baseline().mean(),
+                currentMean,
+                baselineMean,
                 "Population Stability Index exceeded threshold",
-                Map.of("buckets", config.buckets())
+                DriftEvents.standardDetails(
+                        baselineMean,
+                        currentMean,
+                        config.warningThreshold(),
+                        config.criticalThreshold(),
+                        Map.of("buckets", config.buckets(), "psi", psi)
+                )
         ));
     }
 

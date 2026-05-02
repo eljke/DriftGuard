@@ -3,18 +3,18 @@ package ru.eljke.driftguard.core.config;
 import java.util.List;
 
 /**
- * Extension point for code-defined detector definitions.
+ * Точка расширения для detector definitions, описанных кодом.
  *
- * <p>Use this contract when detector configuration cannot be expressed by the
- * built-in {@code application.yml} properties, for example when a custom
- * algorithm has its own typed {@link DetectorConfig}. Core stays independent
- * from Spring and Kafka: infrastructure modules only collect providers and pass
- * their definitions to {@code DriftDetectorEngine}.</p>
+ * <p>Используется, когда конфигурацию detector-а неудобно или невозможно
+ * выразить через стандартные свойства {@code application.yml}, например если
+ * пользовательский алгоритм имеет собственный типизированный {@link DetectorConfig}.
+ * Core при этом остаётся независимым от Spring и Kafka: инфраструктурные
+ * модули только собирают providers и передают их definitions в engine.</p>
  */
 @FunctionalInterface
 public interface DetectorDefinitionProvider {
     /**
-     * Returns detector definitions contributed by this provider.
+     * Возвращает detector definitions, предоставленные этим provider-ом.
      */
     List<DetectorDefinition> definitions();
 }

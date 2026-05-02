@@ -55,12 +55,18 @@ public final class AdwinDetector implements DetectorAlgorithm<AdwinConfig, Adwin
                 best.rightMean(),
                 best.leftMean(),
                 "ADWIN-style adaptive window mean difference exceeded Hoeffding bound",
-                Map.of(
-                        "epsilon", best.epsilon(),
-                        "leftMean", best.leftMean(),
-                        "rightMean", best.rightMean(),
-                        "split", best.split(),
-                        "windowSize", window.size()
+                DriftEvents.standardDetails(
+                        best.leftMean(),
+                        best.rightMean(),
+                        1.0,
+                        config.criticalMultiplier(),
+                        Map.of(
+                                "epsilon", best.epsilon(),
+                                "split", best.split(),
+                                "windowSize", window.size(),
+                                "meanDifference", Math.abs(best.rightMean() - best.leftMean()),
+                                "scoreMultiplier", best.score()
+                        )
                 )
         ));
     }

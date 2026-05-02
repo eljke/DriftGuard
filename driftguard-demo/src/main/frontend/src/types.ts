@@ -17,21 +17,22 @@ export interface MetricPoint {
 }
 
 export interface DriftEvent {
-  id: string;
-  key: MetricKey;
-  detectedAt: string;
-  windowStart: string;
-  windowEnd: string;
-  direction: string;
-  detector: string;
-  algorithm: string;
-  severity: Severity;
-  score: number;
-  currentValue: number;
-  baselineValue: number;
-  reason: string;
-  tags: Record<string, string>;
-  details: Record<string, unknown>;
+    id: string;
+    key: MetricKey;
+    detectedAt: string;
+    direction: string;
+    detector: string;
+    algorithm: string;
+    severity: Severity;
+    score: number;
+    currentValue: number;
+    baselineValue: number;
+    baselineSummary?: string;
+    currentSummary?: string;
+    reason: string;
+    metadata: Record<string, string>;
+    tags: Record<string, string>;
+    details: Record<string, unknown>;
 }
 
 export interface DetectionMetrics {

@@ -380,6 +380,12 @@ th {
   background: var(--surface-muted);
 }
 
+.event-explanation {
+  max-width: 520px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
 .severity.info {
   background: #dbeafe;
   color: #1d4ed8;

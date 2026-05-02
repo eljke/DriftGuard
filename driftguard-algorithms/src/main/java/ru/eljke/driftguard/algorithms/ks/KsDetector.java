@@ -52,6 +52,8 @@ public final class KsDetector implements DetectorAlgorithm<KsConfig, KsState> {
             return DetectionResult.noDrift(next);
         }
         DriftSeverity severity = pValue <= config.criticalPValue() ? DriftSeverity.CRITICAL : DriftSeverity.WARNING;
+        double baselineMean = next.baseline().mean();
+        double currentMean = next.current().mean();
         return DetectionResult.drift(next, DriftEvents.create(
                 point,
                 context,
@@ -59,10 +61,16 @@ public final class KsDetector implements DetectorAlgorithm<KsConfig, KsState> {
                 DriftDirection.DISTRIBUTION,
                 severity,
                 1.0 - pValue,
-                next.current().mean(),
-                next.baseline().mean(),
+                currentMean,
+                baselineMean,
                 "Kolmogorov-Smirnov distribution distance exceeded p-value threshold",
-                Map.of("statistic", statistic, "pValue", pValue)
+                DriftEvents.standardDetails(
+                        baselineMean,
+                        currentMean,
+                        config.warningPValue(),
+                        config.criticalPValue(),
+                        Map.of("statistic", statistic, "pValue", pValue)
+                )
         ));
     }
 }
