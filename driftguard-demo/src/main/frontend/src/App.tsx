@@ -18,6 +18,7 @@ import { api } from "./api/client";
 import { TimeSeriesChart } from "./components/TimeSeriesChart";
 import type {
   DemoConfigurationView,
+  DetectionBenchmarkReport,
   DemoRunResult,
   DemoScenarioDescriptor,
   DriftEvent,
@@ -138,6 +139,7 @@ function SyntheticPage({ result, scenarios }: { result?: DemoRunResult; scenario
     mutationFn: api.stopLive,
     onSuccess: (data) => queryClient.setQueryData(["overview"], data)
   });
+  const benchmark = useQuery({ queryKey: ["benchmark"], queryFn: api.benchmark, enabled: false });
   const busy = run.isPending || live.isPending || stopLive.isPending;
   const error = run.error ?? live.error ?? stopLive.error;
 
@@ -148,6 +150,11 @@ function SyntheticPage({ result, scenarios }: { result?: DemoRunResult; scenario
         {error && <Notice tone="error" text={readableError(error)} />}
         <ScenarioButtons scenarios={scenarios} busy={busy} onRun={(id) => run.mutate(id)} onLive={(id) => live.mutate(id)} />
       </Panel>
+      <BenchmarkPanel
+        benchmark={benchmark.data}
+        loading={benchmark.isFetching}
+        onRun={() => benchmark.refetch()}
+      />
       <Panel title="Result">
         <ScenarioSummary result={result} />
         {result?.running && <Notice tone="info" text="Live playback активен: точки и события появляются по мере обработки." />}
@@ -490,6 +497,75 @@ function ScenarioSummary({ result }: { result?: DemoRunResult }) {
   );
 }
 
+function BenchmarkPanel({
+  benchmark,
+  loading,
+  onRun
+}: {
+  benchmark?: DetectionBenchmarkReport;
+  loading: boolean;
+  onRun: () => void;
+}) {
+  return (
+    <Panel title="Synthetic benchmark">
+      <div className="actions">
+        <button className="secondary-button" disabled={loading} onClick={onRun} type="button">
+          {loading ? <Loader2 className="spin" size={16} /> : <BarChart3 size={16} />}
+          Run benchmark
+        </button>
+      </div>
+      {!benchmark ? (
+        <div className="empty-state compact">
+          Benchmark прогоняет все synthetic scenarios на текущем detector profile и считает precision, recall, false positives и пропуски.
+        </div>
+      ) : (
+        <div className="benchmark-stack">
+          <div className="summary-grid">
+            <MetricCard title="Profile" value={benchmark.label} helper="Runtime detector profile" />
+            <MetricCard
+              title="Detected"
+              value={`${benchmark.summary.detectedScenarios}/${benchmark.summary.scenarios}`}
+              helper="Scenarios with expected drift detected"
+            />
+            <MetricCard title="Precision" value={formatPercent(benchmark.summary.precision)} helper={`${benchmark.summary.falsePositiveEvents} false positive events`} />
+            <MetricCard title="Recall" value={formatPercent(benchmark.summary.recall)} helper={`${benchmark.summary.missedDriftIntervals} missed intervals`} />
+          </div>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Scenario</th>
+                  <th>Detected</th>
+                  <th>Events</th>
+                  <th>False positives</th>
+                  <th>Missed</th>
+                  <th>Precision</th>
+                  <th>Recall</th>
+                  <th>Delay</th>
+                </tr>
+              </thead>
+              <tbody>
+                {benchmark.results.map((result) => (
+                  <tr key={result.scenario}>
+                    <td>{result.scenario}</td>
+                    <td>{result.metrics.detected ? "yes" : "no"}</td>
+                    <td>{result.metrics.events}</td>
+                    <td>{result.metrics.falsePositiveEvents}</td>
+                    <td>{result.metrics.missedDriftIntervals}</td>
+                    <td>{formatPercent(result.metrics.precision)}</td>
+                    <td>{formatPercent(result.metrics.recall)}</td>
+                    <td>{result.metrics.firstDetectionDelay ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </Panel>
+  );
+}
+
 function MetricCard({ title, value, helper, tone }: { title: string; value: string | number; helper: string; tone?: "danger" }) {
   return (
     <article className={tone === "danger" ? "metric-card danger" : "metric-card"}>
@@ -661,6 +737,10 @@ function formatNumber(value: number) {
   return Number.isFinite(value)
     ? new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 3 }).format(value)
     : "—";
+}
+
+function formatPercent(value: number) {
+  return `${formatNumber(value * 100)}%`;
 }
 
 function formatMoscow(value: string) {

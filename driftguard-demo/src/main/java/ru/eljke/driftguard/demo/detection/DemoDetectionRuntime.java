@@ -41,6 +41,10 @@ public class DemoDetectionRuntime {
         return state.get().definitions();
     }
 
+    public synchronized void reset() {
+        state.set(create(profile(), versionSequence.incrementAndGet()));
+    }
+
     public synchronized DemoDetectorProfile setProfile(DemoDetectorProfile profile) {
         state.set(create(profile, versionSequence.incrementAndGet()));
         return profile;

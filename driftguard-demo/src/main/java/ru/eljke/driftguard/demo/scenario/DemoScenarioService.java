@@ -13,6 +13,9 @@ import ru.eljke.driftguard.demo.detection.DemoDetectionRuntime;
 import ru.eljke.driftguard.demo.error.DemoErrorReason;
 import ru.eljke.driftguard.testkit.DetectionEvaluator;
 import ru.eljke.driftguard.testkit.GradualDriftScenario;
+import ru.eljke.driftguard.testkit.DetectionBenchmarkReport;
+import ru.eljke.driftguard.testkit.DetectionBenchmarkResult;
+import ru.eljke.driftguard.testkit.DetectionBenchmarkRunner;
 import ru.eljke.driftguard.testkit.MetricScenario;
 import ru.eljke.driftguard.testkit.PulseSpikeScenario;
 import ru.eljke.driftguard.testkit.ScenarioConfig;
@@ -148,6 +151,21 @@ public class DemoScenarioService {
             return run("latency-step");
         }
         return lastResult;
+    }
+
+    public DetectionBenchmarkReport benchmark() {
+        stopLive();
+        List<DetectionBenchmarkResult> results = new ArrayList<>();
+        for (DemoScenarioDescriptor descriptor : SCENARIOS) {
+            runtime.reset();
+            MetricScenario scenario = createScenario(
+                    descriptor.id(),
+                    "benchmark-" + descriptor.id() + "-" + runSequence.incrementAndGet()
+            );
+            results.add(DetectionBenchmarkRunner.runScenario(descriptor.id(), scenario, runtime::detect));
+        }
+        runtime.reset();
+        return DetectionBenchmarkRunner.report(runtime.profile().name(), results);
     }
 
     public synchronized void stopLive() {

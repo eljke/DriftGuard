@@ -46,6 +46,31 @@ export interface DetectionMetrics {
   events: number;
 }
 
+export interface DetectionBenchmarkReport {
+  label: string;
+  results: DetectionBenchmarkResult[];
+  summary: DetectionBenchmarkSummary;
+}
+
+export interface DetectionBenchmarkResult {
+  scenario: string;
+  metrics: DetectionMetrics;
+}
+
+export interface DetectionBenchmarkSummary {
+  scenarios: number;
+  detectedScenarios: number;
+  events: number;
+  truePositiveEvents: number;
+  falsePositiveEvents: number;
+  expectedDriftIntervals: number;
+  detectedDriftIntervals: number;
+  missedDriftIntervals: number;
+  precision: number;
+  recall: number;
+  meanFirstDetectionDelay: string;
+}
+
 export interface DriftInterval {
   start: string;
   end: string;

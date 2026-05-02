@@ -20,6 +20,7 @@ import ru.eljke.driftguard.demo.scenario.DemoRunResult;
 import ru.eljke.driftguard.demo.scenario.DemoScenarioDescriptor;
 import ru.eljke.driftguard.demo.scenario.DemoScenarioService;
 import ru.eljke.driftguard.demo.tool.ToolLink;
+import ru.eljke.driftguard.testkit.DetectionBenchmarkReport;
 
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,12 @@ public class DemoController {
     @Operation(summary = "Возвращает оценку качества детекции из последнего запуска")
     public Object quality() {
         return service.lastResult().quality();
+    }
+
+    @GetMapping("/benchmark")
+    @Operation(summary = "Запускает benchmark всех synthetic scenarios на текущем detector profile")
+    public DetectionBenchmarkReport benchmark() {
+        return service.benchmark();
     }
 
     @GetMapping("/scenarios")
@@ -151,6 +158,7 @@ public class DemoController {
                 Map.entry("runScenario", "POST /api/demo/run/{scenario}"),
                 Map.entry("startLiveScenario", "POST /api/demo/live/{scenario}"),
                 Map.entry("stopLiveScenario", "POST /api/demo/live/stop"),
+                Map.entry("benchmark", "GET /api/demo/benchmark"),
                 Map.entry("kafkaStatus", "GET /api/demo/kafka"),
                 Map.entry("startKafkaScenario", "POST /api/demo/kafka/start/{scenario}"),
                 Map.entry("stopKafkaScenario", "POST /api/demo/kafka/stop"),

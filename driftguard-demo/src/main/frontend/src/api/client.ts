@@ -1,5 +1,6 @@
 import type {
   DemoConfigurationView,
+  DetectionBenchmarkReport,
   DemoRunResult,
   DemoScenarioDescriptor,
   KafkaDemoStatus,
@@ -47,6 +48,7 @@ export const api = {
   runScenario: (scenario: string) => request<DemoRunResult>(`/api/demo/run/${scenario}`, { method: "POST" }),
   startLive: (scenario: string) => request<DemoRunResult>(`/api/demo/live/${scenario}`, { method: "POST" }),
   stopLive: () => request<DemoRunResult>("/api/demo/live/stop", { method: "POST" }),
+  benchmark: () => request<DetectionBenchmarkReport>("/api/demo/benchmark"),
   kafkaStatus: () => request<KafkaDemoStatus>("/api/demo/kafka"),
   startKafka: (scenario: string) => request<KafkaDemoStatus>(`/api/demo/kafka/start/${scenario}`, { method: "POST" }),
   stopKafka: () => request<KafkaDemoStatus>("/api/demo/kafka/stop", { method: "POST" }),
