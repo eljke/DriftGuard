@@ -20,6 +20,7 @@ export interface DriftEvent {
     id: string;
     key: MetricKey;
     detectedAt: string;
+    phase: string;
     direction: string;
     detector: string;
     algorithm: string;

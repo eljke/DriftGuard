@@ -93,8 +93,7 @@ public final class DriftDetectorEngine {
         DetectionResult<S> result = algorithm.detect(point, state, config, new DetectionContext(definition.name()));
         stateStore.put(instanceKey, result.state());
         if (result.eventValue().isEmpty()) {
-            observeNormalPoint(instanceKey, definition);
-            return List.of();
+            return observeNormalPoint(point, instanceKey, definition);
         }
         return result.eventValue()
                 .filter(event -> shouldEmit(instanceKey, definition, event))
@@ -102,22 +101,33 @@ public final class DriftDetectorEngine {
                 .toList();
     }
 
-    private void observeNormalPoint(DetectorInstanceKey instanceKey, DetectorDefinition definition) {
+    private List<DriftEvent> observeNormalPoint(
+            MetricPoint point,
+            DetectorInstanceKey instanceKey,
+            DetectorDefinition definition
+    ) {
         EmissionState previous = emissionStateStore.get(instanceKey).orElse(EmissionState.EMPTY);
         if (previous.activeEpisode()) {
             int consecutiveNormal = previous.consecutiveNormal() + 1;
             boolean recovered = consecutiveNormal >= definition.emissionPolicy().recoveryConsecutiveNormal();
+            DriftEvent recoveryEvent = recovered
+                    ? previous.lastEmittedEventValue()
+                    .map(event -> event.recoveredAt(point.timestamp(), definition.emissionPolicy().recoveryConsecutiveNormal()))
+                    .orElse(null)
+                    : null;
             emissionStateStore.put(instanceKey, new EmissionState(
                     recovered ? 0 : previous.consecutiveSignals(),
                     previous.lastEmittedAt(),
                     !recovered,
-                    recovered ? 0 : consecutiveNormal
+                    recovered ? 0 : consecutiveNormal,
+                    recovered ? null : previous.lastEmittedEvent()
             ));
-            return;
+            return recoveryEvent == null ? List.of() : List.of(recoveryEvent);
         }
         if (previous.consecutiveSignals() > 0 || previous.consecutiveNormal() > 0) {
-            emissionStateStore.put(instanceKey, new EmissionState(0, previous.lastEmittedAt(), false, 0));
+            emissionStateStore.put(instanceKey, new EmissionState(0, previous.lastEmittedAt(), false, 0, previous.lastEmittedEvent()));
         }
+        return List.of();
     }
 
     private boolean shouldEmit(DetectorInstanceKey instanceKey, DetectorDefinition definition, DriftEvent event) {
@@ -142,7 +152,8 @@ public final class DriftDetectorEngine {
                 consecutiveSignals,
                 emit ? event.detectedAt() : previous.lastEmittedAt(),
                 emit,
-                0
+                0,
+                emit ? event : previous.lastEmittedEvent()
         ));
         return emit;
     }

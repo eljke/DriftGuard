@@ -388,6 +388,7 @@ function EventsTable({ events }: { events: DriftEvent[] }) {
               <tr>
                 <th>Time MSK</th>
                 <th>Severity</th>
+                <th>Phase</th>
                 <th>Service</th>
                 <th>Metric</th>
                 <th>Algorithm</th>
@@ -399,17 +400,18 @@ function EventsTable({ events }: { events: DriftEvent[] }) {
             </thead>
             <tbody>
               {events.slice().reverse().map((event) => (
-                <tr key={event.id}>
-                  <td>{formatMoscow(event.detectedAt)}</td>
-                  <td><SeverityBadge severity={event.severity} /></td>
-                  <td>{event.key.service}</td>
-                  <td>{event.key.metric}</td>
-                  <td>{event.algorithm}</td>
-                  <td>{formatNumber(event.score)}</td>
-                  <td>{formatNumber(event.currentValue)}</td>
-                  <td>{formatNumber(event.baselineValue)}</td>
-                  <td className="event-explanation">{eventExplanation(event)}</td>
-                </tr>
+                  <tr key={event.id}>
+                      <td>{formatMoscow(event.detectedAt)}</td>
+                      <td><span className={`severity ${event.severity.toLowerCase()}`}>{event.severity}</span></td>
+                      <td><span className={`phase ${event.phase.toLowerCase()}`}>{event.phase}</span></td>
+                      <td>{event.key.service}</td>
+                      <td>{event.key.metric}</td>
+                      <td>{event.algorithm}</td>
+                      <td>{formatNumber(event.score)}</td>
+                      <td>{formatNumber(event.currentValue)}</td>
+                      <td>{formatNumber(event.baselineValue)}</td>
+                      <td className="event-explanation">{eventExplanation(event)}</td>
+                  </tr>
               ))}
             </tbody>
           </table>
@@ -466,11 +468,6 @@ function Notice({ tone, text }: { tone: "info" | "error"; text: string }) {
 function StatusPill({ label, active }: { label: string; active: boolean }) {
   return <span className={active ? "status-pill active" : "status-pill"}>{label}: {active ? "running" : "idle"}</span>;
 }
-
-function SeverityBadge({ severity }: { severity: string }) {
-  return <span className={`severity ${severity.toLowerCase()}`}>{severity}</span>;
-}
-
 function Progress({ value, max }: { value: number; max: number }) {
   const percent = max === 0 ? 0 : Math.min(100, Math.round((value / max) * 100));
   return (
