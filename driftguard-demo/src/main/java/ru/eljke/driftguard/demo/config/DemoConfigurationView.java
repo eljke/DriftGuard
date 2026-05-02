@@ -8,12 +8,15 @@ import java.util.List;
  * прямого чтения {@code application.yml}.
  *
  * @param aggressiveness агрегированная оценка чувствительности detector-ов
+ * @param availableProfiles профили чувствительности, доступные для runtime-переключения
+ * @param registeredAlgorithms алгоритмы, доступные в текущем registry
  * @param kafka настройки Kafka demo и Kafka Streams adapter-а
  * @param detectors detector definitions, активные в текущем Spring context-е
  */
 public record DemoConfigurationView(
         AggressivenessView aggressiveness,
         List<String> availableProfiles,
+        List<String> registeredAlgorithms,
         KafkaConfigurationView kafka,
         List<DetectorConfigurationView> detectors
 ) {

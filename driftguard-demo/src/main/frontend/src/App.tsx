@@ -233,6 +233,16 @@ function ConfigurationPage({ configuration }: { configuration?: DemoConfiguratio
         <MetricCard title="Kafka output" value={configuration.kafka.outputTopic} helper={configuration.kafka.applicationId} />
         <MetricCard title="Playback" value={configuration.kafka.playbackInterval} helper="Интервал публикации точек" />
       </div>
+      <Panel title="Registered algorithms">
+        <div className="algorithm-list">
+          {configuration.registeredAlgorithms.map((algorithm) => (
+            <span className="badge" key={algorithm}>{algorithm}</span>
+          ))}
+        </div>
+        <p className="panel-note">
+          Starter автоматически объединяет встроенные алгоритмы DriftGuard и пользовательские DetectorAlgorithm bean-ы.
+        </p>
+      </Panel>
       <Panel title="Runtime detector profile">
         {updateProfile.isPending && <Notice tone="info" text="Профиль применяется: engine пересоздаётся, состояние detector-ов сбрасывается." />}
         {updateProfile.error && <Notice tone="error" text={readableError(updateProfile.error)} />}

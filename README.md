@@ -359,9 +359,40 @@ DetectionMetrics quality = DetectionEvaluator.evaluate(scenario, events);
 1. Создать immutable config, реализующий `DetectorConfig`.
 2. Создать state, реализующий `DetectorState`.
 3. Реализовать `DetectorAlgorithm<C, S>`.
-4. Добавить алгоритм в `DefaultAlgorithms`.
-5. Добавить tests на stable stream, drift stream и шум.
-6. При необходимости добавить mapping в `DetectorDefinitionFactory` для Spring Boot starter.
+4. Добавить tests на stable stream, drift stream и шум.
+
+Для core-only использования достаточно передать алгоритм в `SimpleDetectorRegistry`:
+
+```java
+DetectorRegistry registry = new SimpleDetectorRegistry(List.of(new MyLatencyDetector()));
+```
+
+В Spring Boot приложении алгоритм можно подключить без форка DriftGuard: объявите его как обычный bean. Starter автоматически добавит его к встроенным алгоритмам.
+
+```java
+@Configuration
+class MyDriftGuardConfiguration {
+    @Bean
+    DetectorAlgorithm<MyLatencyConfig, MyLatencyState> myLatencyDetector() {
+        return new MyLatencyDetector();
+    }
+}
+```
+
+Если алгоритму нужна собственная типизированная конфигурация, добавьте `DetectorDefinitionProvider`:
+
+```java
+@Bean
+DetectorDefinitionProvider myDetectorDefinitions() {
+    return () -> List.of(new DetectorDefinition(
+            "latency-my-detector",
+            new MyLatencyConfig(50, 0.8),
+            key -> key.metric().equals("latency")
+    ));
+}
+```
+
+Такой путь сохраняет `driftguard-core` независимым от Spring/Kafka и позволяет подключать собственные алгоритмы без изменения `DefaultAlgorithms` и `DetectorDefinitionFactory`. YAML-mapping нужен только для встроенных алгоритмов starter-а.
 
 ## Kafka-Модуль
 

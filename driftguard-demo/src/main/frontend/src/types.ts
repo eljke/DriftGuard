@@ -108,6 +108,7 @@ export interface DemoConfigurationView {
     description: string;
   };
   availableProfiles: string[];
+  registeredAlgorithms: string[];
   kafka: {
     demoEnabled: boolean;
     bootstrapServers: string;

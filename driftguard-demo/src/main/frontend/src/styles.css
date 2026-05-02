@@ -151,7 +151,8 @@ h2 {
 
 .status-strip,
 .actions,
-.scenario-actions {
+.scenario-actions,
+.algorithm-list {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -356,6 +357,13 @@ table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
+}
+
+.panel-note {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 th,

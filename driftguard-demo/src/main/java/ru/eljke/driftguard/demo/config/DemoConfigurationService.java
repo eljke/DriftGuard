@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.eljke.driftguard.algorithms.ks.KsConfig;
 import ru.eljke.driftguard.algorithms.pagehinkley.PageHinkleyConfig;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
+import ru.eljke.driftguard.core.detector.DetectorRegistry;
 import ru.eljke.driftguard.demo.detection.DemoDetectionRuntime;
 import ru.eljke.driftguard.demo.detection.DemoDetectorProfile;
 import ru.eljke.driftguard.spring.DriftGuardProperties;
@@ -18,15 +19,18 @@ public class DemoConfigurationService {
     private final DemoKafkaProperties demoKafkaProperties;
     private final DriftGuardProperties driftGuardProperties;
     private final DemoDetectionRuntime runtime;
+    private final DetectorRegistry detectorRegistry;
 
     public DemoConfigurationService(
             DemoKafkaProperties demoKafkaProperties,
             DriftGuardProperties driftGuardProperties,
-            DemoDetectionRuntime runtime
+            DemoDetectionRuntime runtime,
+            DetectorRegistry detectorRegistry
     ) {
         this.demoKafkaProperties = demoKafkaProperties;
         this.driftGuardProperties = driftGuardProperties;
         this.runtime = runtime;
+        this.detectorRegistry = detectorRegistry;
     }
 
     public DemoConfigurationView current() {
@@ -36,6 +40,7 @@ public class DemoConfigurationService {
         return new DemoConfigurationView(
                 aggressiveness(),
                 List.of("AGGRESSIVE", "BALANCED", "CONSERVATIVE"),
+                detectorRegistry.algorithmNames().stream().sorted().toList(),
                 kafkaView(),
                 detectors
         );

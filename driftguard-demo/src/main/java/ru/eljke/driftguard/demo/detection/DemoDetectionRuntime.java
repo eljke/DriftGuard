@@ -13,6 +13,7 @@ import ru.eljke.driftguard.core.state.InMemoryDetectorStateStore;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -21,7 +22,8 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @Service
 public class DemoDetectionRuntime {
-    private final AtomicReference<RuntimeState> state = new AtomicReference<>(create(DemoDetectorProfile.BALANCED));
+    private final AtomicLong versionSequence = new AtomicLong(1);
+    private final AtomicReference<RuntimeState> state = new AtomicReference<>(create(DemoDetectorProfile.BALANCED, 1));
 
     public List<DriftEvent> detect(MetricPoint point) {
         return state.get().engine().detect(point);
@@ -31,19 +33,24 @@ public class DemoDetectionRuntime {
         return state.get().profile();
     }
 
+    public long version() {
+        return state.get().version();
+    }
+
     public List<DetectorDefinition> definitions() {
         return state.get().definitions();
     }
 
     public synchronized DemoDetectorProfile setProfile(DemoDetectorProfile profile) {
-        state.set(create(profile));
+        state.set(create(profile, versionSequence.incrementAndGet()));
         return profile;
     }
 
-    private static RuntimeState create(DemoDetectorProfile profile) {
+    private static RuntimeState create(DemoDetectorProfile profile, long version) {
         List<DetectorDefinition> definitions = definitions(profile);
         return new RuntimeState(
                 profile,
+                version,
                 definitions,
                 new DriftDetectorEngine(DefaultAlgorithms.registry(), new InMemoryDetectorStateStore(), definitions)
         );
@@ -81,6 +88,7 @@ public class DemoDetectionRuntime {
 
     private record RuntimeState(
             DemoDetectorProfile profile,
+            long version,
             List<DetectorDefinition> definitions,
             DriftDetectorEngine engine
     ) {
