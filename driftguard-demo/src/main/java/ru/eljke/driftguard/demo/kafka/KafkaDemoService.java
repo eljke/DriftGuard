@@ -10,7 +10,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.errors.WakeupException;
-import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.serialization.*;
 import org.springframework.stereotype.Service;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricKind;
@@ -18,6 +18,8 @@ import ru.eljke.driftguard.core.domain.MetricPoint;
 import ru.eljke.driftguard.core.error.DriftGuardValidationException;
 import ru.eljke.driftguard.demo.config.DemoKafkaProperties;
 import ru.eljke.driftguard.demo.error.DemoErrorReason;
+import ru.eljke.driftguard.demo.detection.DemoDetectionRuntime;
+import ru.eljke.driftguard.demo.detection.DemoDetectorProfile;
 import ru.eljke.driftguard.demo.scenario.DemoScenarioService;
 import ru.eljke.driftguard.kafka.DriftGuardObjectMapper;
 import ru.eljke.driftguard.kafka.DriftGuardSerdes;
@@ -52,6 +54,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class KafkaDemoService {
     private final DemoKafkaProperties properties;
     private final DriftGuardKafkaStreamsManager streamsManager;
+    private final DemoDetectionRuntime detectionRuntime;
     private final ObjectMapper objectMapper;
     private final AtomicLong runSequence = new AtomicLong();
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(8, runnable -> {
@@ -68,20 +71,59 @@ public class KafkaDemoService {
     private volatile boolean running;
     private volatile String scenarioId = "latency-step";
     private volatile int totalPoints;
+    private volatile boolean replay;
+    private volatile double speed = 1.0;
     private volatile String error;
 
-    public KafkaDemoService(DemoKafkaProperties properties, DriftGuardKafkaStreamsManager streamsManager) {
+    public KafkaDemoService(
+            DemoKafkaProperties properties,
+            DriftGuardKafkaStreamsManager streamsManager,
+            DemoDetectionRuntime detectionRuntime
+    ) {
         this.properties = properties;
         this.streamsManager = streamsManager;
+        this.detectionRuntime = detectionRuntime;
         this.objectMapper = DriftGuardObjectMapper.create();
     }
 
     public synchronized KafkaDemoStatus start(String scenario) {
+        return startInternal(scenario, false, 1.0, false, null);
+    }
+
+    public synchronized KafkaDemoStatus replay(KafkaReplayRequest request) {
+        KafkaReplayRequest safeRequest = request == null
+                ? new KafkaReplayRequest("latency-step", 2.0, true, null)
+                : request;
+
+        return startInternal(
+                safeRequest.normalizedScenario(),
+                true,
+                safeRequest.normalizedSpeed(),
+                safeRequest.resetState(),
+                safeRequest.profile()
+        );
+    }
+
+    private KafkaDemoStatus startInternal(
+            String scenario,
+            boolean replayMode,
+            double playbackSpeed,
+            boolean resetState,
+            String profile
+    ) {
         if (!properties.isEnabled()) {
             throw new DriftGuardValidationException(DemoErrorReason.KAFKA_DEMO_DISABLED);
         }
+
         stop();
+        applyProfile(profile);
+        if (resetState) {
+            detectionRuntime.reset();
+        }
+
         scenarioId = scenario == null || scenario.isBlank() ? "latency-step" : scenario.trim();
+        replay = replayMode;
+        speed = playbackSpeed <= 0.0 ? 1.0 : Math.min(playbackSpeed, 20.0);
         consumedEvents.clear();
         producedSamples.clear();
         producerPlaybacks.clear();
@@ -96,14 +138,17 @@ public class KafkaDemoService {
             createTopics();
             streamsManager.start();
 
-            consumer = new KafkaConsumer<>(consumerProperties(run), Serdes.String().deserializer(),
-                    DriftGuardSerdes.driftEvent(objectMapper).deserializer());
+            consumer = new KafkaConsumer<>(
+                    consumerProperties(run),
+                    new StringDeserializer(),
+                    driftEventDeserializer()
+            );
             consumer.subscribe(List.of(properties.getOutputTopic()));
             consumer.poll(Duration.ofMillis(500));
             consuming.set(true);
             executor.execute(this::consumeEvents);
 
-            playbacks.forEach(this::scheduleProducer);
+            playbacks.forEach(playback -> scheduleProducer(playback, speed));
             running = true;
             return status();
         } catch (RuntimeException exception) {
@@ -125,9 +170,11 @@ public class KafkaDemoService {
         return new KafkaDemoStatus(
                 properties.isEnabled(),
                 running,
+                replay,
                 scenarioId,
                 properties.getInputTopic(),
                 properties.getOutputTopic(),
+                speed,
                 properties.getBootstrapServers(),
                 producedSamples.size(),
                 totalPoints,
@@ -224,12 +271,16 @@ public class KafkaDemoService {
                 first.key().metric(),
                 first.key().operation(),
                 points,
-                new KafkaProducer<>(producerProperties(), Serdes.String().serializer(),
-                        DriftGuardSerdes.metricPoint(objectMapper).serializer())
+                new KafkaProducer<>(
+                        producerProperties(),
+                        new StringSerializer(),
+                        metricPointSerializer()
+                )
         );
     }
 
-    private void scheduleProducer(ProducerPlayback playback) {
+    private void scheduleProducer(ProducerPlayback playback, double playbackSpeed) {
+        long intervalMillis = Math.max(10, Math.round(properties.getPlaybackInterval().toMillis() / playbackSpeed));
         ScheduledFuture<?> task = executor.scheduleAtFixedRate(() -> {
             try {
                 if (!playback.publishNext()) {
@@ -243,7 +294,7 @@ public class KafkaDemoService {
                 running = false;
                 playback.cancel();
             }
-        }, 0, Math.max(20, properties.getPlaybackInterval().toMillis()), TimeUnit.MILLISECONDS);
+        }, 0, intervalMillis, TimeUnit.MILLISECONDS);
         playback.setTask(task);
     }
 
@@ -265,6 +316,20 @@ public class KafkaDemoService {
         }
     }
 
+    private void applyProfile(String profile) {
+        if (profile == null || profile.isBlank()) {
+            return;
+        }
+        try {
+            detectionRuntime.setProfile(DemoDetectorProfile.valueOf(profile.trim().toUpperCase()));
+        } catch (IllegalArgumentException exception) {
+            throw new DriftGuardValidationException(
+                    DemoErrorReason.KAFKA_DEMO_FAILED,
+                    "Unknown detector profile: " + profile
+            );
+        }
+    }
+
     private Properties adminProperties() {
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getBootstrapServers());
@@ -282,6 +347,16 @@ public class KafkaDemoService {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, properties.getConsumerGroup() + "-" + run);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         return props;
+    }
+
+    @SuppressWarnings("resource")
+    private Serializer<MetricPoint> metricPointSerializer() {
+        return DriftGuardSerdes.metricPoint(objectMapper).serializer();
+    }
+
+    @SuppressWarnings("resource")
+    private Deserializer<DriftEvent> driftEventDeserializer() {
+        return DriftGuardSerdes.driftEvent(objectMapper).deserializer();
     }
 
     private static void addMissingTopic(Collection<String> existing, List<NewTopic> missing, String topic) {
@@ -309,7 +384,7 @@ public class KafkaDemoService {
         consumer = null;
         if (current != null) {
             current.wakeup();
-            current.close(Duration.ofSeconds(2));
+            current.close();
         }
     }
 

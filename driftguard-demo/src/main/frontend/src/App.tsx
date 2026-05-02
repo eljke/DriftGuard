@@ -184,9 +184,13 @@ function KafkaPage({ status, scenarios }: { status?: KafkaDemoStatus; scenarios:
     mutationFn: api.stopKafka,
     onSuccess: (data) => queryClient.setQueryData(["kafka"], data)
   });
+  const replay = useMutation({
+    mutationFn: api.replayKafka,
+    onSuccess: (data) => queryClient.setQueryData(["kafka"], data)
+  });
   const kafkaScenarios = scenarios.filter((scenario) => scenario.id !== "seasonal-latency");
-  const busy = start.isPending || stop.isPending;
-  const error = start.error ?? stop.error;
+  const busy = start.isPending || replay.isPending || stop.isPending;
+  const error = start.error ?? replay.error ?? stop.error;
 
   return (
     <section className="stack">
@@ -195,12 +199,25 @@ function KafkaPage({ status, scenarios }: { status?: KafkaDemoStatus; scenarios:
         {status?.running && <Notice tone="info" text="Kafka demo работает. График и таблица обновляются каждые 750 мс." />}
         {status?.error && <Notice tone="error" text={status.error} />}
         {error && <Notice tone="error" text={readableError(error)} />}
-        <ScenarioButtons scenarios={kafkaScenarios} busy={busy || Boolean(status?.running)} onRun={(id) => start.mutate(id)} />
+        <ScenarioButtons
+          scenarios={kafkaScenarios}
+          busy={busy || Boolean(status?.running)}
+          onRun={(id) => start.mutate(id)}
+          onReplay={(id) => replay.mutate({ scenario: id, speed: 2.0, resetState: true })}
+        />
         <div className="actions">
           <button className="secondary-button" disabled={!status?.running || stop.isPending} onClick={() => stop.mutate()} type="button">
             <Square size={16} />
             Stop Kafka demo
           </button>
+        </div>
+      </Panel>
+      <Panel title="Kafka replay">
+        <div className="summary-grid">
+          <MetricCard title="Mode" value={status?.replay ? "Replay" : "Normal"} helper="Replay сбрасывает detector state и переигрывает тот же поток" />
+          <MetricCard title="Speed" value={`${status?.speed ?? 1}x`} helper="Множитель скорости публикации" />
+          <MetricCard title="Scenario" value={status?.scenario ?? "—"} helper="Текущий Kafka scenario" />
+          <MetricCard title="Progress" value={`${status?.producedPoints ?? 0}/${status?.totalPoints ?? 0}`} helper={status?.inputTopic ?? "Topic не загружен"} />
         </div>
       </Panel>
       <div className="producer-grid">
@@ -321,38 +338,45 @@ function ToolsPage({ tools }: { tools: ToolLink[] }) {
 }
 
 function ScenarioButtons({
-  scenarios,
-  busy,
-  onRun,
-  onLive
-}: {
+                           scenarios,
+                           busy,
+                           onRun,
+                           onReplay,
+                           onLive
+                         }: {
   scenarios: DemoScenarioDescriptor[];
   busy?: boolean;
   onRun: (scenario: string) => void;
+  onReplay?: (scenario: string) => void;
   onLive?: (scenario: string) => void;
 }) {
   return (
-    <div className="scenario-grid">
-      {scenarios.map((scenario) => (
-        <article className="scenario-card" key={scenario.id}>
-          <div>
-            <strong>{scenario.title}</strong>
-            <span>{scenario.description}</span>
-          </div>
-          <div className="scenario-actions">
-            <button className="primary-button" disabled={busy} onClick={() => onRun(scenario.id)} type="button">
-              {busy ? <Loader2 className="spin" size={16} /> : <Play size={16} />}
-              Run
-            </button>
-            {onLive && (
-              <button className="secondary-button" disabled={busy} onClick={() => onLive(scenario.id)} type="button">
-                Live
-              </button>
-            )}
-          </div>
-        </article>
-      ))}
-    </div>
+      <div className="scenario-grid">
+        {scenarios.map((scenario) => (
+            <article className="scenario-card" key={scenario.id}>
+              <div>
+                <strong>{scenario.title}</strong>
+                <span>{scenario.description}</span>
+              </div>
+              <div className="scenario-actions">
+                <button className="primary-button" disabled={busy} onClick={() => onRun(scenario.id)} type="button">
+                  {busy ? <Loader2 className="spin" size={16} /> : <Play size={16} />}
+                  Run
+                </button>
+                {onReplay && (
+                    <button className="secondary-button" disabled={busy} onClick={() => onReplay(scenario.id)} type="button">
+                      Replay 2x
+                    </button>
+                )}
+                {onLive && (
+                    <button className="secondary-button" disabled={busy} onClick={() => onLive(scenario.id)} type="button">
+                      Live
+                    </button>
+                )}
+              </div>
+            </article>
+        ))}
+      </div>
   );
 }
 
@@ -550,11 +574,11 @@ function BenchmarkPanel({
                     <td>{result.scenario}</td>
                     <td>{result.metrics.detected ? "yes" : "no"}</td>
                     <td>{result.metrics.events}</td>
-                    <td>{result.metrics.falsePositiveEvents}</td>
-                    <td>{result.metrics.missedDriftIntervals}</td>
-                    <td>{formatPercent(result.metrics.precision)}</td>
-                    <td>{formatPercent(result.metrics.recall)}</td>
-                    <td>{result.metrics.firstDetectionDelay ?? "—"}</td>
+                    <td>{result.metrics.falsePositiveEvents ?? boolCount(result.metrics.falsePositive)}</td>
+                    <td>{result.metrics.missedDriftIntervals ?? boolCount(result.metrics.missed)}</td>
+                    <td>{formatPercent(result.metrics.precision ?? legacyPrecision(result.metrics))}</td>
+                    <td>{formatPercent(result.metrics.recall ?? legacyRecall(result.metrics))}</td>
+                    <td>{result.metrics.firstDetectionDelay ?? result.metrics.detectionDelay ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -741,6 +765,18 @@ function formatNumber(value: number) {
 
 function formatPercent(value: number) {
   return `${formatNumber(value * 100)}%`;
+}
+
+function boolCount(value?: boolean) {
+  return value ? 1 : 0;
+}
+
+function legacyPrecision(metrics: { falsePositive?: boolean }) {
+  return metrics.falsePositive ? 0 : 1;
+}
+
+function legacyRecall(metrics: { missed?: boolean }) {
+  return metrics.missed ? 0 : 1;
 }
 
 function formatMoscow(value: string) {

@@ -10,9 +10,11 @@ import java.util.List;
  *
  * @param enabled включён ли Kafka demo режим в конфигурации
  * @param running выполняется ли сейчас producer playback
+ * @param replay выполняется ли сценарий в replay-режиме
  * @param scenario id запущенного сценария
  * @param inputTopic topic входных метрик
  * @param outputTopic topic событий drift-а
+ * @param speed множитель скорости публикации точек
  * @param bootstrapServers Kafka bootstrap servers
  * @param producedPoints сколько точек уже опубликовано producer-ом
  * @param totalPoints сколько точек должно быть опубликовано всего
@@ -24,9 +26,11 @@ import java.util.List;
 public record KafkaDemoStatus(
         boolean enabled,
         boolean running,
+        boolean replay,
         String scenario,
         String inputTopic,
         String outputTopic,
+        double speed,
         String bootstrapServers,
         int producedPoints,
         int totalPoints,

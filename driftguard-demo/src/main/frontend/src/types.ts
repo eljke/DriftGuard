@@ -38,12 +38,22 @@ export interface DriftEvent {
 
 export interface DetectionMetrics {
   detected: boolean;
-  truePositive: boolean;
-  falsePositive: boolean;
-  missed: boolean;
-  detectionDelaySamples: number;
-  detectionDelay: string;
   events: number;
+
+  truePositive?: boolean;
+  falsePositive?: boolean;
+  missed?: boolean;
+  detectionDelaySamples?: number;
+  detectionDelay?: string;
+
+  truePositiveEvents?: number;
+  falsePositiveEvents?: number;
+  expectedDriftIntervals?: number;
+  detectedDriftIntervals?: number;
+  missedDriftIntervals?: number;
+  firstDetectionDelay?: string;
+  precision?: number;
+  recall?: number;
 }
 
 export interface DetectionBenchmarkReport {
@@ -110,9 +120,11 @@ export interface KafkaProducerStatus {
 export interface KafkaDemoStatus {
   enabled: boolean;
   running: boolean;
+  replay: boolean;
   scenario: string;
   inputTopic: string;
   outputTopic: string;
+  speed: number;
   bootstrapServers: string;
   producedPoints: number;
   totalPoints: number;
@@ -120,6 +132,13 @@ export interface KafkaDemoStatus {
   consumedEvents: DriftEvent[];
   samplePoints: MetricPoint[];
   error?: string;
+}
+
+export interface KafkaReplayRequest {
+  scenario: string;
+  speed: number;
+  resetState: boolean;
+  profile?: string;
 }
 
 export interface ToolLink {

@@ -4,6 +4,7 @@ import type {
   DemoRunResult,
   DemoScenarioDescriptor,
   KafkaDemoStatus,
+  KafkaReplayRequest,
   ToolLink
 } from "../types";
 
@@ -51,6 +52,11 @@ export const api = {
   benchmark: () => request<DetectionBenchmarkReport>("/api/demo/benchmark"),
   kafkaStatus: () => request<KafkaDemoStatus>("/api/demo/kafka"),
   startKafka: (scenario: string) => request<KafkaDemoStatus>(`/api/demo/kafka/start/${scenario}`, { method: "POST" }),
+  replayKafka: (body: KafkaReplayRequest) => request<KafkaDemoStatus>("/api/demo/kafka/replay", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  }),
   stopKafka: () => request<KafkaDemoStatus>("/api/demo/kafka/stop", { method: "POST" }),
   tools: () => request<ToolLink[]>("/api/demo/tools"),
   configuration: () => request<DemoConfigurationView>("/api/demo/configuration"),

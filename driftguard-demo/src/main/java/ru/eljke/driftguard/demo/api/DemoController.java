@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +17,7 @@ import ru.eljke.driftguard.demo.detection.DemoDetectorProfile;
 import ru.eljke.driftguard.demo.error.DemoErrorReason;
 import ru.eljke.driftguard.demo.kafka.KafkaDemoService;
 import ru.eljke.driftguard.demo.kafka.KafkaDemoStatus;
+import ru.eljke.driftguard.demo.kafka.KafkaReplayRequest;
 import ru.eljke.driftguard.demo.scenario.DemoRunResult;
 import ru.eljke.driftguard.demo.scenario.DemoScenarioDescriptor;
 import ru.eljke.driftguard.demo.scenario.DemoScenarioService;
@@ -113,6 +115,12 @@ public class DemoController {
         return kafkaDemoService.start(scenario);
     }
 
+    @PostMapping("/kafka/replay")
+    @Operation(summary = "Переигрывает Kafka demo scenario с выбранной скоростью и сбросом detector state")
+    public KafkaDemoStatus replayKafkaScenario(@RequestBody(required = false) KafkaReplayRequest request) {
+        return kafkaDemoService.replay(request);
+    }
+
     @PostMapping("/kafka/stop")
     @Operation(summary = "Останавливает интеграционный Kafka demo")
     public KafkaDemoStatus stopKafkaScenario() {
@@ -159,6 +167,7 @@ public class DemoController {
                 Map.entry("startLiveScenario", "POST /api/demo/live/{scenario}"),
                 Map.entry("stopLiveScenario", "POST /api/demo/live/stop"),
                 Map.entry("benchmark", "GET /api/demo/benchmark"),
+                Map.entry("replayKafkaScenario", "POST /api/demo/kafka/replay"),
                 Map.entry("kafkaStatus", "GET /api/demo/kafka"),
                 Map.entry("startKafkaScenario", "POST /api/demo/kafka/start/{scenario}"),
                 Map.entry("stopKafkaScenario", "POST /api/demo/kafka/stop"),
