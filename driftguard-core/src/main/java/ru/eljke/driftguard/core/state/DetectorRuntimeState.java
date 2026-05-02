@@ -13,13 +13,15 @@ import ru.eljke.driftguard.core.error.DriftGuardErrors;
  *
  * @param detectorState состояние алгоритма
  * @param emissionState состояние emission-политики
- * @param version монотонная версия snapshot-а внутри конкретного хранилища
+ * @param version монотонная runtime-версия snapshot-а внутри конкретного хранилища
  */
 public record DetectorRuntimeState(
         DetectorState detectorState,
         EmissionState emissionState,
         long version
 ) {
+    public static final int CURRENT_SCHEMA_VERSION = DetectorRuntimeStateSchema.CURRENT_VERSION;
+
     public DetectorRuntimeState {
         DriftGuardErrors.requireNonNull(detectorState, "detectorState");
         DriftGuardErrors.requireNonNull(emissionState, "emissionState");
@@ -30,6 +32,26 @@ public record DetectorRuntimeState(
 
     public static DetectorRuntimeState initial(DetectorState detectorState) {
         return new DetectorRuntimeState(detectorState, EmissionState.EMPTY, 0);
+    }
+
+    /**
+     * Restores runtime state from a persisted snapshot after validating its schema version.
+     */
+    public static DetectorRuntimeState restore(
+            int schemaVersion,
+            DetectorState detectorState,
+            EmissionState emissionState,
+            long version
+    ) {
+        DetectorRuntimeStateSchema.requireSupported(schemaVersion);
+        return new DetectorRuntimeState(detectorState, emissionState, version);
+    }
+
+    /**
+     * Persisted snapshot schema version. It is independent from the per-key runtime version.
+     */
+    public int schemaVersion() {
+        return CURRENT_SCHEMA_VERSION;
     }
 
     public DetectorRuntimeState withDetectorState(DetectorState nextDetectorState) {
