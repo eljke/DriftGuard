@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.error.DriftGuardValidationException;
+import ru.eljke.driftguard.demo.capability.DemoCapabilityGroup;
+import ru.eljke.driftguard.demo.capability.DemoCapabilityService;
 import ru.eljke.driftguard.demo.config.DemoConfigurationService;
 import ru.eljke.driftguard.demo.config.DemoConfigurationView;
 import ru.eljke.driftguard.demo.config.DemoToolProperties;
@@ -35,6 +37,7 @@ import java.util.Map;
 @RequestMapping("/api/demo")
 @Tag(name = "Demo", description = "REST API демонстрационного сценария DriftGuard")
 public class DemoController {
+    private final DemoCapabilityService capabilityService;
     private final DemoScenarioService service;
     private final KafkaDemoService kafkaDemoService;
     private final KafkaOperationsService kafkaOperationsService;
@@ -43,6 +46,7 @@ public class DemoController {
     private final DemoDriftEventRepository eventRepository;
 
     public DemoController(
+            DemoCapabilityService capabilityService,
             DemoScenarioService service,
             KafkaDemoService kafkaDemoService,
             KafkaOperationsService kafkaOperationsService,
@@ -50,6 +54,7 @@ public class DemoController {
             DemoConfigurationService configurationService,
             DemoDriftEventRepository eventRepository
     ) {
+        this.capabilityService = capabilityService;
         this.service = service;
         this.kafkaDemoService = kafkaDemoService;
         this.kafkaOperationsService = kafkaOperationsService;
@@ -162,6 +167,12 @@ public class DemoController {
         return kafkaDemoService.stop();
     }
 
+    @GetMapping("/capabilities")
+    @Operation(summary = "Возвращает карту возможностей demo UI и backend API")
+    public List<DemoCapabilityGroup> capabilities() {
+        return capabilityService.capabilities();
+    }
+
     @GetMapping("/tools")
     @Operation(summary = "Возвращает ссылки на инструменты локального demo-стенда")
     public List<ToolLink> tools() {
@@ -211,6 +222,7 @@ public class DemoController {
                 Map.entry("startKafkaScenario", "POST /api/demo/kafka/start/{scenario}"),
                 Map.entry("stopKafkaScenario", "POST /api/demo/kafka/stop"),
                 Map.entry("tools", "GET /api/demo/tools"),
+                Map.entry("capabilities", "GET /api/demo/capabilities"),
                 Map.entry("configuration", "GET /api/demo/configuration"),
                 Map.entry("updateProfile", "POST /api/demo/configuration/profile/{profile}")
         );

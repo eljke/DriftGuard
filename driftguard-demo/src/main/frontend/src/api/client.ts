@@ -1,4 +1,5 @@
 import type {
+  DemoCapabilityGroup,
   DemoConfigurationView,
   DetectionBenchmarkReport,
   DetectionMetrics,
@@ -69,6 +70,7 @@ export const api = {
     }),
     stopKafka: () => request<KafkaDemoStatus>("/api/demo/kafka/stop", {method: "POST"}),
     tools: () => request<ToolLink[]>("/api/demo/tools"),
+    capabilities: () => request<DemoCapabilityGroup[]>("/api/demo/capabilities"),
     configuration: () => request<DemoConfigurationView>("/api/demo/configuration"),
     updateProfile: (profile: string) => request<DemoConfigurationView>(`/api/demo/configuration/profile/${profile}`, {method: "POST"})
 };

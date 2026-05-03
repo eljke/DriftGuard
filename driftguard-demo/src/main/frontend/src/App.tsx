@@ -12,7 +12,7 @@ import { ToolsPage } from "./pages/ToolsPage";
 export default function App() {
   const [page, setPage] = useState<Page>("overview");
   const queries = useDemoQueries();
-  const { configuration, kafka, kafkaOperations, overview, scenarios, storedEvents, tools } = queries;
+  const { capabilities, configuration, kafka, kafkaOperations, overview, scenarios, storedEvents, tools } = queries;
 
   return (
     <AppShell page={page} onPageChange={setPage} overview={overview.data} kafka={kafka.data}>
@@ -23,10 +23,11 @@ export default function App() {
           { label: "Kafka status", error: kafka.error, retry: () => kafka.refetch() },
           { label: "Kafka operations", error: kafkaOperations.error, retry: () => kafkaOperations.refetch() },
           { label: "Configuration", error: configuration.error, retry: () => configuration.refetch() },
-          { label: "Stored events", error: storedEvents.error, retry: () => storedEvents.refetch() }
+          { label: "Stored events", error: storedEvents.error, retry: () => storedEvents.refetch() },
+          { label: "Capabilities", error: capabilities.error, retry: () => capabilities.refetch() }
         ]}
       />
-      {page === "overview" && <OverviewPage result={overview.data} kafka={kafka.data} storedEvents={storedEvents.data ?? []} />}
+      {page === "overview" && <OverviewPage result={overview.data} kafka={kafka.data} storedEvents={storedEvents.data ?? []} capabilities={capabilities.data ?? []} />}
       {page === "synthetic" && <SyntheticPage result={overview.data} scenarios={scenarios.data ?? []} />}
       {page === "kafka" && <KafkaPage status={kafka.data} operations={kafkaOperations.data} scenarios={scenarios.data ?? []} configuration={configuration.data} />}
       {page === "configuration" && <ConfigurationPage configuration={configuration.data} />}

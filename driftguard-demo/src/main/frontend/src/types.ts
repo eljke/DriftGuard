@@ -182,6 +182,26 @@ export interface KafkaReplayRequest {
   profile?: string;
 }
 
+
+export type DemoCapabilityStatus = "READY" | "PARTIAL" | "PLANNED";
+
+export interface DemoCapability {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  status: DemoCapabilityStatus;
+  apiEndpoints: string[];
+  uiSurfaces: string[];
+}
+
+export interface DemoCapabilityGroup {
+  id: string;
+  title: string;
+  description: string;
+  capabilities: DemoCapability[];
+}
+
 export interface ToolLink {
   id: string;
   title: string;

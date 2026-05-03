@@ -7,6 +7,7 @@ export function useDemoQueries() {
   const kafka = useQuery({ queryKey: ["kafka"], queryFn: api.kafkaStatus, refetchInterval: 750 });
   const kafkaOperations = useQuery({ queryKey: ["kafka-operations"], queryFn: api.kafkaOperations, refetchInterval: 1500 });
   const tools = useQuery({ queryKey: ["tools"], queryFn: api.tools });
+  const capabilities = useQuery({ queryKey: ["capabilities"], queryFn: api.capabilities });
   const configuration = useQuery({ queryKey: ["configuration"], queryFn: api.configuration });
   const storedEvents = useQuery({ queryKey: ["stored-events"], queryFn: api.storedEvents, refetchInterval: 750 });
 
@@ -16,6 +17,7 @@ export function useDemoQueries() {
     kafka,
     kafkaOperations,
     tools,
+    capabilities,
     configuration,
     storedEvents
   };
