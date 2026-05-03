@@ -1,10 +1,7 @@
 package ru.eljke.driftguard.testkit;
 
 import org.junit.jupiter.api.Test;
-import ru.eljke.driftguard.core.domain.DriftDirection;
-import ru.eljke.driftguard.core.domain.DriftEvent;
-import ru.eljke.driftguard.core.domain.DriftSeverity;
-import ru.eljke.driftguard.core.domain.MetricKey;
+import ru.eljke.driftguard.core.domain.*;
 
 import java.time.Instant;
 import java.util.List;
@@ -22,8 +19,7 @@ class DetectionBenchmarkSuiteTest {
         ));
 
         DetectionBenchmarkReport report = suite.run(point -> {
-            String sample = point.tags().get("sample");
-            if ("55".equals(sample)) {
+            if (sampleIndex(point) == 55) {
                 return List.of(eventAt(point.timestamp()));
             }
             return List.of();
@@ -43,8 +39,7 @@ class DetectionBenchmarkSuiteTest {
 
         DetectionQualityReport report = suite.assertQuality(
                 point -> {
-                    String sample = point.tags().get("sample");
-                    if ("55".equals(sample)) {
+                    if (sampleIndex(point) == 55) {
                         return List.of(eventAt(point.timestamp()));
                     }
                     return List.of();
@@ -65,6 +60,17 @@ class DetectionBenchmarkSuiteTest {
         assertTrue(DetectionQualityGates.smoke().minRecall() < DetectionQualityGates.strict().minRecall());
         assertTrue(DetectionQualityGates.balanced().maxFalsePositiveEvents()
                 > DetectionQualityGates.strict().maxFalsePositiveEvents());
+    }
+
+    private static int sampleIndex(MetricPoint point) {
+        Object sample = point.attributes().get("sample");
+        if (sample instanceof Number number) {
+            return number.intValue();
+        }
+        if (sample instanceof String text) {
+            return Integer.parseInt(text);
+        }
+        throw new IllegalStateException("sample attribute is missing");
     }
 
     private static MetricScenario stepScenario() {

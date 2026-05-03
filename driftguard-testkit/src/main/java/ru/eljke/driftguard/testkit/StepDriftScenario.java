@@ -58,7 +58,7 @@ public final class StepDriftScenario implements MetricScenario {
                     Math.max(0.0, value),
                     config.kind(),
                     Map.of("scenario", name),
-                    Map.of("sample", i)
+                    Map.of("sample", Integer.toString(i))
             ));
         }
         return List.copyOf(points);
