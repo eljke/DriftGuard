@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Activity, BarChart3, Cable, Gauge, Settings, Wrench } from "lucide-react";
 import { useState } from "react";
 import { api } from "./api/client";
-import { StatusPill } from "./components/ui";
+import { ApiStatusBanner, StatusPill } from "./components/ui";
 import { KafkaPage } from "./features/kafka/KafkaPage";
 import { ConfigurationPage } from "./pages/ConfigurationPage";
 import { OverviewPage } from "./pages/OverviewPage";
@@ -62,6 +62,16 @@ export default function App() {
 
       <main className="main">
         <Header overview={overview.data} kafka={kafka.data} />
+        <ApiStatusBanner
+          items={[
+            { label: "Overview", error: overview.error, retry: () => overview.refetch() },
+            { label: "Scenarios", error: scenarios.error, retry: () => scenarios.refetch() },
+            { label: "Kafka status", error: kafka.error, retry: () => kafka.refetch() },
+            { label: "Kafka operations", error: kafkaOperations.error, retry: () => kafkaOperations.refetch() },
+            { label: "Configuration", error: configuration.error, retry: () => configuration.refetch() },
+            { label: "Stored events", error: storedEvents.error, retry: () => storedEvents.refetch() }
+          ]}
+        />
         {page === "overview" && <OverviewPage result={overview.data} kafka={kafka.data} storedEvents={storedEvents.data ?? []} />}
         {page === "synthetic" && <SyntheticPage result={overview.data} scenarios={scenarios.data ?? []} />}
         {page === "kafka" && <KafkaPage status={kafka.data} operations={kafkaOperations.data} scenarios={scenarios.data ?? []} configuration={configuration.data} />}
