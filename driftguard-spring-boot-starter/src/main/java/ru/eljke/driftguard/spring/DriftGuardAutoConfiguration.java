@@ -26,6 +26,7 @@ import ru.eljke.driftguard.core.state.InMemoryDetectorStateStore;
 import ru.eljke.driftguard.core.state.InMemoryEmissionStateStore;
 import ru.eljke.driftguard.core.state.SplitDetectorRuntimeStateStore;
 import ru.eljke.driftguard.kafka.DriftGuardObjectMapper;
+import ru.eljke.driftguard.kafka.KafkaDetectionTelemetryListener;
 import ru.eljke.driftguard.kafka.KafkaDriftGuardTopologyBuilder;
 import ru.eljke.driftguard.kafka.KafkaDriftGuardTopologyConfig;
 
@@ -98,6 +99,15 @@ public class DriftGuardAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnClass(MeterRegistry.class)
+    @ConditionalOnBean(MeterRegistry.class)
+    @ConditionalOnProperty(prefix = "driftguard.metrics", name = "kafka-enabled", havingValue = "true", matchIfMissing = true)
+    public KafkaDetectionTelemetryListener driftGuardMicrometerKafkaDetectionTelemetryListener(MeterRegistry meterRegistry) {
+        return new MicrometerKafkaDetectionTelemetryListener(meterRegistry);
+    }
+
+    @Bean
     @ConditionalOnMissingBean(name = "driftGuardDriftEventSinkListener")
     @ConditionalOnBean(DriftEventSink.class)
     public DriftDetectionListener driftGuardDriftEventSinkListener(ObjectProvider<DriftEventSink> sinks) {
@@ -121,7 +131,8 @@ public class DriftGuardAutoConfiguration {
     public DriftGuardKafkaStreamsManager driftGuardKafkaStreamsManager(
             DriftGuardProperties properties,
             DriftDetectorEngine engine,
-            KafkaDriftGuardTopologyConfig topologyConfig
+            KafkaDriftGuardTopologyConfig topologyConfig,
+            ObjectProvider<KafkaDetectionTelemetryListener> telemetryListeners
     ) {
         DriftGuardProperties.KafkaProperties kafka = properties.getKafka();
         return new DriftGuardKafkaStreamsManager(kafka, () -> new KafkaStreams(

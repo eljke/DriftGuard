@@ -1,5 +1,6 @@
 package ru.eljke.driftguard.spring;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -15,6 +16,7 @@ import ru.eljke.driftguard.core.detector.DetectorRegistry;
 import ru.eljke.driftguard.core.detector.DetectorState;
 import ru.eljke.driftguard.core.detector.DriftDetectorEngine;
 import ru.eljke.driftguard.core.domain.MetricPoint;
+import ru.eljke.driftguard.kafka.KafkaDetectionTelemetryListener;
 import ru.eljke.driftguard.kafka.KafkaDriftGuardTopologyConfig;
 
 import java.util.List;
@@ -66,6 +68,18 @@ class DriftGuardAutoConfigurationTest {
                 });
     }
 
+
+    @Test
+    void registersKafkaMicrometerTelemetryListenerWhenMeterRegistryExists() {
+        contextRunner
+                .withUserConfiguration(MeterRegistryConfiguration.class)
+                .run(context -> {
+                    assertThat(context).hasSingleBean(KafkaDetectionTelemetryListener.class);
+                    assertThat(context.getBean(KafkaDetectionTelemetryListener.class))
+                            .isInstanceOf(MicrometerKafkaDetectionTelemetryListener.class);
+                });
+    }
+
     @Test
     void appendsCustomDetectorDefinitionProviders() {
         contextRunner
@@ -89,6 +103,15 @@ class DriftGuardAutoConfigurationTest {
                         "driftguard.kafka.output-topic=drift-events"
                 )
                 .run(context -> assertThat(context).hasFailed());
+    }
+
+
+    @Configuration(proxyBeanMethods = false)
+    static class MeterRegistryConfiguration {
+        @Bean
+        SimpleMeterRegistry meterRegistry() {
+            return new SimpleMeterRegistry();
+        }
     }
 
     @Configuration(proxyBeanMethods = false)

@@ -255,6 +255,14 @@ public class DriftGuardProperties {
          * Например, в Spring Boot приложении его обычно добавляет Actuator.</p>
          */
         private boolean enabled = true;
+
+        /**
+         * Включает Kafka-специфичные Micrometer-метрики topology.
+         *
+         * <p>Эти метрики дополняют общий detection listener и показывают ошибки,
+         * routed error-сообщения и длительность обработки внутри Kafka Streams task.</p>
+         */
+        private boolean kafkaEnabled = true;
     }
 
     @Getter

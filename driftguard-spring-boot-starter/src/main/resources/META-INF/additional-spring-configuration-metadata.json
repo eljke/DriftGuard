@@ -60,6 +60,12 @@
       "defaultValue": true
     },
     {
+      "name": "driftguard.metrics.kafka-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Включает Kafka-специфичные Micrometer-метрики detection topology при наличии MeterRegistry.",
+      "defaultValue": true
+    },
+    {
       "name": "driftguard.detectors[].baseline-window-size",
       "type": "java.lang.Integer",
       "description": "Размер baseline-окна для PSI, KS и chi-square.",
