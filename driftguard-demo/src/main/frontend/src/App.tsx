@@ -273,36 +273,24 @@ function KafkaPage({
           </button>
         </div>
       </Panel>
-      <KafkaOperationsPanel status={status} />
-      <Panel title="Kafka replay">
-        <div className="summary-grid">
-          <MetricCard title="Mode" value={status?.replay ? "Replay" : "Normal"} helper="Replay сбрасывает detector state и переигрывает тот же поток" />
-          <MetricCard title="Speed" value={`${status?.speed ?? 1}x`} helper="Множитель скорости публикации" />
-          <MetricCard title="Scenario" value={status?.scenario ?? "—"} helper="Текущий Kafka scenario" />
-          <MetricCard title="Progress" value={`${status?.producedPoints ?? 0}/${status?.totalPoints ?? 0}`} helper={status?.inputTopic ?? "Topic не загружен"} />
-        </div>
+      <KafkaOperationsPanel status={status} operations={operations} />
+      <Panel title="Kafka producers" className="quiet-panel">
+        {(status?.producers ?? []).length === 0 ? (
+          <div className="empty-state compact">Producer-ы появятся после запуска Kafka scenario.</div>
+        ) : (
+          <div className="producer-grid compact-producer-grid">
+            {(status?.producers ?? []).map((producer) => (
+              <article className="producer-card" key={producer.id}>
+                <div>
+                  <strong>{producer.service}</strong>
+                  <span>{producer.metric} · {producer.operation ?? "-"}</span>
+                </div>
+                <Progress value={producer.producedPoints} max={producer.totalPoints} />
+              </article>
+            ))}
+          </div>
+        )}
       </Panel>
-      <Panel title="Kafka operations telemetry">
-        <div className="summary-grid">
-          <MetricCard title="Processed" value={formatNumber(operations?.metrics.processedPoints)} helper="MetricPoint, обработанные topology" />
-          <MetricCard title="Events" value={formatNumber(operations?.metrics.emittedEvents)} helper="DriftEvent из Kafka pipeline" />
-          <MetricCard title="Errors" value={formatNumber(operations?.metrics.failedPoints)} helper={`DLQ: ${formatNumber(operations?.metrics.routedErrors)}`} tone={(operations?.metrics.failedPoints ?? 0) > 0 ? "danger" : undefined} />
-          <MetricCard title="Mean latency" value={`${formatNumber(operations?.metrics.meanDurationMillis)} ms`} helper={operations?.telemetryEnabled ? "Micrometer timer" : "Telemetry недоступна"} />
-          <MetricCard title="State store" value={operations?.runtimeStateStoreName ?? "—"} helper="Kafka Streams runtime state" />
-          <MetricCard title="Error mode" value={operations?.detectionErrorMode ?? "—"} helper="Detection error strategy" />
-        </div>
-      </Panel>
-      <div className="producer-grid">
-        {(status?.producers ?? []).map((producer) => (
-          <article className="producer-card" key={producer.id}>
-            <div>
-              <strong>{producer.service}</strong>
-              <span>{producer.metric} · {producer.operation ?? "-"}</span>
-            </div>
-            <Progress value={producer.producedPoints} max={producer.totalPoints} />
-          </article>
-        ))}
-      </div>
       <Panel title="Kafka metric streams">
         <StreamGrid points={status?.samplePoints ?? []} events={status?.consumedEvents ?? []} running={Boolean(status?.running)} />
       </Panel>
@@ -586,29 +574,30 @@ function EventsTable({ events }: { events: DriftEvent[] }) {
                 <thead>
                   <tr>
                     <th>Time MSK</th>
-                    <th>Severity</th>
-                    <th>Phase</th>
-                    <th>Service</th>
+                    <th>Event</th>
                     <th>Metric</th>
-                    <th>Algorithm</th>
-                    <th>Score</th>
-                    <th>Current</th>
-                    <th>Baseline</th>
+                    <th>Values</th>
                     <th>Explanation</th>
                   </tr>
                 </thead>
                 <tbody>
                   {visibleEvents.map((event) => (
                     <tr key={event.id}>
-                      <td>{formatMoscow(event.detectedAt)}</td>
-                      <td><span className={`severity ${event.severity.toLowerCase()}`}>{event.severity}</span></td>
-                      <td><span className={`phase ${event.phase.toLowerCase()}`}>{event.phase}</span></td>
-                      <td>{event.key.service}</td>
-                      <td>{event.key.metric}</td>
-                      <td>{event.algorithm}</td>
-                      <td>{formatNumber(event.score)}</td>
-                      <td>{formatNumber(event.currentValue)}</td>
-                      <td>{formatNumber(event.baselineValue)}</td>
+                      <td className="nowrap">{formatMoscow(event.detectedAt)}</td>
+                      <td>
+                        <div className="event-stack">
+                          <span className={`severity ${event.severity.toLowerCase()}`}>{event.severity}</span>
+                          <span className={`phase ${event.phase.toLowerCase()}`}>{event.phase}</span>
+                          <small>{event.algorithm}</small>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="metric-cell">
+                          <strong>{event.key.service}</strong>
+                          <span>{event.key.metric}{event.key.operation ? ` · ${event.key.operation}` : ""}</span>
+                        </div>
+                      </td>
+                      <td><EventValueSummary event={event} /></td>
                       <td className="event-explanation">{eventExplanation(event)}</td>
                     </tr>
                   ))}
@@ -622,47 +611,81 @@ function EventsTable({ events }: { events: DriftEvent[] }) {
   );
 }
 
-function KafkaOperationsPanel({ status }: { status?: KafkaDemoStatus }) {
+function KafkaOperationsPanel({ status, operations }: { status?: KafkaDemoStatus; operations?: KafkaOperationsSnapshot }) {
   const producerCount = status?.producers.length ?? 0;
   const activeProducers = status?.producers.filter((producer) => producer.running).length ?? 0;
-  const progress = status?.totalPoints ? `${Math.round(((status.producedPoints ?? 0) / status.totalPoints) * 100)}%` : "0%";
+  const progressPercent = operations?.progressPercent ?? (status?.totalPoints ? ((status.producedPoints ?? 0) / status.totalPoints) * 100 : 0);
   const lastEvent = status?.consumedEvents.at(-1);
+  const metrics = operations?.metrics;
 
   return (
-    <Panel title="Kafka operations">
-      <div className="ops-grid">
-        <MetricCard
-          title="Pipeline"
-          value={status?.running ? "Running" : "Idle"}
-          helper={status?.bootstrapServers ?? "Kafka bootstrap не загружен"}
-        />
-        <MetricCard
-          title="Producer health"
-          value={`${activeProducers}/${producerCount}`}
-          helper="Активные synthetic producers"
-        />
-        <MetricCard
-          title="Replay progress"
-          value={progress}
-          helper={`${status?.producedPoints ?? 0}/${status?.totalPoints ?? 0} metric points`}
-        />
-        <MetricCard
-          title="Last event"
-          value={lastEvent ? lastEvent.severity : "—"}
-          helper={lastEvent ? `${lastEvent.key.service} · ${lastEvent.key.metric}` : "Drift events ещё не получены"}
-          tone={lastEvent?.severity === "CRITICAL" ? "danger" : undefined}
-        />
+    <Panel title="Kafka operations" className="operations-panel">
+      <div className="operations-hero">
+        <div className="operations-summary">
+          <span className={status?.running ? "status-dot-label active" : "status-dot-label"}>
+            {status?.running ? "Pipeline running" : "Pipeline idle"}
+          </span>
+          <h3>{status?.scenario || "Kafka scenario не выбран"}</h3>
+          <p>{status?.bootstrapServers ?? "Kafka bootstrap ещё не загружен"}</p>
+          <div className="ops-meta-row">
+            <span className="badge">{status?.replay ? `Replay ${status.speed}x` : "Normal mode"}</span>
+            <span className="badge">{activeProducers}/{producerCount} producers</span>
+            <span className="badge">{operations?.detectionErrorMode ?? "FAIL_FAST"}</span>
+          </div>
+        </div>
+        <div className="operations-progress-card">
+          <span>Replay progress</span>
+          <strong>{formatPercent(progressPercent / 100)}</strong>
+          <Progress value={status?.producedPoints ?? 0} max={status?.totalPoints ?? 0} />
+          <small>{status?.producedPoints ?? 0}/{status?.totalPoints ?? 0} points</small>
+        </div>
       </div>
-      <div className="ops-checklist">
-        <OperationCheck active={Boolean(status?.enabled)} label="Kafka demo enabled" detail={status?.outputTopic ?? "output topic недоступен"} />
-        <OperationCheck active={Boolean(status?.running)} label="Streams topology running" detail={status?.inputTopic ?? "input topic недоступен"} />
-        <OperationCheck active={Boolean(status?.replay)} label="Replay mode" detail={`speed ${status?.speed ?? 1}x`} />
-        <OperationCheck active={!status?.error} label="No runtime error" detail={status?.error ?? "Ошибок в demo status нет"} />
+
+      <div className="operations-kpis">
+        <CompactMetric label="Processed" value={formatNumber(metrics?.processedPoints)} hint="MetricPoint" />
+        <CompactMetric label="Events" value={formatNumber(metrics?.emittedEvents)} hint="DriftEvent" />
+        <CompactMetric
+          label="Errors"
+          value={formatNumber(metrics?.failedPoints)}
+          hint={`DLQ ${formatNumber(metrics?.routedErrors)}`}
+          tone={(metrics?.failedPoints ?? 0) > 0 ? "danger" : undefined}
+        />
+        <CompactMetric label="Latency" value={`${formatNumber(metrics?.meanDurationMillis)} ms`} hint="mean detection" />
       </div>
-      <p className="help-text">
-        Панель держит операционный контекст рядом с графиками: состояние topology, producer-ов, прогресс replay и последний drift event.
-      </p>
+
+      <div className="operations-meta-grid">
+        <KeyValue label="Input" value={operations?.streamsInputTopics?.join(", ") || status?.inputTopic || "—"} />
+        <KeyValue label="Output" value={operations?.streamsOutputTopic || status?.outputTopic || "—"} />
+        <KeyValue label="State store" value={operations?.runtimeStateStoreName || "driftguard-runtime-state"} />
+        <KeyValue label="Telemetry" value={operations?.telemetryEnabled ? "Enabled" : "Unavailable"} />
+      </div>
+
+      <div className="ops-checklist compact-checklist">
+        <OperationCheck active={Boolean(status?.enabled)} label="Kafka enabled" detail={status?.outputTopic ?? "output topic недоступен"} />
+        <OperationCheck active={Boolean(status?.running)} label="Topology running" detail={status?.inputTopic ?? "input topic недоступен"} />
+        <OperationCheck active={!status?.error} label="Runtime healthy" detail={status?.error ?? "Ошибок в demo status нет"} />
+        <OperationCheck active={Boolean(lastEvent)} label="Last event" detail={lastEvent ? `${lastEvent.severity} · ${lastEvent.key.metric}` : "Событий пока нет"} />
+      </div>
     </Panel>
+  );
+}
+
+function CompactMetric({ label, value, hint, tone }: { label: string; value: string | number; hint: string; tone?: "danger" }) {
+  return (
+    <div className={tone === "danger" ? "compact-metric danger" : "compact-metric"}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+      <small>{hint}</small>
+    </div>
+  );
+}
+
+function KeyValue({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="key-value">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
   );
 }
 
@@ -675,6 +698,25 @@ function OperationCheck({ active, label, detail }: { active: boolean; label: str
         <span>{detail}</span>
       </div>
     </div>
+  );
+}
+
+function EventValueSummary({ event }: { event: DriftEvent }) {
+  return (
+    <dl className="event-values">
+      <div>
+        <dt>Current</dt>
+        <dd>{formatNumber(event.currentValue)}</dd>
+      </div>
+      <div>
+        <dt>Baseline</dt>
+        <dd>{formatNumber(event.baselineValue)}</dd>
+      </div>
+      <div>
+        <dt>Score</dt>
+        <dd>{formatNumber(event.score)}</dd>
+      </div>
+    </dl>
   );
 }
 
