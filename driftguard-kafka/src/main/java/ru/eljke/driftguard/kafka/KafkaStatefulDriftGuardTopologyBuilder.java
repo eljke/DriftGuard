@@ -22,6 +22,7 @@ import ru.eljke.driftguard.core.state.DetectorRuntimeStateSnapshot;
 import ru.eljke.driftguard.core.state.DetectorRuntimeStateSnapshotCodec;
 import ru.eljke.driftguard.core.state.DetectorStateCodecRegistry;
 
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -75,33 +76,45 @@ public final class KafkaStatefulDriftGuardTopologyBuilder {
         StreamsBuilder builder = new StreamsBuilder();
         var metricPointSerde = DriftGuardSerdes.metricPoint(objectMapper);
         var driftEventSerde = DriftGuardSerdes.driftEvent(objectMapper);
+        var detectionErrorSerde = DriftGuardSerdes.detectionError(objectMapper);
 
         builder.addStateStore(KafkaDriftGuardStateStores.runtimeStateStore(runtimeStateStoreName, objectMapper));
-        builder.stream(config.inputTopics(), Consumed.with(Serdes.String(), metricPointSerde))
+        var detectionResults = builder.stream(config.inputTopics(), Consumed.with(Serdes.String(), metricPointSerde))
                 .filter((ignored, point) -> point != null)
                 .selectKey((ignored, point) -> KafkaMetricKeys.stateKey(point.key()))
                 .repartition(Repartitioned.with(Serdes.String(), metricPointSerde)
                         .withName("driftguard-metric-key"))
-                .processValues(new DetectingProcessorSupplier(), runtimeStateStoreName)
-                .flatMapValues(events -> events)
+                .processValues(new DetectingProcessorSupplier(), runtimeStateStoreName);
+
+        detectionResults
+                .flatMapValues(DetectionResult::events)
                 .selectKey((ignored, event) -> event.id())
                 .to(config.outputTopic(), Produced.with(Serdes.String(), driftEventSerde));
+
+        if (config.detectionErrorTopic() != null) {
+            detectionResults
+                    .filter((ignored, result) -> result.error() != null)
+                    .mapValues(DetectionResult::error)
+                    .selectKey((ignored, error) -> KafkaMetricKeys.stateKey(error.point().key()))
+                    .to(config.detectionErrorTopic(), Produced.with(Serdes.String(), detectionErrorSerde));
+        }
+
         return builder.build();
     }
 
-    private final class DetectingProcessorSupplier implements FixedKeyProcessorSupplier<String, MetricPoint, List<DriftEvent>> {
+    private final class DetectingProcessorSupplier implements FixedKeyProcessorSupplier<String, MetricPoint, DetectionResult> {
         @Override
-        public FixedKeyProcessor<String, MetricPoint, List<DriftEvent>> get() {
+        public FixedKeyProcessor<String, MetricPoint, DetectionResult> get() {
             return new DetectingProcessor();
         }
     }
 
-    private final class DetectingProcessor implements FixedKeyProcessor<String, MetricPoint, List<DriftEvent>> {
-        private FixedKeyProcessorContext<String, List<DriftEvent>> context;
+    private final class DetectingProcessor implements FixedKeyProcessor<String, MetricPoint, DetectionResult> {
+        private FixedKeyProcessorContext<String, DetectionResult> context;
         private DriftDetectorEngine detectorEngine;
 
         @Override
-        public void init(FixedKeyProcessorContext<String, List<DriftEvent>> context) {
+        public void init(FixedKeyProcessorContext<String, DetectionResult> context) {
             this.context = context;
             KeyValueStore<String, DetectorRuntimeStateSnapshot> store = context.getStateStore(runtimeStateStoreName);
             var runtimeStateStore = new KafkaDetectorRuntimeStateStore(
@@ -113,18 +126,35 @@ public final class KafkaStatefulDriftGuardTopologyBuilder {
 
         @Override
         public void process(FixedKeyRecord<String, MetricPoint> record) {
-            List<DriftEvent> events;
+            DetectionResult result;
             try {
-                events = emptyIfNull(detectorEngine.detect(record.value()));
+                result = DetectionResult.events(emptyIfNull(detectorEngine.detect(record.value())));
             } catch (RuntimeException exception) {
-                events = emptyIfNull(detectionErrorHandler.handle(record.value(), exception));
+                result = DetectionResult.failure(
+                        emptyIfNull(detectionErrorHandler.handle(record.value(), exception)),
+                        KafkaDetectionError.from(record.value(), exception, Instant.ofEpochMilli(record.timestamp()))
+                );
             }
-            context.forward(record.withValue(events));
+            context.forward(record.withValue(result));
         }
 
         @Override
         public void close() {
             // Kafka Streams управляет жизненным циклом state store-а.
+        }
+    }
+
+    private record DetectionResult(List<DriftEvent> events, KafkaDetectionError error) {
+        private DetectionResult {
+            events = emptyIfNull(events);
+        }
+
+        private static DetectionResult events(List<DriftEvent> events) {
+            return new DetectionResult(events, null);
+        }
+
+        private static DetectionResult failure(List<DriftEvent> fallbackEvents, KafkaDetectionError error) {
+            return new DetectionResult(fallbackEvents, error);
         }
     }
 

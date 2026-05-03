@@ -24,4 +24,8 @@ public final class DriftGuardSerdes {
     public static Serde<DetectorRuntimeStateSnapshot> runtimeStateSnapshot(ObjectMapper objectMapper) {
         return new JsonSerde<>(objectMapper, DetectorRuntimeStateSnapshot.class);
     }
+
+    public static Serde<KafkaDetectionError> detectionError(ObjectMapper objectMapper) {
+        return new JsonSerde<>(objectMapper, KafkaDetectionError.class);
+    }
 }

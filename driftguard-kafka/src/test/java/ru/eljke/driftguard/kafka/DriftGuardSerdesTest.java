@@ -137,6 +137,33 @@ class DriftGuardSerdesTest {
         assertEquals(snapshot.version(), decoded.version());
     }
 
+
+    @Test
+    void detectionErrorSerdeRoundTripsPublicMessageContract() {
+        Serde<KafkaDetectionError> serde = DriftGuardSerdes.detectionError(DriftGuardObjectMapper.create());
+        MetricPoint point = new MetricPoint(
+                new MetricKey("checkout", "latency", "pod-1", "POST /orders"),
+                Instant.parse("2026-05-01T10:15:30Z"),
+                123.45,
+                MetricKind.GAUGE,
+                Map.of("region", "eu-west-1"),
+                Map.of("source", "test")
+        );
+        KafkaDetectionError error = new KafkaDetectionError(
+                point,
+                IllegalStateException.class.getName(),
+                "boom",
+                Instant.parse("2026-05-01T10:15:31Z")
+        );
+
+        KafkaDetectionError decoded = roundTrip(serde, "drift-errors", error);
+
+        assertEquals(error.point(), decoded.point());
+        assertEquals(error.exceptionClass(), decoded.exceptionClass());
+        assertEquals(error.message(), decoded.message());
+        assertEquals(error.occurredAt(), decoded.occurredAt());
+    }
+
     @Test
     void serializersPreserveKafkaTombstones() {
         Serde<MetricPoint> serde = DriftGuardSerdes.metricPoint(DriftGuardObjectMapper.create());

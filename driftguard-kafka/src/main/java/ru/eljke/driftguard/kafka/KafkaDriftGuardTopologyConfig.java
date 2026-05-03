@@ -9,11 +9,17 @@ import java.util.List;
  *
  * @param inputTopics topic-и с входными {@code MetricPoint}
  * @param outputTopic topic для выходных {@code DriftEvent}
+ * @param detectionErrorTopic опциональный topic для ошибок detector-а
  */
 public record KafkaDriftGuardTopologyConfig(
         List<String> inputTopics,
-        String outputTopic
+        String outputTopic,
+        String detectionErrorTopic
 ) {
+    public KafkaDriftGuardTopologyConfig(List<String> inputTopics, String outputTopic) {
+        this(inputTopics, outputTopic, null);
+    }
+
     public KafkaDriftGuardTopologyConfig {
         inputTopics = List.copyOf(inputTopics == null ? List.of() : inputTopics);
         if (inputTopics.isEmpty()) {
@@ -23,5 +29,12 @@ public record KafkaDriftGuardTopologyConfig(
             throw new DriftGuardValidationException(KafkaDriftGuardErrorReason.BLANK_OUTPUT_TOPIC);
         }
         outputTopic = outputTopic.trim();
+        if (detectionErrorTopic != null) {
+            detectionErrorTopic = detectionErrorTopic.trim();
+            if (detectionErrorTopic.isBlank()) {
+                detectionErrorTopic = null;
+            }
+        }
     }
 }
+
