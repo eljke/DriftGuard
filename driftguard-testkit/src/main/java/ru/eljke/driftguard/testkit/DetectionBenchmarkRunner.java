@@ -30,4 +30,14 @@ public final class DetectionBenchmarkRunner {
     public static DetectionBenchmarkReport report(String label, List<DetectionBenchmarkResult> results) {
         return new DetectionBenchmarkReport(label, results, DetectionBenchmarkSummary.from(results));
     }
+
+    public static DetectionQualityReport assertQuality(
+            String label,
+            List<DetectionBenchmarkResult> results,
+            DetectionQualityGate gate
+    ) {
+        DetectionBenchmarkReport report = report(label, results);
+        gate.assertPassed(report);
+        return gate.evaluate(report);
+    }
 }

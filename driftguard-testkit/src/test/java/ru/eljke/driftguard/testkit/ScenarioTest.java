@@ -6,12 +6,15 @@ import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.DriftSeverity;
 import ru.eljke.driftguard.core.domain.MetricKey;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ScenarioTest {
     @Test
@@ -90,6 +93,71 @@ class ScenarioTest {
         assertEquals(0, metrics.missedDriftIntervals());
         assertEquals(0.5, metrics.precision());
         assertEquals(1.0, metrics.recall());
+    }
+
+
+    @Test
+    void qualityGatePassesWhenSummarySatisfiesThresholds() {
+        DetectionBenchmarkReport report = DetectionBenchmarkRunner.report("quality", List.of(
+                new DetectionBenchmarkResult("good", new DetectionMetrics(
+                        2,
+                        2,
+                        0,
+                        1,
+                        1,
+                        0,
+                        true,
+                        Duration.ofSeconds(5),
+                        1.0,
+                        1.0
+                ))
+        ));
+
+        DetectionQualityGate gate = DetectionQualityGate.builder()
+                .minPrecision(0.95)
+                .minRecall(1.0)
+                .maxFalsePositiveEvents(0)
+                .maxMissedDriftIntervals(0)
+                .maxMeanFirstDetectionDelay(Duration.ofSeconds(10))
+                .build();
+
+        DetectionQualityReport qualityReport = gate.evaluate(report);
+
+        assertTrue(qualityReport.passed());
+    }
+
+    @Test
+    void qualityGateFailsWhenSummaryViolatesThresholds() {
+        DetectionBenchmarkReport report = DetectionBenchmarkRunner.report("quality", List.of(
+                new DetectionBenchmarkResult("bad", new DetectionMetrics(
+                        2,
+                        1,
+                        1,
+                        1,
+                        0,
+                        1,
+                        false,
+                        Duration.ofSeconds(30),
+                        0.5,
+                        0.0
+                ))
+        ));
+
+        DetectionQualityGate gate = DetectionQualityGate.builder()
+                .minPrecision(0.9)
+                .minRecall(0.9)
+                .maxFalsePositiveEvents(0)
+                .maxMissedDriftIntervals(0)
+                .maxMeanFirstDetectionDelay(Duration.ofSeconds(10))
+                .build();
+
+        DetectionQualityGateException exception = assertThrows(
+                DetectionQualityGateException.class,
+                () -> gate.assertPassed(report)
+        );
+
+        assertFalse(exception.report().passed());
+        assertEquals(5, exception.report().violations().size());
     }
 
     private static DriftEvent eventAt(Instant detectedAt) {
