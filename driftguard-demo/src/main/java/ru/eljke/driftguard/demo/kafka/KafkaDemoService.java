@@ -37,6 +37,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -70,6 +72,8 @@ public class KafkaDemoService {
     private final List<ProducerPlayback> producerPlaybacks = new CopyOnWriteArrayList<>();
     private final AtomicBoolean consuming = new AtomicBoolean();
     private volatile KafkaConsumer<String, DriftEvent> consumer;
+    private volatile Future<?> consumerTask;
+    private volatile Set<String> activeEventInstances = Set.of();
     private volatile boolean running;
     private volatile String scenarioId = "latency-step";
     private volatile int totalPoints;
@@ -140,8 +144,7 @@ public class KafkaDemoService {
 
         try {
             createTopics();
-            streamsManager.start();
-
+            activeEventInstances = eventInstances(playbacks);
             consumer = new KafkaConsumer<>(
                     consumerProperties(run),
                     new StringDeserializer(),
@@ -150,8 +153,9 @@ public class KafkaDemoService {
             consumer.subscribe(List.of(properties.getOutputTopic()));
             consumer.poll(Duration.ofMillis(500));
             consuming.set(true);
-            executor.execute(this::consumeEvents);
+            consumerTask = executor.submit(this::consumeEvents);
 
+            streamsManager.start();
             playbacks.forEach(playback -> scheduleProducer(playback, speed));
             running = true;
             return status();
@@ -311,8 +315,10 @@ public class KafkaDemoService {
             while (consuming.get()) {
                 current.poll(Duration.ofMillis(250)).forEach(record -> {
                     DriftEvent event = record.value();
-                    consumedEvents.add(event);
-                    eventRepository.append("kafka", scenarioId, event);
+                    if (event != null && activeEventInstances.contains(event.key().instance())) {
+                        consumedEvents.add(event);
+                        eventRepository.append("kafka", scenarioId, event);
+                    }
                 });
             }
         } catch (WakeupException exception) {
@@ -321,6 +327,12 @@ public class KafkaDemoService {
             }
         } catch (RuntimeException exception) {
             error = exception.getMessage();
+        } finally {
+            try {
+                current.close();
+            } catch (RuntimeException ignored) {
+                // KafkaConsumer закрывается в своём же consumer-thread: ошибка закрытия не должна ломать stop/start demo.
+            }
         }
     }
 
@@ -353,7 +365,7 @@ public class KafkaDemoService {
     private Properties consumerProperties(long run) {
         Properties props = adminProperties();
         props.put(ConsumerConfig.GROUP_ID_CONFIG, properties.getConsumerGroup() + "-" + run);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         return props;
     }
 
@@ -389,11 +401,35 @@ public class KafkaDemoService {
     private void closeConsumer() {
         consuming.set(false);
         KafkaConsumer<String, DriftEvent> current = consumer;
+        Future<?> currentTask = consumerTask;
         consumer = null;
+        consumerTask = null;
+        activeEventInstances = Set.of();
         if (current != null) {
             current.wakeup();
-            current.close();
         }
+        awaitConsumerStopped(currentTask);
+    }
+
+    private void awaitConsumerStopped(Future<?> task) {
+        if (task == null || task.isDone()) {
+            return;
+        }
+        try {
+            task.get(3, TimeUnit.SECONDS);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException ignored) {
+            // Ошибка consumer loop уже перенесена в demo status через поле error.
+        } catch (java.util.concurrent.TimeoutException exception) {
+            error = "Kafka demo consumer did not stop within timeout";
+        }
+    }
+
+    private static Set<String> eventInstances(List<ProducerPlayback> playbacks) {
+        return playbacks.stream()
+                .map(ProducerPlayback::instance)
+                .collect(java.util.stream.Collectors.toUnmodifiableSet());
     }
 
     private final class ProducerPlayback {
@@ -437,6 +473,10 @@ public class KafkaDemoService {
             });
             producer.flush();
             return current + 1 < points.size();
+        }
+
+        private String instance() {
+            return points.isEmpty() ? "" : points.getFirst().key().instance();
         }
 
         private int totalPoints() {

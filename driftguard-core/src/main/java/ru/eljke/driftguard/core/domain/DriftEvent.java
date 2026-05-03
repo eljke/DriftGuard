@@ -87,6 +87,30 @@ public record DriftEvent(
         details = Map.copyOf(details == null ? Map.of() : details);
     }
 
+    public DriftEvent ongoingAt(Instant observedAt, int consecutiveSignals) {
+        Map<String, Object> ongoingDetails = new LinkedHashMap<>(details);
+        ongoingDetails.put("consecutiveSignals", consecutiveSignals);
+        ongoingDetails.put("episodeOngoing", true);
+        return new DriftEvent(
+                null,
+                key,
+                observedAt,
+                windowStart,
+                observedAt,
+                DriftEventPhase.ONGOING,
+                direction,
+                severity,
+                score,
+                currentValue,
+                baselineValue,
+                detector,
+                algorithm,
+                reason,
+                tags,
+                ongoingDetails
+        );
+    }
+
     public DriftEvent recoveredAt(Instant recoveredAt, int recoveryConsecutiveNormal) {
         Map<String, Object> recoveryDetails = new LinkedHashMap<>(details);
         recoveryDetails.put("recoveryConsecutiveNormal", recoveryConsecutiveNormal);

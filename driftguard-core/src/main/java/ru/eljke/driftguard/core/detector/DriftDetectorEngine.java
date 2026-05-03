@@ -2,6 +2,7 @@ package ru.eljke.driftguard.core.detector;
 
 import ru.eljke.driftguard.core.config.DetectorConfig;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
+import ru.eljke.driftguard.core.domain.DriftDirection;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricPoint;
 import ru.eljke.driftguard.core.error.CoreErrorReason;
@@ -184,23 +185,12 @@ public final class DriftDetectorEngine {
 
     private EmissionTransition onDriftSignal(EmissionState previous, DetectorDefinition definition, DriftEvent event) {
         if (previous.activeEpisode()) {
-            return new EmissionTransition(
-                    new EmissionState(
-                            previous.consecutiveSignals() + 1,
-                            previous.lastEmittedAt(),
-                            true,
-                            0,
-                            previous.lastEmittedEvent()
-                    ),
-                    List.of()
-            );
+            return onActiveEpisodeSignal(previous, definition, event);
         }
 
         int consecutiveSignals = previous.consecutiveSignals() + 1;
         boolean enoughSignals = consecutiveSignals >= definition.emissionPolicy().minConsecutiveSignals();
-        boolean cooldownElapsed = previous.lastEmittedAtValue()
-                .map(last -> !event.detectedAt().isBefore(last.plus(definition.emissionPolicy().cooldown())))
-                .orElse(true);
+        boolean cooldownElapsed = cooldownElapsed(previous, definition, event);
         boolean emit = enoughSignals && cooldownElapsed;
         EmissionState next = new EmissionState(
                 consecutiveSignals,
@@ -210,6 +200,43 @@ public final class DriftDetectorEngine {
                 emit ? event : previous.lastEmittedEvent()
         );
         return new EmissionTransition(next, emit ? List.of(event) : List.of());
+    }
+
+    private EmissionTransition onActiveEpisodeSignal(EmissionState previous, DetectorDefinition definition, DriftEvent event) {
+        int consecutiveSignals = previous.consecutiveSignals() + 1;
+        DriftEvent lastEvent = previous.lastEmittedEventValue().orElse(null);
+        if (isOppositeDirection(lastEvent, event)) {
+            DriftEvent recovered = lastEvent.recoveredAt(event.detectedAt(), definition.emissionPolicy().recoveryConsecutiveNormal());
+            return new EmissionTransition(
+                    new EmissionState(0, event.detectedAt(), false, 0, recovered),
+                    List.of(recovered)
+            );
+        }
+
+        boolean emitOngoing = cooldownElapsed(previous, definition, event);
+        DriftEvent ongoing = emitOngoing ? event.ongoingAt(event.detectedAt(), consecutiveSignals) : null;
+        EmissionState next = new EmissionState(
+                consecutiveSignals,
+                emitOngoing ? event.detectedAt() : previous.lastEmittedAt(),
+                true,
+                0,
+                emitOngoing ? ongoing : previous.lastEmittedEvent()
+        );
+        return new EmissionTransition(next, ongoing == null ? List.of() : List.of(ongoing));
+    }
+
+    private static boolean isOppositeDirection(DriftEvent previous, DriftEvent current) {
+        if (previous == null) {
+            return false;
+        }
+        return (previous.direction() == DriftDirection.UP && current.direction() == DriftDirection.DOWN)
+                || (previous.direction() == DriftDirection.DOWN && current.direction() == DriftDirection.UP);
+    }
+
+    private static boolean cooldownElapsed(EmissionState previous, DetectorDefinition definition, DriftEvent event) {
+        return previous.lastEmittedAtValue()
+                .map(last -> !event.detectedAt().isBefore(last.plus(definition.emissionPolicy().cooldown())))
+                .orElse(true);
     }
 
     private record EmissionTransition(EmissionState state, List<DriftEvent> events) {

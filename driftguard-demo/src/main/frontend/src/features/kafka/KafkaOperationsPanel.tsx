@@ -1,12 +1,18 @@
+import { Activity, CheckCircle2, RotateCcw, ShieldAlert } from "lucide-react";
+import type { ReactNode } from "react";
 import { MetricCard, Panel } from "../../components/ui";
 import { formatNumber } from "../../lib/format";
-import type { KafkaDemoStatus, KafkaOperationsSnapshot } from "../../types";
+import type { DriftEvent, KafkaDemoStatus, KafkaOperationsSnapshot } from "../../types";
 
 export function KafkaOperationsPanel({ status, operations }: { status?: KafkaDemoStatus; operations?: KafkaOperationsSnapshot }) {
   const producerCount = status?.producers.length ?? 0;
   const activeProducers = status?.producers.filter((producer) => producer.running).length ?? 0;
   const progressValue = status?.totalPoints ? Math.round(((status.producedPoints ?? 0) / status.totalPoints) * 100) : 0;
-  const lastEvent = status?.consumedEvents.at(-1);
+  const events = status?.consumedEvents ?? [];
+  const lastEvent = events.at(-1);
+  const lifecycle = eventLifecycle(events);
+  const hasRecovered = lifecycle.recovered > 0;
+  const hasOngoing = lifecycle.ongoing > 0;
 
   return (
     <Panel title="Kafka operations" className="ops-panel">
@@ -26,7 +32,7 @@ export function KafkaOperationsPanel({ status, operations }: { status?: KafkaDem
 
       <div className="ops-kpis">
         <MetricCard title="Processed" value={formatNumber(operations?.metrics.processedPoints)} helper="MetricPoint обработано" />
-        <MetricCard title="Events" value={formatNumber(operations?.metrics.emittedEvents ?? status?.consumedEvents.length)} helper="DriftEvent в pipeline" />
+        <MetricCard title="Events" value={formatNumber(operations?.metrics.emittedEvents ?? events.length)} helper="DriftEvent в pipeline" />
         <MetricCard
           title="Errors / DLQ"
           value={`${formatNumber(operations?.metrics.failedPoints)} / ${formatNumber(operations?.metrics.routedErrors)}`}
@@ -40,13 +46,20 @@ export function KafkaOperationsPanel({ status, operations }: { status?: KafkaDem
         />
       </div>
 
+      <div className="ops-lifecycle-grid">
+        <LifecycleTile icon={<ShieldAlert size={18} />} label="Started" value={lifecycle.started} helper="Новые drift episodes" />
+        <LifecycleTile icon={<Activity size={18} />} label="Ongoing" value={lifecycle.ongoing} helper={hasOngoing ? "Обновления активных episodes" : "Появятся после cooldown"} />
+        <LifecycleTile icon={<CheckCircle2 size={18} />} label="Recovered" value={lifecycle.recovered} helper={hasRecovered ? "Закрытые episodes" : "Ждём нормализацию потока"} />
+        <LifecycleTile icon={<RotateCcw size={18} />} label="Active" value={lifecycle.active} helper="Сейчас открыто в UI" />
+      </div>
+
       <div className="ops-meta-row">
         <span><strong>Producers</strong>{activeProducers}/{producerCount}</span>
         <span><strong>Input</strong>{operations?.streamsInputTopics?.join(", ") || status?.inputTopic || "—"}</span>
         <span><strong>Output</strong>{operations?.outputTopic || status?.outputTopic || "—"}</span>
         <span><strong>State store</strong>{operations?.runtimeStateStoreName ?? "—"}</span>
         <span><strong>Error mode</strong>{operations?.detectionErrorMode ?? "—"}</span>
-        <span><strong>Last event</strong>{lastEvent ? `${lastEvent.severity} · ${lastEvent.key.metric}` : "—"}</span>
+        <span><strong>Last event</strong>{lastEvent ? `${lastEvent.phase} · ${lastEvent.key.metric}` : "—"}</span>
       </div>
 
       <div className="ops-checklist compact">
@@ -56,6 +69,19 @@ export function KafkaOperationsPanel({ status, operations }: { status?: KafkaDem
         <OperationCheck active={!status?.error} label="No runtime error" detail={status?.error ?? "Ошибок в demo status нет"} />
       </div>
     </Panel>
+  );
+}
+
+function LifecycleTile({ icon, label, value, helper }: { icon: ReactNode; label: string; value: number; helper: string }) {
+  return (
+    <div className="lifecycle-tile">
+      <span className="lifecycle-icon">{icon}</span>
+      <div>
+        <strong>{value}</strong>
+        <span>{label}</span>
+        <small>{helper}</small>
+      </div>
+    </div>
   );
 }
 
@@ -69,4 +95,22 @@ function OperationCheck({ active, label, detail }: { active: boolean; label: str
       </div>
     </div>
   );
+}
+
+function eventLifecycle(events: DriftEvent[]) {
+  const started = events.filter((event) => event.phase === "STARTED").length;
+  const ongoing = events.filter((event) => event.phase === "ONGOING").length;
+  const recovered = events.filter((event) => event.phase === "RECOVERED").length;
+  const active = new Set<string>();
+
+  for (const event of events) {
+    const key = `${event.key.service}|${event.key.metric}|${event.key.operation ?? ""}|${event.detector}`;
+    if (event.phase === "RECOVERED") {
+      active.delete(key);
+    } else {
+      active.add(key);
+    }
+  }
+
+  return { started, ongoing, recovered, active: active.size };
 }
