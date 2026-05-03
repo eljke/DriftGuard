@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.serialization.Serde;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricPoint;
+import ru.eljke.driftguard.core.state.DetectorRuntimeStateSnapshot;
 
 /**
  * Готовые Kafka SerDes для публичных DriftGuard-сообщений.
@@ -18,5 +19,9 @@ public final class DriftGuardSerdes {
 
     public static Serde<DriftEvent> driftEvent(ObjectMapper objectMapper) {
         return new JsonSerde<>(objectMapper, DriftEvent.class);
+    }
+
+    public static Serde<DetectorRuntimeStateSnapshot> runtimeStateSnapshot(ObjectMapper objectMapper) {
+        return new JsonSerde<>(objectMapper, DetectorRuntimeStateSnapshot.class);
     }
 }

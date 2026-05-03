@@ -12,10 +12,13 @@ import ru.eljke.driftguard.core.domain.MetricKey;
 import ru.eljke.driftguard.core.domain.MetricKind;
 import ru.eljke.driftguard.core.domain.MetricPoint;
 import ru.eljke.driftguard.core.error.DriftGuardException;
+import ru.eljke.driftguard.core.state.DetectorRuntimeStateSchema;
+import ru.eljke.driftguard.core.state.DetectorRuntimeStateSnapshot;
 
 import java.time.Instant;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -85,6 +88,53 @@ class DriftGuardSerdesTest {
         assertEquals(event.tags(), decoded.tags());
         assertEquals(25.0, decoded.details().get("threshold"));
         assertEquals(50, decoded.details().get("windowSize"));
+    }
+
+
+    @Test
+    void runtimeStateSnapshotSerdeRoundTripsPersistedStateContract() {
+        Serde<DetectorRuntimeStateSnapshot> serde = DriftGuardSerdes.runtimeStateSnapshot(DriftGuardObjectMapper.create());
+        DriftEvent lastEvent = new DriftEvent(
+                "event-1",
+                new MetricKey("checkout", "latency", "pod-1", "POST /orders"),
+                Instant.parse("2026-05-01T10:15:30Z"),
+                Instant.parse("2026-05-01T10:14:30Z"),
+                Instant.parse("2026-05-01T10:15:30Z"),
+                DriftEventPhase.STARTED,
+                DriftDirection.UP,
+                DriftSeverity.WARNING,
+                10.0,
+                180.0,
+                100.0,
+                "latency-page-hinkley",
+                "page-hinkley",
+                "Mean shifted upward",
+                Map.of("region", "eu-west-1"),
+                Map.of("threshold", 25.0)
+        );
+        DetectorRuntimeStateSnapshot snapshot = new DetectorRuntimeStateSnapshot(
+                DetectorRuntimeStateSchema.CURRENT_VERSION,
+                "page-hinkley",
+                new byte[]{1, 2, 3, 4},
+                2,
+                Instant.parse("2026-05-01T10:15:30Z"),
+                true,
+                1,
+                lastEvent,
+                42
+        );
+
+        DetectorRuntimeStateSnapshot decoded = roundTrip(serde, "driftguard-runtime-state", snapshot);
+
+        assertEquals(snapshot.schemaVersion(), decoded.schemaVersion());
+        assertEquals(snapshot.algorithm(), decoded.algorithm());
+        assertArrayEquals(snapshot.detectorStatePayload(), decoded.detectorStatePayload());
+        assertEquals(snapshot.consecutiveSignals(), decoded.consecutiveSignals());
+        assertEquals(snapshot.lastEmittedAt(), decoded.lastEmittedAt());
+        assertEquals(snapshot.activeEpisode(), decoded.activeEpisode());
+        assertEquals(snapshot.consecutiveNormal(), decoded.consecutiveNormal());
+        assertEquals(snapshot.lastEmittedEvent(), decoded.lastEmittedEvent());
+        assertEquals(snapshot.version(), decoded.version());
     }
 
     @Test
