@@ -8,6 +8,7 @@ import {
   Gauge,
   Loader2,
   Play,
+  Search,
   Settings,
   Square,
   Wrench
@@ -268,6 +269,7 @@ function KafkaPage({
           </button>
         </div>
       </Panel>
+      <KafkaOperationsPanel status={status} />
       <Panel title="Kafka replay">
         <div className="summary-grid">
           <MetricCard title="Mode" value={status?.replay ? "Replay" : "Normal"} helper="Replay сбрасывает detector state и переигрывает тот же поток" />
@@ -533,30 +535,57 @@ function StreamGrid({ points, events, running = false }: { points: MetricPoint[]
 }
 
 function EventsTable({ events }: { events: DriftEvent[] }) {
+  const [severity, setSeverity] = useState("ALL");
+  const [phase, setPhase] = useState("ALL");
+  const [query, setQuery] = useState("");
+  const visibleEvents = useMemo(
+    () => events
+      .filter((event) => severity === "ALL" || event.severity === severity)
+      .filter((event) => phase === "ALL" || event.phase === phase)
+      .filter((event) => eventMatchesQuery(event, query))
+      .slice()
+      .reverse(),
+    [events, phase, query, severity]
+  );
+
   return (
     <Panel title="Drift events">
       {events.length === 0 ? (
         <div className="empty-state">Событий drift-а пока нет.</div>
       ) : (
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Time MSK</th>
-                <th>Severity</th>
-                <th>Phase</th>
-                <th>Service</th>
-                <th>Metric</th>
-                <th>Algorithm</th>
-                <th>Score</th>
-                <th>Current</th>
-                <th>Baseline</th>
-                <th>Explanation</th>
-              </tr>
-            </thead>
-            <tbody>
-              {events.slice().reverse().map((event) => (
-                  <tr key={event.id}>
+        <>
+          <EventFilters
+            phase={phase}
+            query={query}
+            severity={severity}
+            total={events.length}
+            visible={visibleEvents.length}
+            onPhaseChange={setPhase}
+            onQueryChange={setQuery}
+            onSeverityChange={setSeverity}
+          />
+          {visibleEvents.length === 0 ? (
+            <div className="empty-state compact">По текущим фильтрам событий нет.</div>
+          ) : (
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time MSK</th>
+                    <th>Severity</th>
+                    <th>Phase</th>
+                    <th>Service</th>
+                    <th>Metric</th>
+                    <th>Algorithm</th>
+                    <th>Score</th>
+                    <th>Current</th>
+                    <th>Baseline</th>
+                    <th>Explanation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleEvents.map((event) => (
+                    <tr key={event.id}>
                       <td>{formatMoscow(event.detectedAt)}</td>
                       <td><span className={`severity ${event.severity.toLowerCase()}`}>{event.severity}</span></td>
                       <td><span className={`phase ${event.phase.toLowerCase()}`}>{event.phase}</span></td>
@@ -567,13 +596,123 @@ function EventsTable({ events }: { events: DriftEvent[] }) {
                       <td>{formatNumber(event.currentValue)}</td>
                       <td>{formatNumber(event.baselineValue)}</td>
                       <td className="event-explanation">{eventExplanation(event)}</td>
-                  </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
       )}
     </Panel>
+  );
+}
+
+function KafkaOperationsPanel({ status }: { status?: KafkaDemoStatus }) {
+  const producerCount = status?.producers.length ?? 0;
+  const activeProducers = status?.producers.filter((producer) => producer.running).length ?? 0;
+  const progress = status?.totalPoints ? `${Math.round(((status.producedPoints ?? 0) / status.totalPoints) * 100)}%` : "0%";
+  const lastEvent = status?.consumedEvents.at(-1);
+
+  return (
+    <Panel title="Kafka operations">
+      <div className="ops-grid">
+        <MetricCard
+          title="Pipeline"
+          value={status?.running ? "Running" : "Idle"}
+          helper={status?.bootstrapServers ?? "Kafka bootstrap не загружен"}
+        />
+        <MetricCard
+          title="Producer health"
+          value={`${activeProducers}/${producerCount}`}
+          helper="Активные synthetic producers"
+        />
+        <MetricCard
+          title="Replay progress"
+          value={progress}
+          helper={`${status?.producedPoints ?? 0}/${status?.totalPoints ?? 0} metric points`}
+        />
+        <MetricCard
+          title="Last event"
+          value={lastEvent ? lastEvent.severity : "—"}
+          helper={lastEvent ? `${lastEvent.key.service} · ${lastEvent.key.metric}` : "Drift events ещё не получены"}
+          tone={lastEvent?.severity === "CRITICAL" ? "danger" : undefined}
+        />
+      </div>
+      <div className="ops-checklist">
+        <OperationCheck active={Boolean(status?.enabled)} label="Kafka demo enabled" detail={status?.outputTopic ?? "output topic недоступен"} />
+        <OperationCheck active={Boolean(status?.running)} label="Streams topology running" detail={status?.inputTopic ?? "input topic недоступен"} />
+        <OperationCheck active={Boolean(status?.replay)} label="Replay mode" detail={`speed ${status?.speed ?? 1}x`} />
+        <OperationCheck active={!status?.error} label="No runtime error" detail={status?.error ?? "Ошибок в demo status нет"} />
+      </div>
+      <p className="help-text">
+        Панель держит операционный контекст рядом с графиками: состояние topology, producer-ов, прогресс replay и последний drift event.
+      </p>
+    </Panel>
+  );
+}
+
+function OperationCheck({ active, label, detail }: { active: boolean; label: string; detail: string }) {
+  return (
+    <div className={active ? "operation-check active" : "operation-check"}>
+      <span className="operation-dot" />
+      <div>
+        <strong>{label}</strong>
+        <span>{detail}</span>
+      </div>
+    </div>
+  );
+}
+
+function EventFilters({
+  phase,
+  query,
+  severity,
+  total,
+  visible,
+  onPhaseChange,
+  onQueryChange,
+  onSeverityChange
+}: {
+  phase: string;
+  query: string;
+  severity: string;
+  total: number;
+  visible: number;
+  onPhaseChange: (phase: string) => void;
+  onQueryChange: (query: string) => void;
+  onSeverityChange: (severity: string) => void;
+}) {
+  return (
+    <div className="event-filters">
+      <label className="search-field">
+        <Search size={16} />
+        <input
+          placeholder="Search service, metric, detector, algorithm or reason"
+          value={query}
+          onChange={(event) => onQueryChange(event.target.value)}
+        />
+      </label>
+      <label className="field compact-field">
+        <span>Severity</span>
+        <select value={severity} onChange={(event) => onSeverityChange(event.target.value)}>
+          <option value="ALL">All</option>
+          <option value="INFO">INFO</option>
+          <option value="WARNING">WARNING</option>
+          <option value="CRITICAL">CRITICAL</option>
+        </select>
+      </label>
+      <label className="field compact-field">
+        <span>Phase</span>
+        <select value={phase} onChange={(event) => onPhaseChange(event.target.value)}>
+          <option value="ALL">All</option>
+          <option value="STARTED">STARTED</option>
+          <option value="ONGOING">ONGOING</option>
+          <option value="RECOVERED">RECOVERED</option>
+        </select>
+      </label>
+      <span className="filter-counter">{visible}/{total} events</span>
+    </div>
   );
 }
 
@@ -873,6 +1012,29 @@ function groupStreams(points: MetricPoint[]) {
 
 function streamId(key: MetricKey) {
   return `${key.service}|${key.metric}|${key.operation ?? ""}`;
+}
+
+function eventMatchesQuery(event: DriftEvent, query: string) {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) {
+    return true;
+  }
+
+  return [
+    event.id,
+    event.key.service,
+    event.key.metric,
+    event.key.instance,
+    event.key.operation,
+    event.detector,
+    event.algorithm,
+    event.phase,
+    event.severity,
+    event.reason,
+    eventExplanation(event)
+  ]
+    .filter(Boolean)
+    .some((value) => String(value).toLowerCase().includes(normalized));
 }
 
 function countSeverity(events: DriftEvent[], severity: string) {
