@@ -238,8 +238,10 @@ function KafkaPage({
   const profiles = configuration?.availableProfiles ?? [];
 
   return (
-    <section className="stack">
-      <Panel title="Kafka scenarios">
+    <section className="stack kafka-page">
+      <KafkaOperationsPanel status={status} operations={operations} />
+
+      <Panel title="Run Kafka scenario" className="control-panel">
         {busy && <Notice tone="info" text="Kafka demo запускается. Создаются topic-и, topology, producer и consumer." />}
         {status?.running && <Notice tone="info" text="Kafka demo работает. График и таблица обновляются каждые 750 мс." />}
         {status?.replay && <Notice tone="info" text={`Replay mode активен: скорость ${status.speed}x, detector state был сброшен перед запуском.`} />}
@@ -273,24 +275,9 @@ function KafkaPage({
           </button>
         </div>
       </Panel>
-      <KafkaOperationsPanel status={status} operations={operations} />
-      <Panel title="Kafka producers" className="quiet-panel">
-        {(status?.producers ?? []).length === 0 ? (
-          <div className="empty-state compact">Producer-ы появятся после запуска Kafka scenario.</div>
-        ) : (
-          <div className="producer-grid compact-producer-grid">
-            {(status?.producers ?? []).map((producer) => (
-              <article className="producer-card" key={producer.id}>
-                <div>
-                  <strong>{producer.service}</strong>
-                  <span>{producer.metric} · {producer.operation ?? "-"}</span>
-                </div>
-                <Progress value={producer.producedPoints} max={producer.totalPoints} />
-              </article>
-            ))}
-          </div>
-        )}
-      </Panel>
+
+      <ProducerStrip status={status} />
+
       <Panel title="Kafka metric streams">
         <StreamGrid points={status?.samplePoints ?? []} events={status?.consumedEvents ?? []} running={Boolean(status?.running)} />
       </Panel>
@@ -570,7 +557,7 @@ function EventsTable({ events }: { events: DriftEvent[] }) {
             <div className="empty-state compact">По текущим фильтрам событий нет.</div>
           ) : (
             <div className="table-wrap">
-              <table>
+              <table className="events-table">
                 <thead>
                   <tr>
                     <th>Time MSK</th>
@@ -583,18 +570,18 @@ function EventsTable({ events }: { events: DriftEvent[] }) {
                 <tbody>
                   {visibleEvents.map((event) => (
                     <tr key={event.id}>
-                      <td className="nowrap">{formatMoscow(event.detectedAt)}</td>
+                      <td>{formatMoscow(event.detectedAt)}</td>
                       <td>
-                        <div className="event-stack">
+                        <div className="event-cell">
                           <span className={`severity ${event.severity.toLowerCase()}`}>{event.severity}</span>
                           <span className={`phase ${event.phase.toLowerCase()}`}>{event.phase}</span>
-                          <small>{event.algorithm}</small>
+                          <span className="muted-line">{event.algorithm}</span>
                         </div>
                       </td>
                       <td>
-                        <div className="metric-cell">
+                        <div className="event-cell">
                           <strong>{event.key.service}</strong>
-                          <span>{event.key.metric}{event.key.operation ? ` · ${event.key.operation}` : ""}</span>
+                          <span className="muted-line">{event.key.metric} · {event.key.operation ?? "-"}</span>
                         </div>
                       </td>
                       <td><EventValueSummary event={event} /></td>
@@ -614,90 +601,72 @@ function EventsTable({ events }: { events: DriftEvent[] }) {
 function KafkaOperationsPanel({ status, operations }: { status?: KafkaDemoStatus; operations?: KafkaOperationsSnapshot }) {
   const producerCount = status?.producers.length ?? 0;
   const activeProducers = status?.producers.filter((producer) => producer.running).length ?? 0;
-  const progressPercent = operations?.progressPercent ?? (status?.totalPoints ? ((status.producedPoints ?? 0) / status.totalPoints) * 100 : 0);
+  const progressValue = status?.totalPoints ? Math.round(((status.producedPoints ?? 0) / status.totalPoints) * 100) : 0;
   const lastEvent = status?.consumedEvents.at(-1);
-  const metrics = operations?.metrics;
+  const failedPoints = operations?.metrics.failedPoints ?? 0;
+  const routedErrors = operations?.metrics.routedErrors ?? 0;
 
   return (
-    <Panel title="Kafka operations" className="operations-panel">
-      <div className="operations-hero">
-        <div className="operations-summary">
-          <span className={status?.running ? "status-dot-label active" : "status-dot-label"}>
-            {status?.running ? "Pipeline running" : "Pipeline idle"}
-          </span>
-          <h3>{status?.scenario || "Kafka scenario не выбран"}</h3>
-          <p>{status?.bootstrapServers ?? "Kafka bootstrap ещё не загружен"}</p>
-          <div className="ops-meta-row">
-            <span className="badge">{status?.replay ? `Replay ${status.speed}x` : "Normal mode"}</span>
-            <span className="badge">{activeProducers}/{producerCount} producers</span>
-            <span className="badge">{operations?.detectionErrorMode ?? "FAIL_FAST"}</span>
-          </div>
+    <Panel title="Kafka operations" className="ops-panel">
+      <div className={status?.running ? "ops-hero active" : "ops-hero"}>
+        <div>
+          <p className="eyebrow">Stateful Kafka pipeline</p>
+          <h2>{status?.running ? "Pipeline is running" : "Pipeline is idle"}</h2>
+          <p>{status?.scenario ?? "Scenario не выбран"} · {status?.replay ? "Replay" : "Normal"} · {status?.speed ?? 1}x</p>
         </div>
-        <div className="operations-progress-card">
-          <span>Replay progress</span>
-          <strong>{formatPercent(progressPercent / 100)}</strong>
-          <Progress value={status?.producedPoints ?? 0} max={status?.totalPoints ?? 0} />
-          <small>{status?.producedPoints ?? 0}/{status?.totalPoints ?? 0} points</small>
+        <div className="ops-progress-ring" aria-label={`Replay progress ${progressValue}%`}>
+          <strong>{progressValue}%</strong>
+          <span>{status?.producedPoints ?? 0}/{status?.totalPoints ?? 0}</span>
         </div>
       </div>
 
-      <div className="operations-kpis">
-        <CompactMetric label="Processed" value={formatNumber(metrics?.processedPoints)} hint="MetricPoint" />
-        <CompactMetric label="Events" value={formatNumber(metrics?.emittedEvents)} hint="DriftEvent" />
-        <CompactMetric
-          label="Errors"
-          value={formatNumber(metrics?.failedPoints)}
-          hint={`DLQ ${formatNumber(metrics?.routedErrors)}`}
-          tone={(metrics?.failedPoints ?? 0) > 0 ? "danger" : undefined}
-        />
-        <CompactMetric label="Latency" value={`${formatNumber(metrics?.meanDurationMillis)} ms`} hint="mean detection" />
+      <div className="ops-kpis">
+        <MetricCard title="Processed" value={formatNumber(operations?.metrics.processedPoints)} helper="MetricPoint обработано" />
+        <MetricCard title="Events" value={formatNumber(operations?.metrics.emittedEvents ?? status?.consumedEvents.length)} helper="DriftEvent в pipeline" />
+        <MetricCard title="Errors / DLQ" value={`${formatNumber(failedPoints)} / ${formatNumber(routedErrors)}`} helper="Ошибки detector-а" tone={failedPoints > 0 ? "danger" : undefined} />
+        <MetricCard title="Latency" value={`${formatNumber(operations?.metrics.meanDurationMillis)} ms`} helper={operations?.telemetryEnabled ? "Micrometer timer" : "Telemetry недоступна"} />
       </div>
 
-      <div className="operations-meta-grid">
-        <KeyValue label="Input" value={operations?.streamsInputTopics?.join(", ") || status?.inputTopic || "—"} />
-        <KeyValue label="Output" value={operations?.streamsOutputTopic || status?.outputTopic || "—"} />
-        <KeyValue label="State store" value={operations?.runtimeStateStoreName || "driftguard-runtime-state"} />
-        <KeyValue label="Telemetry" value={operations?.telemetryEnabled ? "Enabled" : "Unavailable"} />
+      <div className="ops-meta-row">
+        <span><strong>Producers</strong>{activeProducers}/{producerCount}</span>
+        <span><strong>Input</strong>{operations?.streamsInputTopics?.join(", ") || status?.inputTopic || "—"}</span>
+        <span><strong>Output</strong>{operations?.outputTopic || status?.outputTopic || "—"}</span>
+        <span><strong>State store</strong>{operations?.runtimeStateStoreName ?? "—"}</span>
+        <span><strong>Error mode</strong>{operations?.detectionErrorMode ?? "—"}</span>
+        <span><strong>Last event</strong>{lastEvent ? `${lastEvent.severity} · ${lastEvent.key.metric}` : "—"}</span>
       </div>
 
-      <div className="ops-checklist compact-checklist">
-        <OperationCheck active={Boolean(status?.enabled)} label="Kafka enabled" detail={status?.outputTopic ?? "output topic недоступен"} />
-        <OperationCheck active={Boolean(status?.running)} label="Topology running" detail={status?.inputTopic ?? "input topic недоступен"} />
-        <OperationCheck active={!status?.error} label="Runtime healthy" detail={status?.error ?? "Ошибок в demo status нет"} />
-        <OperationCheck active={Boolean(lastEvent)} label="Last event" detail={lastEvent ? `${lastEvent.severity} · ${lastEvent.key.metric}` : "Событий пока нет"} />
+      <div className="ops-checklist compact">
+        <OperationCheck active={Boolean(status?.enabled)} label="Kafka demo enabled" detail={status?.outputTopic ?? "output topic недоступен"} />
+        <OperationCheck active={Boolean(status?.running)} label="Streams topology running" detail={status?.inputTopic ?? "input topic недоступен"} />
+        <OperationCheck active={Boolean(status?.replay)} label="Replay mode" detail={`speed ${status?.speed ?? 1}x`} />
+        <OperationCheck active={!status?.error} label="No runtime error" detail={status?.error ?? "Ошибок в demo status нет"} />
       </div>
     </Panel>
   );
 }
 
-function CompactMetric({ label, value, hint, tone }: { label: string; value: string | number; hint: string; tone?: "danger" }) {
-  return (
-    <div className={tone === "danger" ? "compact-metric danger" : "compact-metric"}>
-      <span>{label}</span>
-      <strong>{value}</strong>
-      <small>{hint}</small>
-    </div>
-  );
-}
+function ProducerStrip({ status }: { status?: KafkaDemoStatus }) {
+  const producers = status?.producers ?? [];
 
-function KeyValue({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="key-value">
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
-  );
-}
+  if (producers.length === 0) {
+    return null;
+  }
 
-function OperationCheck({ active, label, detail }: { active: boolean; label: string; detail: string }) {
   return (
-    <div className={active ? "operation-check active" : "operation-check"}>
-      <span className="operation-dot" />
-      <div>
-        <strong>{label}</strong>
-        <span>{detail}</span>
+    <Panel title="Kafka producers" className="quiet-panel">
+      <div className="producer-strip">
+        {producers.map((producer) => (
+          <article className="producer-card compact" key={producer.id}>
+            <div>
+              <strong>{producer.service}</strong>
+              <span>{producer.metric} · {producer.operation ?? "-"}</span>
+            </div>
+            <Progress value={producer.producedPoints} max={producer.totalPoints} />
+          </article>
+        ))}
       </div>
-    </div>
+    </Panel>
   );
 }
 
@@ -717,6 +686,18 @@ function EventValueSummary({ event }: { event: DriftEvent }) {
         <dd>{formatNumber(event.score)}</dd>
       </div>
     </dl>
+  );
+}
+
+function OperationCheck({ active, label, detail }: { active: boolean; label: string; detail: string }) {
+  return (
+    <div className={active ? "operation-check active" : "operation-check"}>
+      <span className="operation-dot" />
+      <div>
+        <strong>{label}</strong>
+        <span>{detail}</span>
+      </div>
+    </div>
   );
 }
 
