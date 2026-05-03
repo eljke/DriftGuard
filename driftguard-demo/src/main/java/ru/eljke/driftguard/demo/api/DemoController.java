@@ -18,6 +18,8 @@ import ru.eljke.driftguard.demo.error.DemoErrorReason;
 import ru.eljke.driftguard.demo.kafka.KafkaDemoService;
 import ru.eljke.driftguard.demo.kafka.KafkaDemoStatus;
 import ru.eljke.driftguard.demo.kafka.KafkaReplayRequest;
+import ru.eljke.driftguard.demo.kafka.ops.KafkaOperationsService;
+import ru.eljke.driftguard.demo.kafka.ops.KafkaOperationsSnapshot;
 import ru.eljke.driftguard.demo.event.DemoDriftEventRepository;
 import ru.eljke.driftguard.demo.event.DemoStoredDriftEvent;
 import ru.eljke.driftguard.demo.scenario.DemoRunResult;
@@ -35,6 +37,7 @@ import java.util.Map;
 public class DemoController {
     private final DemoScenarioService service;
     private final KafkaDemoService kafkaDemoService;
+    private final KafkaOperationsService kafkaOperationsService;
     private final DemoToolProperties toolProperties;
     private final DemoConfigurationService configurationService;
     private final DemoDriftEventRepository eventRepository;
@@ -42,12 +45,14 @@ public class DemoController {
     public DemoController(
             DemoScenarioService service,
             KafkaDemoService kafkaDemoService,
+            KafkaOperationsService kafkaOperationsService,
             DemoToolProperties toolProperties,
             DemoConfigurationService configurationService,
             DemoDriftEventRepository eventRepository
     ) {
         this.service = service;
         this.kafkaDemoService = kafkaDemoService;
+        this.kafkaOperationsService = kafkaOperationsService;
         this.toolProperties = toolProperties;
         this.configurationService = configurationService;
         this.eventRepository = eventRepository;
@@ -133,6 +138,12 @@ public class DemoController {
         return kafkaDemoService.status();
     }
 
+    @GetMapping("/kafka/operations")
+    @Operation(summary = "Возвращает operational-сводку Kafka topology и demo playback")
+    public KafkaOperationsSnapshot kafkaOperations() {
+        return kafkaOperationsService.snapshot();
+    }
+
     @PostMapping("/kafka/start/{scenario}")
     @Operation(summary = "Запускает Kafka producer, Kafka Streams topology и consumer событий")
     public KafkaDemoStatus startKafkaScenario(@PathVariable("scenario") String scenario) {
@@ -196,6 +207,7 @@ public class DemoController {
                 Map.entry("benchmark", "GET /api/demo/benchmark"),
                 Map.entry("replayKafkaScenario", "POST /api/demo/kafka/replay"),
                 Map.entry("kafkaStatus", "GET /api/demo/kafka"),
+                Map.entry("kafkaOperations", "GET /api/demo/kafka/operations"),
                 Map.entry("startKafkaScenario", "POST /api/demo/kafka/start/{scenario}"),
                 Map.entry("stopKafkaScenario", "POST /api/demo/kafka/stop"),
                 Map.entry("tools", "GET /api/demo/tools"),

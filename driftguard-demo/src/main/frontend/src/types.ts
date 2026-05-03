@@ -141,6 +141,40 @@ export interface KafkaDemoStatus {
   error?: string;
 }
 
+
+export interface KafkaOperationsMetrics {
+  processedPoints: number;
+  emittedEvents: number;
+  failedPoints: number;
+  routedErrors: number;
+  durationMeasurements: number;
+  totalDurationMillis: number;
+  maxDurationMillis: number;
+  meanDurationMillis: number;
+}
+
+export interface KafkaOperationsSnapshot {
+  enabled: boolean;
+  running: boolean;
+  replay: boolean;
+  scenario: string;
+  inputTopic: string;
+  outputTopic: string;
+  bootstrapServers: string;
+  producedPoints: number;
+  totalPoints: number;
+  consumedEvents: number;
+  progressPercent: number;
+  streamsApplicationId: string;
+  streamsInputTopics: string[];
+  streamsOutputTopic: string;
+  runtimeStateStoreName: string;
+  detectionErrorMode: string;
+  telemetryEnabled: boolean;
+  metrics: KafkaOperationsMetrics;
+  error?: string;
+}
+
 export interface KafkaReplayRequest {
   scenario: string;
   speed: number;

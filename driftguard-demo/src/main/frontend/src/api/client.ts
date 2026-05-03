@@ -1,13 +1,15 @@
 import type {
-    DemoConfigurationView,
-    DetectionBenchmarkReport,
-    DemoRunResult,
-    DemoScenarioDescriptor,
-    DemoStoredDriftEvent,
-    DriftEvent,
-    KafkaDemoStatus,
-    KafkaReplayRequest,
-    ToolLink, DetectionMetrics
+  DemoConfigurationView,
+  DetectionBenchmarkReport,
+  DetectionMetrics,
+  DemoRunResult,
+  DemoScenarioDescriptor,
+  DemoStoredDriftEvent,
+  DriftEvent,
+  KafkaDemoStatus,
+  KafkaOperationsSnapshot,
+  KafkaReplayRequest,
+  ToolLink
 } from "../types";
 
 interface ApiErrorResponse {
@@ -58,6 +60,7 @@ export const api = {
     benchmark: () => request<DetectionBenchmarkReport>("/api/demo/benchmark"),
     benchmarkProfiles: () => request<DetectionBenchmarkReport[]>("/api/demo/benchmark/profiles"),
     kafkaStatus: () => request<KafkaDemoStatus>("/api/demo/kafka"),
+    kafkaOperations: () => request<KafkaOperationsSnapshot>("/api/demo/kafka/operations"),
     startKafka: (scenario: string) => request<KafkaDemoStatus>(`/api/demo/kafka/start/${scenario}`, {method: "POST"}),
     replayKafka: (body: KafkaReplayRequest) => request<KafkaDemoStatus>("/api/demo/kafka/replay", {
         method: "POST",

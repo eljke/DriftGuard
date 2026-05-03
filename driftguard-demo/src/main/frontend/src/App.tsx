@@ -25,6 +25,7 @@ import type {
   DemoScenarioDescriptor,
   DriftEvent,
   KafkaDemoStatus,
+  KafkaOperationsSnapshot,
   MetricKey,
   MetricPoint,
   ToolLink
@@ -45,6 +46,7 @@ export default function App() {
   const overview = useQuery({ queryKey: ["overview"], queryFn: api.overview, refetchInterval: 750 });
   const scenarios = useQuery({ queryKey: ["scenarios"], queryFn: api.scenarios });
   const kafka = useQuery({ queryKey: ["kafka"], queryFn: api.kafkaStatus, refetchInterval: 750 });
+  const kafkaOperations = useQuery({ queryKey: ["kafka-operations"], queryFn: api.kafkaOperations, refetchInterval: 1500 });
   const tools = useQuery({ queryKey: ["tools"], queryFn: api.tools });
   const configuration = useQuery({ queryKey: ["configuration"], queryFn: api.configuration });
   const storedEvents = useQuery({ queryKey: ["stored-events"], queryFn: api.storedEvents, refetchInterval: 750 });
@@ -83,7 +85,7 @@ export default function App() {
         <Header overview={overview.data} kafka={kafka.data} />
         {page === "overview" && <Overview result={overview.data} kafka={kafka.data} storedEvents={storedEvents.data ?? []} />}
         {page === "synthetic" && <SyntheticPage result={overview.data} scenarios={scenarios.data ?? []} />}
-        {page === "kafka" && <KafkaPage status={kafka.data} scenarios={scenarios.data ?? []} configuration={configuration.data} />}
+        {page === "kafka" && <KafkaPage status={kafka.data} operations={kafkaOperations.data} scenarios={scenarios.data ?? []} configuration={configuration.data} />}
         {page === "configuration" && <ConfigurationPage configuration={configuration.data} />}
         {page === "tools" && <ToolsPage tools={tools.data ?? []} />}
       </main>
@@ -205,10 +207,12 @@ function SyntheticPage({ result, scenarios }: { result?: DemoRunResult; scenario
 
 function KafkaPage({
   status,
+  operations,
   scenarios,
   configuration
 }: {
   status?: KafkaDemoStatus;
+  operations?: KafkaOperationsSnapshot;
   scenarios: DemoScenarioDescriptor[];
   configuration?: DemoConfigurationView;
 }) {
@@ -276,6 +280,16 @@ function KafkaPage({
           <MetricCard title="Speed" value={`${status?.speed ?? 1}x`} helper="Множитель скорости публикации" />
           <MetricCard title="Scenario" value={status?.scenario ?? "—"} helper="Текущий Kafka scenario" />
           <MetricCard title="Progress" value={`${status?.producedPoints ?? 0}/${status?.totalPoints ?? 0}`} helper={status?.inputTopic ?? "Topic не загружен"} />
+        </div>
+      </Panel>
+      <Panel title="Kafka operations telemetry">
+        <div className="summary-grid">
+          <MetricCard title="Processed" value={formatNumber(operations?.metrics.processedPoints)} helper="MetricPoint, обработанные topology" />
+          <MetricCard title="Events" value={formatNumber(operations?.metrics.emittedEvents)} helper="DriftEvent из Kafka pipeline" />
+          <MetricCard title="Errors" value={formatNumber(operations?.metrics.failedPoints)} helper={`DLQ: ${formatNumber(operations?.metrics.routedErrors)}`} tone={(operations?.metrics.failedPoints ?? 0) > 0 ? "danger" : undefined} />
+          <MetricCard title="Mean latency" value={`${formatNumber(operations?.metrics.meanDurationMillis)} ms`} helper={operations?.telemetryEnabled ? "Micrometer timer" : "Telemetry недоступна"} />
+          <MetricCard title="State store" value={operations?.runtimeStateStoreName ?? "—"} helper="Kafka Streams runtime state" />
+          <MetricCard title="Error mode" value={operations?.detectionErrorMode ?? "—"} helper="Detection error strategy" />
         </div>
       </Panel>
       <div className="producer-grid">
@@ -1134,8 +1148,8 @@ function detailNumber(event: DriftEvent, key: string) {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
-function formatNumber(value: number) {
-  return Number.isFinite(value)
+function formatNumber(value?: number) {
+  return value !== undefined && Number.isFinite(value)
     ? new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 3 }).format(value)
     : "—";
 }
