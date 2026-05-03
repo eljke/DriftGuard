@@ -39,6 +39,7 @@ public final class KafkaStatefulDriftGuardTopologyBuilder {
     private final List<DetectorDefinition> definitions;
     private final KafkaDetectionErrorHandler detectionErrorHandler;
     private final String runtimeStateStoreName;
+    private final List<KafkaDetectionTelemetryListener> telemetryListeners;
 
     public KafkaStatefulDriftGuardTopologyBuilder(
             ObjectMapper objectMapper,
@@ -52,7 +53,8 @@ public final class KafkaStatefulDriftGuardTopologyBuilder {
                 stateCodecRegistry,
                 definitions,
                 KafkaDetectionErrorHandler.failFast(),
-                KafkaDriftGuardStateStores.DEFAULT_RUNTIME_STATE_STORE
+                KafkaDriftGuardStateStores.DEFAULT_RUNTIME_STATE_STORE,
+                List.of()
         );
     }
 
@@ -64,12 +66,33 @@ public final class KafkaStatefulDriftGuardTopologyBuilder {
             KafkaDetectionErrorHandler detectionErrorHandler,
             String runtimeStateStoreName
     ) {
+        this(
+                objectMapper,
+                detectorRegistry,
+                stateCodecRegistry,
+                definitions,
+                detectionErrorHandler,
+                runtimeStateStoreName,
+                List.of()
+        );
+    }
+
+    public KafkaStatefulDriftGuardTopologyBuilder(
+            ObjectMapper objectMapper,
+            DetectorRegistry detectorRegistry,
+            DetectorStateCodecRegistry stateCodecRegistry,
+            List<DetectorDefinition> definitions,
+            KafkaDetectionErrorHandler detectionErrorHandler,
+            String runtimeStateStoreName,
+            List<KafkaDetectionTelemetryListener> telemetryListeners
+    ) {
         this.objectMapper = DriftGuardErrors.requireNonNull(objectMapper, "objectMapper");
         this.detectorRegistry = DriftGuardErrors.requireNonNull(detectorRegistry, "detectorRegistry");
         this.stateCodecRegistry = DriftGuardErrors.requireNonNull(stateCodecRegistry, "stateCodecRegistry");
         this.definitions = List.copyOf(definitions == null ? List.of() : definitions);
         this.detectionErrorHandler = DriftGuardErrors.requireNonNull(detectionErrorHandler, "detectionErrorHandler");
         this.runtimeStateStoreName = DriftGuardErrors.requireNonBlank(runtimeStateStoreName, "runtimeStateStoreName");
+        this.telemetryListeners = List.copyOf(telemetryListeners == null ? List.of() : telemetryListeners);
     }
 
     public Topology build(KafkaDriftGuardTopologyConfig config) {
@@ -95,6 +118,7 @@ public final class KafkaStatefulDriftGuardTopologyBuilder {
             detectionResults
                     .filter((ignored, result) -> result.error() != null)
                     .mapValues(DetectionResult::error)
+                    .peek((ignored, error) -> notifyErrorRouted(error))
                     .selectKey((ignored, error) -> KafkaMetricKeys.stateKey(error.point().key()))
                     .to(config.detectionErrorTopic(), Produced.with(Serdes.String(), detectionErrorSerde));
         }
@@ -127,9 +151,13 @@ public final class KafkaStatefulDriftGuardTopologyBuilder {
         @Override
         public void process(FixedKeyRecord<String, MetricPoint> record) {
             DetectionResult result;
+            long startedAt = System.nanoTime();
             try {
-                result = DetectionResult.events(emptyIfNull(detectorEngine.detect(record.value())));
+                List<DriftEvent> events = emptyIfNull(detectorEngine.detect(record.value()));
+                notifyCompleted(record.value(), events, System.nanoTime() - startedAt);
+                result = DetectionResult.events(events);
             } catch (RuntimeException exception) {
+                notifyFailed(record.value(), exception, System.nanoTime() - startedAt);
                 result = DetectionResult.failure(
                         emptyIfNull(detectionErrorHandler.handle(record.value(), exception)),
                         KafkaDetectionError.from(record.value(), exception, Instant.ofEpochMilli(record.timestamp()))
@@ -155,6 +183,24 @@ public final class KafkaStatefulDriftGuardTopologyBuilder {
 
         private static DetectionResult failure(List<DriftEvent> fallbackEvents, KafkaDetectionError error) {
             return new DetectionResult(fallbackEvents, error);
+        }
+    }
+
+    private void notifyCompleted(MetricPoint point, List<DriftEvent> events, long durationNanos) {
+        for (KafkaDetectionTelemetryListener listener : telemetryListeners) {
+            listener.onDetectionCompleted(point, events, durationNanos);
+        }
+    }
+
+    private void notifyFailed(MetricPoint point, RuntimeException exception, long durationNanos) {
+        for (KafkaDetectionTelemetryListener listener : telemetryListeners) {
+            listener.onDetectionFailed(point, exception, durationNanos);
+        }
+    }
+
+    private void notifyErrorRouted(KafkaDetectionError error) {
+        for (KafkaDetectionTelemetryListener listener : telemetryListeners) {
+            listener.onDetectionErrorRouted(error);
         }
     }
 

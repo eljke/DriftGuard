@@ -4,13 +4,18 @@ import ru.eljke.driftguard.core.detector.DetectorState;
 import ru.eljke.driftguard.core.error.DriftGuardErrors;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 /**
+ * Immutable in-memory implementation of {@link DetectorStateCodecRegistry}.
  * Неизменяемая in-memory реализация {@link DetectorStateCodecRegistry}.
+ *
+ * <p>Порядок регистрации codec-ов сохраняется, чтобы диагностические списки и тесты
+ * были детерминированными.</p>
  */
 public final class SimpleDetectorStateCodecRegistry implements DetectorStateCodecRegistry {
     private final Map<String, DetectorStateCodec<?>> byAlgorithm;
@@ -32,8 +37,8 @@ public final class SimpleDetectorStateCodecRegistry implements DetectorStateCode
                 throw new IllegalArgumentException("Duplicate detector state codec for state type: " + stateType.getName());
             }
         }
-        this.byAlgorithm = Map.copyOf(algorithms);
-        this.byStateType = Map.copyOf(stateTypes);
+        this.byAlgorithm = Collections.unmodifiableMap(new LinkedHashMap<>(algorithms));
+        this.byStateType = Collections.unmodifiableMap(new LinkedHashMap<>(stateTypes));
     }
 
     @Override

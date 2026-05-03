@@ -22,13 +22,14 @@ public final class KafkaDriftGuardTopologyBuilder {
     private final ObjectMapper objectMapper;
     private final Function<MetricPoint, List<DriftEvent>> detector;
     private final KafkaDetectionErrorHandler detectionErrorHandler;
+    private final List<KafkaDetectionTelemetryListener> telemetryListeners;
 
     public KafkaDriftGuardTopologyBuilder(ObjectMapper objectMapper, DriftDetectorEngine detectorEngine) {
         this(objectMapper, detectorEngine::detect);
     }
 
     public KafkaDriftGuardTopologyBuilder(ObjectMapper objectMapper, Function<MetricPoint, List<DriftEvent>> detector) {
-        this(objectMapper, detector, KafkaDetectionErrorHandler.failFast());
+        this(objectMapper, detector, KafkaDetectionErrorHandler.failFast(), List.of());
     }
 
     public KafkaDriftGuardTopologyBuilder(
@@ -36,9 +37,19 @@ public final class KafkaDriftGuardTopologyBuilder {
             Function<MetricPoint, List<DriftEvent>> detector,
             KafkaDetectionErrorHandler detectionErrorHandler
     ) {
+        this(objectMapper, detector, detectionErrorHandler, List.of());
+    }
+
+    public KafkaDriftGuardTopologyBuilder(
+            ObjectMapper objectMapper,
+            Function<MetricPoint, List<DriftEvent>> detector,
+            KafkaDetectionErrorHandler detectionErrorHandler,
+            List<KafkaDetectionTelemetryListener> telemetryListeners
+    ) {
         this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper must not be null");
         this.detector = Objects.requireNonNull(detector, "detector must not be null");
         this.detectionErrorHandler = Objects.requireNonNull(detectionErrorHandler, "detectionErrorHandler must not be null");
+        this.telemetryListeners = List.copyOf(telemetryListeners == null ? List.of() : telemetryListeners);
     }
 
     public Topology build(KafkaDriftGuardTopologyConfig config) {
@@ -58,10 +69,26 @@ public final class KafkaDriftGuardTopologyBuilder {
     }
 
     private List<DriftEvent> detectSafely(MetricPoint point) {
+        long startedAt = System.nanoTime();
         try {
-            return emptyIfNull(detector.apply(point));
+            List<DriftEvent> events = emptyIfNull(detector.apply(point));
+            notifyCompleted(point, events, System.nanoTime() - startedAt);
+            return events;
         } catch (RuntimeException exception) {
+            notifyFailed(point, exception, System.nanoTime() - startedAt);
             return emptyIfNull(detectionErrorHandler.handle(point, exception));
+        }
+    }
+
+    private void notifyCompleted(MetricPoint point, List<DriftEvent> events, long durationNanos) {
+        for (KafkaDetectionTelemetryListener listener : telemetryListeners) {
+            listener.onDetectionCompleted(point, events, durationNanos);
+        }
+    }
+
+    private void notifyFailed(MetricPoint point, RuntimeException exception, long durationNanos) {
+        for (KafkaDetectionTelemetryListener listener : telemetryListeners) {
+            listener.onDetectionFailed(point, exception, durationNanos);
         }
     }
 
