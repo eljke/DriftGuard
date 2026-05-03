@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @OpenAPIDefinition(info = @Info(title = "DriftGuard Demo API", version = "1.0.0"))
 public class DriftGuardDemoApplication {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         SpringApplication.run(DriftGuardDemoApplication.class, args);
     }
 }

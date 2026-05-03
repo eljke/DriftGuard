@@ -44,6 +44,10 @@ public final class SlidingDoubleWindow {
         return new SlidingDoubleWindow(capacity, next);
     }
 
+    public int capacity() {
+        return capacity;
+    }
+
     public int size() {
         return values.size();
     }
