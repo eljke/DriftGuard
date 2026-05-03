@@ -44,7 +44,7 @@ export function KafkaScenarioPanel({
     <Panel title="Run Kafka scenario" className="control-panel">
       {busy && <Notice tone="info" text="Kafka demo запускается. Создаются topic-и, topology, producer и consumer." />}
       {status?.error && <Notice tone="error" text={status.error} />}
-      {error && <Notice tone="error" text={readableError(error)} />}
+      {error ? <Notice tone="error" text={readableError(error)} /> : null}
       <ReplayControls
         disabled={busy || Boolean(status?.running)}
         profiles={profiles}
