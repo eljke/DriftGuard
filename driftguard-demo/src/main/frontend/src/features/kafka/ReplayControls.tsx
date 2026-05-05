@@ -77,7 +77,7 @@ export function ReplayControls({
       <NumberField disabled={disabled} label="Spike length %" max={95} min={5} step={1} value={scenarioParams.spikeLengthPercent} onChange={(next) => setParam("spikeLengthPercent", next)} />
 
       <p className="help-text">
-        Use 0 for scenario defaults. Replay переигрывает тот же synthetic scenario через Kafka, поэтому points становятся Kafka messages per producer stream.
+        Use 0 for scenario defaults. Live run publishes new MetricPoint timestamps now; Replay keeps a reproducible historical timeline. Points become Kafka messages per producer stream.
       </p>
     </div>
   );

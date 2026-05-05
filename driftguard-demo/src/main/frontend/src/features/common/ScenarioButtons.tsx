@@ -4,12 +4,14 @@ import type { DemoScenarioDescriptor } from "../../types";
 export function ScenarioButtons({
   scenarios,
   busy,
+  runLabel = "Run",
   onRun,
   onReplay,
   onLive
 }: {
   scenarios: DemoScenarioDescriptor[];
   busy?: boolean;
+  runLabel?: string;
   onRun: (scenario: string) => void;
   onReplay?: (scenario: string) => void;
   onLive?: (scenario: string) => void;
@@ -25,7 +27,7 @@ export function ScenarioButtons({
           <div className="scenario-actions">
             <button className="primary-button" disabled={busy} onClick={() => onRun(scenario.id)} type="button">
               {busy ? <Loader2 className="spin" size={16} /> : <Play size={16} />}
-              Run
+              {runLabel}
             </button>
             {onReplay && (
               <button className="secondary-button" disabled={busy} onClick={() => onReplay(scenario.id)} type="button">

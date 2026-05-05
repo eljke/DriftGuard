@@ -64,6 +64,7 @@ export function KafkaScenarioPanel({
       <ScenarioButtons
         scenarios={scenarios}
         busy={busy || Boolean(status?.running)}
+        runLabel="Live run"
         onRun={onRun}
         onReplay={onReplay}
       />
