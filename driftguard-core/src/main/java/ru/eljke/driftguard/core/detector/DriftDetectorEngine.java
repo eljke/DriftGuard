@@ -158,12 +158,17 @@ public final class DriftDetectorEngine {
             DetectorDefinition definition
     ) {
         if (previous.activeEpisode()) {
+            DriftEvent lastEvent = previous.lastEmittedEventValue().orElse(null);
+            if (!isBackNearBaseline(point, lastEvent)) {
+                return new EmissionTransition(
+                        new EmissionState(previous.consecutiveSignals(), previous.lastEmittedAt(), true, 0, previous.lastEmittedEvent()),
+                        List.of()
+                );
+            }
             int consecutiveNormal = previous.consecutiveNormal() + 1;
             boolean recovered = consecutiveNormal >= definition.emissionPolicy().recoveryConsecutiveNormal();
             DriftEvent recoveryEvent = recovered
-                    ? previous.lastEmittedEventValue()
-                    .map(event -> event.recoveredAt(point.timestamp(), definition.emissionPolicy().recoveryConsecutiveNormal()))
-                    .orElse(null)
+                    ? lastEvent.recoveredAt(point.timestamp(), definition.emissionPolicy().recoveryConsecutiveNormal())
                     : null;
             EmissionState next = new EmissionState(
                     recovered ? 0 : previous.consecutiveSignals(),
@@ -231,6 +236,20 @@ public final class DriftDetectorEngine {
         }
         return (previous.direction() == DriftDirection.UP && current.direction() == DriftDirection.DOWN)
                 || (previous.direction() == DriftDirection.DOWN && current.direction() == DriftDirection.UP);
+    }
+
+    private static boolean isBackNearBaseline(MetricPoint point, DriftEvent previous) {
+        if (previous == null) {
+            return true;
+        }
+        double baseline = previous.baselineValue();
+        double driftValue = previous.currentValue();
+        double tolerance = Math.abs(driftValue - baseline) * 0.25;
+        return switch (previous.direction()) {
+            case UP -> point.value() <= baseline + tolerance;
+            case DOWN -> point.value() >= baseline - tolerance;
+            case BOTH, DISTRIBUTION, UNKNOWN -> true;
+        };
     }
 
     private static boolean cooldownElapsed(EmissionState previous, DetectorDefinition definition, DriftEvent event) {

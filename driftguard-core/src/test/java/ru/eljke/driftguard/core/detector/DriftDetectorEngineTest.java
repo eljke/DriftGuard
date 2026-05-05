@@ -68,6 +68,33 @@ class DriftDetectorEngineTest {
         assertEquals(DriftEventPhase.ONGOING, ongoingEvents.getFirst().phase());
     }
 
+    @Test
+    void recoversDownwardEpisodeOnlyAfterMetricReturnsNearBaseline() {
+        OneShotDriftAlgorithm algorithm = new OneShotDriftAlgorithm();
+        DetectorDefinition definition = new DetectorDefinition(
+                "one-shot",
+                new OneShotDriftConfig(DriftDirection.DOWN, 1000.0),
+                key -> true,
+                new EmissionPolicyConfig(1, Duration.ZERO, 2)
+        );
+        DriftDetectorEngine engine = new DriftDetectorEngine(
+                new SimpleDetectorRegistry(List.of(algorithm)),
+                new InMemoryDetectorStateStore(),
+                List.of(definition)
+        );
+        MetricKey key = MetricKey.of("checkout-service", "throughput");
+
+        assertEquals(DriftEventPhase.STARTED, engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:00Z"), 430)).getFirst().phase());
+        assertTrue(engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:01Z"), 440)).isEmpty());
+        assertTrue(engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:02Z"), 460)).isEmpty());
+        assertTrue(engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:03Z"), 950)).isEmpty());
+
+        List<DriftEvent> recovered = engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:04Z"), 980));
+
+        assertEquals(1, recovered.size());
+        assertEquals(DriftEventPhase.RECOVERED, recovered.getFirst().phase());
+    }
+
     private record CountingConfig(int emitAt) implements DetectorConfig {
         @Override
         public String algorithm() {
@@ -177,6 +204,67 @@ class DriftDetectorEngineTest {
                     1,
                     point.value(),
                     0,
+                    context.detectorName(),
+                    name(),
+                    "test",
+                    Map.of(),
+                    Map.of()
+            ));
+        }
+    }
+
+    private record OneShotDriftConfig(DriftDirection direction, double baselineValue) implements DetectorConfig {
+        @Override
+        public String algorithm() {
+            return "one-shot-drift";
+        }
+    }
+
+    private record OneShotDriftState(boolean emitted) implements DetectorState {
+        @Override
+        public String algorithm() {
+            return "one-shot-drift";
+        }
+    }
+
+    private static final class OneShotDriftAlgorithm implements DetectorAlgorithm<OneShotDriftConfig, OneShotDriftState> {
+        @Override
+        public String name() {
+            return "one-shot-drift";
+        }
+
+        @Override
+        public Class<OneShotDriftConfig> configType() {
+            return OneShotDriftConfig.class;
+        }
+
+        @Override
+        public OneShotDriftState initialState(OneShotDriftConfig config) {
+            return new OneShotDriftState(false);
+        }
+
+        @Override
+        public DetectionResult<OneShotDriftState> detect(
+                MetricPoint point,
+                OneShotDriftState state,
+                OneShotDriftConfig config,
+                DetectionContext context
+        ) {
+            if (state.emitted()) {
+                return DetectionResult.noDrift(state);
+            }
+            OneShotDriftState next = new OneShotDriftState(true);
+            return DetectionResult.drift(next, new DriftEvent(
+                    null,
+                    point.key(),
+                    point.timestamp(),
+                    point.timestamp(),
+                    point.timestamp(),
+                    config.direction(),
+                    DriftSeverity.CRITICAL,
+                    1,
+                    point.value(),
+                    config.baselineValue(),
                     context.detectorName(),
                     name(),
                     "test",
