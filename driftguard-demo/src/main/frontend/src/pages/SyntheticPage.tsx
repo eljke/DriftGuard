@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Square } from "lucide-react";
+import { useState } from "react";
 import { api } from "../api/client";
 import { Notice, Panel } from "../components/ui";
 import { BenchmarkPanel } from "../features/common/BenchmarkPanel";
@@ -13,12 +14,13 @@ import type { DemoRunResult, DemoScenarioDescriptor } from "../types";
 
 export function SyntheticPage({ result, scenarios }: { result?: DemoRunResult; scenarios: DemoScenarioDescriptor[] }) {
   const queryClient = useQueryClient();
+  const [samples, setSamples] = useState(160);
   const run = useMutation({
-    mutationFn: api.runScenario,
+    mutationFn: (scenario: string) => api.runScenario(scenario, { samples }),
     onSuccess: (data) => queryClient.setQueryData(["overview"], data)
   });
   const live = useMutation({
-    mutationFn: api.startLive,
+    mutationFn: (scenario: string) => api.startLive(scenario, { samples }),
     onSuccess: (data) => queryClient.setQueryData(["overview"], data)
   });
   const stopLive = useMutation({
@@ -35,6 +37,21 @@ export function SyntheticPage({ result, scenarios }: { result?: DemoRunResult; s
       <Panel title="Synthetic scenarios">
         {busy && <Notice tone="info" text="Команда выполняется. Результат обновится автоматически." />}
         {error && <Notice tone="error" text={readableError(error)} />}
+        <div className="scenario-parameters">
+          <label className="field">
+            <span>Sample points per stream</span>
+            <input
+              disabled={busy}
+              max={600}
+              min={80}
+              step={10}
+              type="number"
+              value={samples}
+              onChange={(event) => setSamples(Number(event.target.value))}
+            />
+          </label>
+          <p className="help-text">Points are generated MetricPoint samples. In Kafka mode the same value becomes messages per producer stream.</p>
+        </div>
         <ScenarioButtons scenarios={scenarios} busy={busy} onRun={(id) => run.mutate(id)} onLive={(id) => live.mutate(id)} />
       </Panel>
       <BenchmarkPanel

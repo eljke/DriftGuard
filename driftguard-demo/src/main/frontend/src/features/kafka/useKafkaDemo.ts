@@ -8,6 +8,7 @@ export function useKafkaDemo() {
   const [replaySpeed, setReplaySpeed] = useState(2);
   const [replayProfile, setReplayProfile] = useState("");
   const [resetState, setResetState] = useState(true);
+  const [samples, setSamples] = useState(160);
 
   const start = useMutation({
     mutationFn: api.startKafka,
@@ -29,7 +30,8 @@ export function useKafkaDemo() {
       scenario,
       speed: replaySpeed,
       resetState,
-      profile: replayProfile || undefined
+      profile: replayProfile || undefined,
+      samples
     };
     replay.mutate(request);
   };
@@ -38,9 +40,11 @@ export function useKafkaDemo() {
     replaySpeed,
     replayProfile,
     resetState,
+    samples,
     setReplaySpeed,
     setReplayProfile,
     setResetState,
+    setSamples,
     startScenario: start.mutate,
     replayScenario,
     stop: stop.mutate,

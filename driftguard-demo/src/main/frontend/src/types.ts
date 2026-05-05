@@ -114,6 +114,10 @@ export interface DemoScenarioDescriptor {
   description: string;
 }
 
+export interface DemoScenarioRequest {
+  samples?: number;
+}
+
 export interface KafkaProducerStatus {
   id: string;
   service: string;
@@ -180,6 +184,7 @@ export interface KafkaReplayRequest {
   speed: number;
   resetState: boolean;
   profile?: string;
+  samples?: number;
 }
 
 

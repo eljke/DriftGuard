@@ -5,6 +5,7 @@ import type {
   DetectionMetrics,
   DemoHelp,
   DemoRunResult,
+  DemoScenarioRequest,
   DemoScenarioDescriptor,
   DemoStoredDriftEvent,
   DriftEvent,
@@ -56,8 +57,14 @@ export const api = {
     clearStoredEvents: () => request<{ cleared: boolean }>("/api/demo/events/clear", { method: "POST" }),
     quality: () => request<DetectionMetrics>("/api/demo/quality"),
     scenarios: () => request<DemoScenarioDescriptor[]>("/api/demo/scenarios"),
-    runScenario: (scenario: string) => request<DemoRunResult>(`/api/demo/run/${scenario}`, {method: "POST"}),
-    startLive: (scenario: string) => request<DemoRunResult>(`/api/demo/live/${scenario}`, {method: "POST"}),
+    runScenario: (scenario: string, body?: DemoScenarioRequest) => request<DemoRunResult>(`/api/demo/run/${scenario}`, {
+        method: "POST",
+        body: JSON.stringify(body ?? {})
+    }),
+    startLive: (scenario: string, body?: DemoScenarioRequest) => request<DemoRunResult>(`/api/demo/live/${scenario}`, {
+        method: "POST",
+        body: JSON.stringify(body ?? {})
+    }),
     stopLive: () => request<DemoRunResult>("/api/demo/live/stop", {method: "POST"}),
     benchmark: () => request<DetectionBenchmarkReport>("/api/demo/benchmark"),
     benchmarkProfiles: () => request<DetectionBenchmarkReport[]>("/api/demo/benchmark/profiles"),

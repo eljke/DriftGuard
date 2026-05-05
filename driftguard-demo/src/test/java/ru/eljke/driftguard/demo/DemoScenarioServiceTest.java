@@ -7,12 +7,14 @@ import ru.eljke.driftguard.core.domain.DriftEventPhase;
 import ru.eljke.driftguard.core.domain.MetricPoint;
 import ru.eljke.driftguard.demo.detection.DemoDetectionRuntime;
 import ru.eljke.driftguard.demo.scenario.DemoRunResult;
+import ru.eljke.driftguard.demo.scenario.DemoScenarioRequest;
 import ru.eljke.driftguard.demo.scenario.DemoScenarioService;
 import ru.eljke.driftguard.testkit.MetricScenario;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -39,5 +41,15 @@ class DemoScenarioServiceTest {
         assertFalse(events.isEmpty());
         assertTrue(events.stream().anyMatch(event -> event.key().metric().equals("error-rate")));
         assertTrue(events.stream().anyMatch(event -> event.phase() == DriftEventPhase.RECOVERED));
+    }
+
+    @Test
+    void runScenarioUsesRequestedSampleCount() {
+        DemoScenarioService service = new DemoScenarioService(new DemoDetectionRuntime(), new SimpleMeterRegistry());
+
+        DemoRunResult result = service.run("latency-step", new DemoScenarioRequest(240));
+
+        assertEquals(240, result.metricPoints());
+        assertEquals(240, result.samplePoints().size());
     }
 }

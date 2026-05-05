@@ -29,7 +29,7 @@ export function ScenarioButtons({
             </button>
             {onReplay && (
               <button className="secondary-button" disabled={busy} onClick={() => onReplay(scenario.id)} type="button">
-                Replay 2x
+                Replay
               </button>
             )}
             {onLive && (

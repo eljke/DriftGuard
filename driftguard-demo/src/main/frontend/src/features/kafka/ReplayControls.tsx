@@ -2,19 +2,23 @@ export function ReplayControls({
   disabled,
   profiles,
   resetState,
+  samples,
   selectedProfile,
   speed,
   onProfileChange,
   onResetStateChange,
+  onSamplesChange,
   onSpeedChange
 }: {
   disabled: boolean;
   profiles: string[];
   resetState: boolean;
+  samples: number;
   selectedProfile: string;
   speed: number;
   onProfileChange: (profile: string) => void;
   onResetStateChange: (reset: boolean) => void;
+  onSamplesChange: (samples: number) => void;
   onSpeedChange: (speed: number) => void;
 }) {
   return (
@@ -32,6 +36,19 @@ export function ReplayControls({
           <option value={5}>5x</option>
           <option value={10}>10x</option>
         </select>
+      </label>
+
+      <label className="field">
+        <span>Sample points per stream</span>
+        <input
+          disabled={disabled}
+          max={600}
+          min={80}
+          step={10}
+          type="number"
+          value={samples}
+          onChange={(event) => onSamplesChange(Number(event.target.value))}
+        />
       </label>
 
       <label className="field">

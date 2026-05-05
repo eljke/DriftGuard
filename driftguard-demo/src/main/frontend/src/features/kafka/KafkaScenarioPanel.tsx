@@ -12,12 +12,14 @@ interface KafkaScenarioPanelProps {
   replayProfile: string;
   replaySpeed: number;
   resetState: boolean;
+  samples: number;
   scenarios: DemoScenarioDescriptor[];
   status?: KafkaDemoStatus;
   stopping: boolean;
   onProfileChange: (profile: string) => void;
   onReplay: (scenario: string) => void;
   onResetStateChange: (reset: boolean) => void;
+  onSamplesChange: (samples: number) => void;
   onRun: (scenario: string) => void;
   onSpeedChange: (speed: number) => void;
   onStop: () => void;
@@ -30,12 +32,14 @@ export function KafkaScenarioPanel({
   replayProfile,
   replaySpeed,
   resetState,
+  samples,
   scenarios,
   status,
   stopping,
   onProfileChange,
   onReplay,
   onResetStateChange,
+  onSamplesChange,
   onRun,
   onSpeedChange,
   onStop
@@ -49,10 +53,12 @@ export function KafkaScenarioPanel({
         disabled={busy || Boolean(status?.running)}
         profiles={profiles}
         resetState={resetState}
+        samples={samples}
         selectedProfile={replayProfile}
         speed={replaySpeed}
         onProfileChange={onProfileChange}
         onResetStateChange={onResetStateChange}
+        onSamplesChange={onSamplesChange}
         onSpeedChange={onSpeedChange}
       />
       <ScenarioButtons

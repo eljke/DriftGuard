@@ -25,6 +25,7 @@ import ru.eljke.driftguard.demo.kafka.ops.KafkaOperationsSnapshot;
 import ru.eljke.driftguard.demo.event.DemoDriftEventRepository;
 import ru.eljke.driftguard.demo.event.DemoStoredDriftEvent;
 import ru.eljke.driftguard.demo.scenario.DemoRunResult;
+import ru.eljke.driftguard.demo.scenario.DemoScenarioRequest;
 import ru.eljke.driftguard.demo.scenario.DemoScenarioDescriptor;
 import ru.eljke.driftguard.demo.scenario.DemoScenarioService;
 import ru.eljke.driftguard.demo.tool.ToolLink;
@@ -120,14 +121,20 @@ public class DemoController {
 
     @PostMapping("/run/{scenario}")
     @Operation(summary = "Запускает выбранный демонстрационный сценарий")
-    public DemoRunResult runScenario(@PathVariable("scenario") String scenario) {
-        return service.run(scenario);
+    public DemoRunResult runScenario(
+            @PathVariable("scenario") String scenario,
+            @RequestBody(required = false) DemoScenarioRequest request
+    ) {
+        return service.run(scenario, request);
     }
 
     @PostMapping("/live/{scenario}")
     @Operation(summary = "Запускает live playback выбранного сценария")
-    public DemoRunResult startLiveScenario(@PathVariable("scenario") String scenario) {
-        return service.startLive(scenario);
+    public DemoRunResult startLiveScenario(
+            @PathVariable("scenario") String scenario,
+            @RequestBody(required = false) DemoScenarioRequest request
+    ) {
+        return service.startLive(scenario, request);
     }
 
     @PostMapping("/live/stop")

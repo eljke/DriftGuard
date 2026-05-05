@@ -92,9 +92,17 @@ public class DemoScenarioService {
     }
 
     public DemoRunResult run(String scenarioId) {
+        return run(scenarioId, null);
+    }
+
+    public DemoRunResult run(String scenarioId, DemoScenarioRequest request) {
         stopLive();
         DemoScenarioDescriptor descriptor = findScenario(scenarioId);
-        MetricScenario scenario = createScenario(descriptor.id(), "demo-run-" + runSequence.incrementAndGet());
+        MetricScenario scenario = createScenario(
+                descriptor.id(),
+                "demo-run-" + runSequence.incrementAndGet(),
+                requestedSamples(descriptor.id(), request)
+        );
         List<MetricPoint> points = scenario.generate();
         List<DriftEvent> events = new ArrayList<>();
         String runId = scenario.name();
@@ -121,9 +129,17 @@ public class DemoScenarioService {
     }
 
     public synchronized DemoRunResult startLive(String scenarioId) {
+        return startLive(scenarioId, null);
+    }
+
+    public synchronized DemoRunResult startLive(String scenarioId, DemoScenarioRequest request) {
         stopLive();
         DemoScenarioDescriptor descriptor = findScenario(scenarioId);
-        MetricScenario scenario = createScenario(descriptor.id(), "live-run-" + runSequence.incrementAndGet());
+        MetricScenario scenario = createScenario(
+                descriptor.id(),
+                "live-run-" + runSequence.incrementAndGet(),
+                requestedSamples(descriptor.id(), request)
+        );
         List<MetricPoint> points = scenario.generate();
         List<MetricPoint> processed = new ArrayList<>();
         List<DriftEvent> events = new ArrayList<>();
@@ -220,52 +236,57 @@ public class DemoScenarioService {
     }
 
     public static MetricScenario createScenario(String scenarioId, String instance) {
+        return createScenario(scenarioId, instance, defaultSamples(scenarioId));
+    }
+
+    public static MetricScenario createScenario(String scenarioId, String instance, int samples) {
+        int safeSamples = new DemoScenarioRequest(samples).normalizedSamples(defaultSamples(scenarioId));
         return switch (scenarioId) {
             case "latency-step" -> new StepDriftScenario(
                 "latency-step-degradation",
-                config("checkout-service", "latency", instance, "POST /checkout", MetricKind.DURATION, 160),
-                80,
+                config("checkout-service", "latency", instance, "POST /checkout", MetricKind.DURATION, safeSamples),
+                at(safeSamples, 0.50),
                 100.0,
                 260.0,
                 4.0
             );
             case "error-rate-spike" -> new PulseSpikeScenario(
                     "error-rate-spike",
-                    config("checkout-service", "error-rate", instance, "POST /checkout", MetricKind.RATE, 140),
-                    60,
-                    28,
+                    config("checkout-service", "error-rate", instance, "POST /checkout", MetricKind.RATE, safeSamples),
+                    at(safeSamples, 0.43),
+                    length(safeSamples, 0.20),
                     0.01,
                     0.18,
                     0.002
             );
             case "throughput-drop" -> new ThroughputDropScenario(
                     "throughput-drop",
-                    config("checkout-service", "throughput", instance, "POST /checkout", MetricKind.RATE, 150),
-                    70,
+                    config("checkout-service", "throughput", instance, "POST /checkout", MetricKind.RATE, safeSamples),
+                    at(safeSamples, 0.47),
                     1000.0,
                     430.0,
                     18.0
             );
             case "queue-growth" -> new GradualDriftScenario(
                     "queue-backlog-growth",
-                    config("orders-worker", "queue-size", instance, "orders.created", MetricKind.SIZE, 160),
-                    55,
+                    config("orders-worker", "queue-size", instance, "orders.created", MetricKind.SIZE, safeSamples),
+                    at(safeSamples, 0.34),
                     40.0,
                     2.6,
                     4.0
             );
             case "seasonal-latency" -> new SeasonalNoiseScenario(
                     "seasonal-latency",
-                    config("checkout-service", "latency", instance, "POST /checkout", MetricKind.DURATION, 180),
+                    config("checkout-service", "latency", instance, "POST /checkout", MetricKind.DURATION, safeSamples),
                     120.0,
                     25.0,
-                    45,
+                    Math.max(20, at(safeSamples, 0.25)),
                     2.0
             );
             case "microservices-system" -> new StepDriftScenario(
                     "microservices-system-latency",
-                    config("checkout-service", "latency", instance, "POST /checkout", MetricKind.DURATION, 160),
-                    80,
+                    config("checkout-service", "latency", instance, "POST /checkout", MetricKind.DURATION, safeSamples),
+                    at(safeSamples, 0.50),
                     100.0,
                     260.0,
                     4.0
@@ -349,5 +370,28 @@ public class DemoScenarioService {
                 .tag("mode", mode)
                 .register(meterRegistry)
                 .increment(events);
+    }
+
+    private static int requestedSamples(String scenarioId, DemoScenarioRequest request) {
+        return request == null
+                ? defaultSamples(scenarioId)
+                : request.normalizedSamples(defaultSamples(scenarioId));
+    }
+
+    private static int defaultSamples(String scenarioId) {
+        return switch (scenarioId) {
+            case "error-rate-spike" -> 140;
+            case "throughput-drop" -> 150;
+            case "seasonal-latency" -> 180;
+            default -> 160;
+        };
+    }
+
+    private static int at(int samples, double ratio) {
+        return Math.max(1, Math.min(samples - 2, (int) Math.round(samples * ratio)));
+    }
+
+    private static int length(int samples, double ratio) {
+        return Math.max(8, Math.min(samples - at(samples, 0.43), (int) Math.round(samples * ratio)));
     }
 }

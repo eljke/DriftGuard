@@ -100,7 +100,7 @@ public class KafkaDemoService {
 
     public synchronized KafkaDemoStatus replay(KafkaReplayRequest request) {
         KafkaReplayRequest safeRequest = request == null
-                ? new KafkaReplayRequest("latency-step", 2.0, true, null)
+                ? new KafkaReplayRequest("latency-step", 2.0, true, null, null)
                 : request;
 
         return startInternal(
@@ -108,7 +108,8 @@ public class KafkaDemoService {
                 true,
                 safeRequest.normalizedSpeed(),
                 safeRequest.resetState(),
-                safeRequest.profile()
+                safeRequest.profile(),
+                safeRequest.normalizedSamples(defaultSamples(safeRequest.normalizedScenario()))
         );
     }
 
@@ -118,6 +119,17 @@ public class KafkaDemoService {
             double playbackSpeed,
             boolean resetState,
             String profile
+    ) {
+        return startInternal(scenario, replayMode, playbackSpeed, resetState, profile, defaultSamples(scenario));
+    }
+
+    private KafkaDemoStatus startInternal(
+            String scenario,
+            boolean replayMode,
+            double playbackSpeed,
+            boolean resetState,
+            String profile,
+            int samples
     ) {
         if (!properties.isEnabled()) {
             throw new DriftGuardValidationException(DemoErrorReason.KAFKA_DEMO_DISABLED);
@@ -138,7 +150,7 @@ public class KafkaDemoService {
         error = null;
 
         long run = runSequence.incrementAndGet();
-        List<ProducerPlayback> playbacks = createProducerPlaybacks(scenarioId, run);
+        List<ProducerPlayback> playbacks = createProducerPlaybacks(scenarioId, run, samples);
         producerPlaybacks.addAll(playbacks);
         totalPoints = playbacks.stream().mapToInt(ProducerPlayback::totalPoints).sum();
 
@@ -213,57 +225,57 @@ public class KafkaDemoService {
         }
     }
 
-    private List<ProducerPlayback> createProducerPlaybacks(String scenario, long run) {
+    private List<ProducerPlayback> createProducerPlaybacks(String scenario, long run, int samples) {
         if ("microservices-system".equals(scenario)) {
             return List.of(
-                    playback("checkout-latency-producer", checkoutLatency(run)),
-                    playback("payment-errors-producer", paymentErrors(run)),
-                    playback("orders-queue-producer", ordersQueue(run)),
-                    playback("checkout-throughput-producer", checkoutThroughput(run))
+                    playback("checkout-latency-producer", checkoutLatency(run, samples)),
+                    playback("payment-errors-producer", paymentErrors(run, samples)),
+                    playback("orders-queue-producer", ordersQueue(run, samples)),
+                    playback("checkout-throughput-producer", checkoutThroughput(run, samples))
             );
         }
-        return List.of(playback(scenario + "-producer", DemoScenarioService.createScenario(scenario, "kafka-run-" + run)));
+        return List.of(playback(scenario + "-producer", DemoScenarioService.createScenario(scenario, "kafka-run-" + run, samples)));
     }
 
-    private static MetricScenario checkoutLatency(long run) {
+    private static MetricScenario checkoutLatency(long run, int samples) {
         return new StepDriftScenario(
                 "checkout-latency-step",
-                DemoScenarioService.config("checkout-service", "latency", "checkout-" + run, "POST /checkout", MetricKind.DURATION, 160),
-                80,
+                DemoScenarioService.config("checkout-service", "latency", "checkout-" + run, "POST /checkout", MetricKind.DURATION, samples),
+                at(samples, 0.50),
                 100.0,
                 260.0,
                 4.0
         );
     }
 
-    private static MetricScenario paymentErrors(long run) {
+    private static MetricScenario paymentErrors(long run, int samples) {
         return new PulseSpikeScenario(
                 "payment-error-rate-spike",
-                DemoScenarioService.config("payment-service", "error-rate", "payment-" + run, "POST /payments", MetricKind.RATE, 140),
-                60,
-                28,
+                DemoScenarioService.config("payment-service", "error-rate", "payment-" + run, "POST /payments", MetricKind.RATE, samples),
+                at(samples, 0.43),
+                length(samples, 0.20),
                 0.01,
                 0.18,
                 0.002
         );
     }
 
-    private static MetricScenario ordersQueue(long run) {
+    private static MetricScenario ordersQueue(long run, int samples) {
         return new GradualDriftScenario(
                 "orders-queue-growth",
-                DemoScenarioService.config("orders-worker", "queue-size", "orders-" + run, "orders.created", MetricKind.SIZE, 160),
-                55,
+                DemoScenarioService.config("orders-worker", "queue-size", "orders-" + run, "orders.created", MetricKind.SIZE, samples),
+                at(samples, 0.34),
                 40.0,
                 2.6,
                 4.0
         );
     }
 
-    private static MetricScenario checkoutThroughput(long run) {
+    private static MetricScenario checkoutThroughput(long run, int samples) {
         return new ThroughputDropScenario(
                 "checkout-throughput-drop",
-                DemoScenarioService.config("checkout-service", "throughput", "checkout-throughput-" + run, "POST /checkout", MetricKind.RATE, 150),
-                70,
+                DemoScenarioService.config("checkout-service", "throughput", "checkout-throughput-" + run, "POST /checkout", MetricKind.RATE, samples),
+                at(samples, 0.47),
                 1000.0,
                 430.0,
                 18.0
@@ -430,6 +442,23 @@ public class KafkaDemoService {
         return playbacks.stream()
                 .map(ProducerPlayback::instance)
                 .collect(java.util.stream.Collectors.toUnmodifiableSet());
+    }
+
+    private static int defaultSamples(String scenario) {
+        return switch (scenario == null ? "" : scenario) {
+            case "error-rate-spike" -> 140;
+            case "throughput-drop" -> 150;
+            case "seasonal-latency" -> 180;
+            default -> 160;
+        };
+    }
+
+    private static int at(int samples, double ratio) {
+        return Math.max(1, Math.min(samples - 2, (int) Math.round(samples * ratio)));
+    }
+
+    private static int length(int samples, double ratio) {
+        return Math.max(8, Math.min(samples - at(samples, 0.43), (int) Math.round(samples * ratio)));
     }
 
     private final class ProducerPlayback {
