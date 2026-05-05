@@ -225,7 +225,7 @@ public final class DriftDetectorEngine {
         }
 
         boolean emitOngoing = cooldownElapsed(previous, definition, event);
-        DriftEvent ongoing = emitOngoing ? event.ongoingAt(event.detectedAt(), consecutiveSignals) : null;
+        DriftEvent ongoing = emitOngoing ? event.ongoingAt(event.detectedAt(), consecutiveSignals, lastEvent.baselineValue()) : null;
         EmissionState next = new EmissionState(
                 consecutiveSignals,
                 emitOngoing ? event.detectedAt() : previous.lastEmittedAt(),

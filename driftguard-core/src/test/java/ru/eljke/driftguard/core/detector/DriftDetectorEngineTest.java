@@ -121,6 +121,33 @@ class DriftDetectorEngineTest {
         assertEquals(980.0, recovered.getFirst().currentValue());
     }
 
+    @Test
+    void keepsEpisodeBaselineAcrossOngoingSignals() {
+        BaselineChangingAlgorithm algorithm = new BaselineChangingAlgorithm();
+        DetectorDefinition definition = new DetectorDefinition(
+                "baseline-changing",
+                new BaselineChangingConfig(),
+                key -> true,
+                new EmissionPolicyConfig(1, Duration.ZERO, 1)
+        );
+        DriftDetectorEngine engine = new DriftDetectorEngine(
+                new SimpleDetectorRegistry(List.of(algorithm)),
+                new InMemoryDetectorStateStore(),
+                List.of(definition)
+        );
+        MetricKey key = MetricKey.of("checkout-service", "throughput");
+
+        DriftEvent started = engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:00Z"), 430)).getFirst();
+        DriftEvent ongoing = engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:01Z"), 440)).getFirst();
+        assertTrue(engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:02Z"), 460)).isEmpty());
+
+        DriftEvent recovered = engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:03Z"), 980)).getFirst();
+
+        assertEquals(1000.0, started.baselineValue());
+        assertEquals(1000.0, ongoing.baselineValue());
+        assertEquals(DriftEventPhase.RECOVERED, recovered.phase());
+    }
+
     private record CountingConfig(int emitAt) implements DetectorConfig {
         @Override
         public String algorithm() {
@@ -350,6 +377,66 @@ class DriftDetectorEngineTest {
                     1,
                     point.value(),
                     1000.0,
+                    context.detectorName(),
+                    name(),
+                    "test",
+                    Map.of(),
+                    Map.of()
+            ));
+        }
+    }
+
+    private record BaselineChangingConfig() implements DetectorConfig {
+        @Override
+        public String algorithm() {
+            return "baseline-changing";
+        }
+    }
+
+    private record BaselineChangingState(int count) implements DetectorState {
+        @Override
+        public String algorithm() {
+            return "baseline-changing";
+        }
+    }
+
+    private static final class BaselineChangingAlgorithm implements DetectorAlgorithm<BaselineChangingConfig, BaselineChangingState> {
+        @Override
+        public String name() {
+            return "baseline-changing";
+        }
+
+        @Override
+        public Class<BaselineChangingConfig> configType() {
+            return BaselineChangingConfig.class;
+        }
+
+        @Override
+        public BaselineChangingState initialState(BaselineChangingConfig config) {
+            return new BaselineChangingState(0);
+        }
+
+        @Override
+        public DetectionResult<BaselineChangingState> detect(
+                MetricPoint point,
+                BaselineChangingState state,
+                BaselineChangingConfig config,
+                DetectionContext context
+        ) {
+            BaselineChangingState next = new BaselineChangingState(state.count() + 1);
+            double baseline = next.count() == 1 ? 1000.0 : 430.0;
+            DriftDirection direction = next.count() <= 2 ? DriftDirection.DOWN : DriftDirection.UP;
+            return DetectionResult.drift(next, new DriftEvent(
+                    null,
+                    point.key(),
+                    point.timestamp(),
+                    point.timestamp(),
+                    point.timestamp(),
+                    direction,
+                    DriftSeverity.CRITICAL,
+                    1,
+                    point.value(),
+                    baseline,
                     context.detectorName(),
                     name(),
                     "test",

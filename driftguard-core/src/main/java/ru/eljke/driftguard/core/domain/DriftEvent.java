@@ -88,9 +88,14 @@ public record DriftEvent(
     }
 
     public DriftEvent ongoingAt(Instant observedAt, int consecutiveSignals) {
+        return ongoingAt(observedAt, consecutiveSignals, baselineValue);
+    }
+
+    public DriftEvent ongoingAt(Instant observedAt, int consecutiveSignals, double episodeBaselineValue) {
         Map<String, Object> ongoingDetails = new LinkedHashMap<>(details);
         ongoingDetails.put("consecutiveSignals", consecutiveSignals);
         ongoingDetails.put("episodeOngoing", true);
+        ongoingDetails.put("episodeBaselineValue", episodeBaselineValue);
         return new DriftEvent(
                 null,
                 key,
@@ -102,7 +107,7 @@ public record DriftEvent(
                 severity,
                 score,
                 currentValue,
-                baselineValue,
+                episodeBaselineValue,
                 detector,
                 algorithm,
                 reason,
