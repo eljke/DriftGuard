@@ -58,6 +58,97 @@ emission policy
 
 `DriftDetectorEngine` применяет подходящие detector-ы, обновляет состояние и возвращает `DriftEvent`, если drift обнаружен.
 
+## Integration contracts
+
+DriftGuard intentionally keeps the integration surface small: consumers send `MetricPoint`, configure detector definitions and receive `DriftEvent`.
+
+### MetricPoint input
+
+`MetricPoint` is the stable input contract for core, Spring Boot and Kafka integrations.
+
+```json
+{
+  "key": {
+    "service": "checkout-service",
+    "metric": "latency",
+    "instance": "instance-1",
+    "operation": "POST /checkout"
+  },
+  "timestamp": "2026-05-05T16:00:00Z",
+  "value": 245.7,
+  "kind": "DURATION",
+  "tags": {
+    "region": "eu-central-1"
+  },
+  "attributes": {}
+}
+```
+
+Required fields are `key.service`, `key.metric`, `timestamp`, `value` and `kind`. `instance`, `operation`, `tags` and `attributes` are optional but useful for routing, filtering and diagnostics.
+
+### DriftEvent output
+
+`DriftEvent` is the stable output contract for REST API, Kafka output topic, sinks and UI.
+
+```json
+{
+  "phase": "STARTED",
+  "direction": "UP",
+  "severity": "CRITICAL",
+  "score": 72.3,
+  "currentValue": 260.0,
+  "baselineValue": 101.4,
+  "detector": "latency-page-hinkley",
+  "algorithm": "page-hinkley",
+  "reason": "Page-Hinkley cumulative deviation crossed threshold",
+  "details": {
+    "relativeChangePercent": 156.4,
+    "criticalThreshold": 50.0
+  }
+}
+```
+
+`phase` describes the lifecycle of one drift episode:
+
+```text
+STARTED   first public event for a drift episode
+ONGOING   repeated signal after emission cooldown
+RECOVERED detector observed enough normal points near baseline
+```
+
+`severity` matters for `STARTED` and `ONGOING`. `RECOVERED` is an informational lifecycle event, so UI should primarily display the phase rather than treating it as a warning or critical alert.
+
+### Kafka topics
+
+The Kafka integration expects JSON `MetricPoint` messages on configured `driftguard.kafka.input-topics` and publishes JSON `DriftEvent` messages to `driftguard.kafka.output-topic`.
+
+```yaml
+driftguard:
+  kafka:
+    enabled: true
+    input-topics: [technical-metrics]
+    output-topic: drift-events
+```
+
+Kafka message keys should identify the metric stream when possible, for example `checkout-service|latency|POST /checkout`. DriftGuard can still deserialize and process value-only JSON messages, but stable keys make partitioning and debugging easier.
+
+### Demo scenario request
+
+Demo REST endpoints accept optional scenario generation parameters for reproducible experiments:
+
+```json
+{
+  "samples": 160,
+  "baselineValue": 100.0,
+  "driftValue": 260.0,
+  "noiseStdDev": 4.0,
+  "driftStartPercent": 50,
+  "spikeLengthPercent": 20
+}
+```
+
+The same fields are supported by `POST /api/demo/run/{scenario}`, `POST /api/demo/live/{scenario}` and `POST /api/demo/kafka/replay`. `samples` means number of generated `MetricPoint` objects; in Kafka replay this becomes the number of Kafka messages per producer stream. Omitted values use scenario defaults.
+
 ## Алгоритмы
 
 | Алгоритм       | Когда использовать                                                                                                                |
