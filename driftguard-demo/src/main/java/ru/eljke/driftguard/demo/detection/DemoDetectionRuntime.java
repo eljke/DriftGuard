@@ -2,7 +2,6 @@ package ru.eljke.driftguard.demo.detection;
 
 import org.springframework.stereotype.Service;
 import ru.eljke.driftguard.algorithms.DefaultAlgorithms;
-import ru.eljke.driftguard.algorithms.adwin.AdwinConfig;
 import ru.eljke.driftguard.algorithms.pagehinkley.PageHinkleyConfig;
 import ru.eljke.driftguard.core.domain.DriftDirection;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
@@ -71,8 +70,8 @@ public class DemoDetectionRuntime {
                         settings.emissionPolicy()
                 ),
                 new DetectorDefinition(
-                        "error-rate-adwin",
-                        new AdwinConfig(48, 12, settings.adwinDelta(), settings.adwinCriticalMultiplier()),
+                        "error-rate-page-hinkley",
+                        new PageHinkleyConfig(20, 0.001, settings.errorRateWarning(), settings.errorRateCritical(), 0.05),
                         key -> key.metric().equals("error-rate"),
                         settings.emissionPolicy()
                 ),
@@ -106,7 +105,7 @@ public class DemoDetectionRuntime {
     ) {
     }
 
-    private record ProfileSettings(
+        private record ProfileSettings(
             double latencyWarning,
             double latencyCritical,
             double errorRateWarning,
@@ -115,8 +114,6 @@ public class DemoDetectionRuntime {
             double queueCritical,
             double throughputWarning,
             double throughputCritical,
-            double adwinDelta,
-            double adwinCriticalMultiplier,
             EmissionPolicyConfig emissionPolicy
     ) {
         private static ProfileSettings of(DemoDetectorProfile profile) {
@@ -126,7 +123,6 @@ public class DemoDetectionRuntime {
                         0.025, 0.09,
                         25.0, 70.0,
                         90.0, 180.0,
-                        0.25, 1.8,
                         new EmissionPolicyConfig(2, Duration.ofSeconds(20))
                 );
                 case BALANCED -> new ProfileSettings(
@@ -134,7 +130,6 @@ public class DemoDetectionRuntime {
                         0.045, 0.14,
                         35.0, 110.0,
                         120.0, 250.0,
-                        0.20, 2.0,
                         new EmissionPolicyConfig(2, Duration.ofSeconds(45))
                 );
                 case CONSERVATIVE -> new ProfileSettings(
@@ -142,7 +137,6 @@ public class DemoDetectionRuntime {
                         0.07, 0.20,
                         75.0, 180.0,
                         180.0, 350.0,
-                        0.12, 2.4,
                         new EmissionPolicyConfig(4, Duration.ofSeconds(75))
                 );
             };

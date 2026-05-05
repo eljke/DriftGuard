@@ -8,14 +8,18 @@ import ru.eljke.driftguard.algorithms.pagehinkley.PageHinkleyConfig;
 import ru.eljke.driftguard.algorithms.psi.PsiConfig;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
+import ru.eljke.driftguard.core.config.EmissionPolicyConfig;
 import ru.eljke.driftguard.core.detector.DriftDetectorEngine;
 import ru.eljke.driftguard.core.domain.DriftDirection;
 import ru.eljke.driftguard.core.domain.DriftEvent;
+import ru.eljke.driftguard.core.domain.DriftEventPhase;
 import ru.eljke.driftguard.core.domain.MetricKey;
 import ru.eljke.driftguard.core.domain.MetricPoint;
 import ru.eljke.driftguard.core.state.InMemoryDetectorStateStore;
 
 import java.time.Instant;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,6 +46,34 @@ class AlgorithmSmokeTest {
                 stableThenDropped(),
                 DriftDirection.DOWN
         );
+    }
+
+    @Test
+    void pageHinkleyKeepsPermanentShiftInSingleActiveEpisode() {
+        DriftDetectorEngine engine = new DriftDetectorEngine(
+                DefaultAlgorithms.registry(),
+                new InMemoryDetectorStateStore(),
+                List.of(new DetectorDefinition(
+                        "page-hinkley-detector",
+                        new PageHinkleyConfig(10, 0.1, 10.0, 20.0, 0.05),
+                        key -> true,
+                        new EmissionPolicyConfig(1, Duration.ofSeconds(10), 3)
+                ))
+        );
+        MetricKey key = MetricKey.of("payments", "latency");
+        List<DriftEvent> events = new ArrayList<>();
+        double[] values = stableThenShifted();
+        for (int i = 0; i < values.length; i++) {
+            events.addAll(engine.detect(MetricPoint.gauge(
+                    key,
+                    Instant.parse("2026-05-01T10:00:00Z").plusSeconds(i),
+                    values[i]
+            )));
+        }
+
+        assertEquals(1, events.stream().filter(event -> event.phase() == DriftEventPhase.STARTED).count());
+        assertTrue(events.stream().anyMatch(event -> event.phase() == DriftEventPhase.ONGOING));
+        assertFalse(events.stream().anyMatch(event -> event.phase() == DriftEventPhase.RECOVERED));
     }
 
     @Test

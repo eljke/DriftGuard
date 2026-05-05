@@ -45,9 +45,13 @@ public final class PageHinkleyDetector implements DetectorAlgorithm<PageHinkleyC
             return DetectionResult.noDrift(new PageHinkleyState(1, observed, 0.0, 0.0));
         }
 
-        double mean = state.mean() + config.alpha() * (observed - state.mean());
-
         if (count <= config.warmupSamples()) {
+            double warmupMean = state.mean() + (observed - state.mean()) / count;
+            return DetectionResult.noDrift(new PageHinkleyState(count, warmupMean, 0.0, 0.0));
+        }
+
+        double mean = state.mean() + config.alpha() * (observed - state.mean());
+        if (observed < mean) {
             return DetectionResult.noDrift(new PageHinkleyState(count, mean, 0.0, 0.0));
         }
 

@@ -55,12 +55,12 @@ driftguard:
       metrics: [error-rate]
       warmup-samples: 20
       delta: 0.001
-      warning-threshold: 0.03
-      critical-threshold: 0.08
+      warning-threshold: 0.045
+      critical-threshold: 0.14
       alpha: 0.05
       emission-policy:
         min-consecutive-signals: 2
-        cooldown: 10s
+        cooldown: 45s
         recovery-consecutive-normal: 3
     - name: throughput-page-hinkley
       enabled: true
