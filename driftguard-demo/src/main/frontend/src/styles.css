@@ -1120,6 +1120,61 @@ th {
     padding: 0 18px 16px;
 }
 
+.pipeline-map {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 32px minmax(0, 1fr) 32px minmax(0, 1fr) 32px minmax(0, 1fr);
+    gap: 8px;
+    align-items: stretch;
+    padding: 0 18px 16px;
+}
+
+.pipeline-step {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-muted);
+}
+
+.pipeline-step.active {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+}
+
+.pipeline-step span {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    color: var(--accent);
+    background: #ffffff;
+}
+
+.pipeline-step strong,
+.pipeline-step small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pipeline-step strong {
+    font-size: 13px;
+}
+
+.pipeline-step small {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.pipeline-arrow {
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+}
+
 .ops-meta-row {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -1217,8 +1272,13 @@ th {
 @media (max-width: 1180px) {
     .ops-kpis,
     .ops-checklist.compact,
-    .producer-strip {
+    .producer-strip,
+    .pipeline-map {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .pipeline-arrow {
+        display: none;
     }
 
     .ops-meta-row {
@@ -1239,6 +1299,7 @@ th {
     .ops-kpis,
     .ops-checklist.compact,
     .producer-strip,
+    .pipeline-map,
     .ops-meta-row {
         grid-template-columns: 1fr;
     }

@@ -1,4 +1,4 @@
-import { Activity, CheckCircle2, RotateCcw, ShieldAlert } from "lucide-react";
+import { Activity, ArrowRight, CheckCircle2, Database, RadioTower, RotateCcw, ServerCog, ShieldAlert } from "lucide-react";
 import type { ReactNode } from "react";
 import { MetricCard, Panel } from "../../components/ui";
 import { formatNumber } from "../../lib/format";
@@ -29,6 +29,8 @@ export function KafkaOperationsPanel({ status, operations }: { status?: KafkaDem
           <span>{status?.producedPoints ?? 0}/{status?.totalPoints ?? 0}</span>
         </div>
       </div>
+
+      <PipelineMap status={status} operations={operations} activeProducers={activeProducers} producerCount={producerCount} />
 
       <div className="ops-kpis">
         <MetricCard title="Processed" value={formatNumber(operations?.metrics.processedPoints)} helper="MetricPoint обработано" />
@@ -69,6 +71,48 @@ export function KafkaOperationsPanel({ status, operations }: { status?: KafkaDem
         <OperationCheck active={!status?.error} label="No runtime error" detail={status?.error ?? "Ошибок в demo status нет"} />
       </div>
     </Panel>
+  );
+}
+
+function PipelineMap({
+  status,
+  operations,
+  activeProducers,
+  producerCount
+}: {
+  status?: KafkaDemoStatus;
+  operations?: KafkaOperationsSnapshot;
+  activeProducers: number;
+  producerCount: number;
+}) {
+  return (
+    <div className="pipeline-map" aria-label="Kafka integration pipeline">
+      <PipelineStep active={activeProducers > 0} detail={`${activeProducers}/${producerCount} active`} icon={<RadioTower size={18} />} label="Demo producers" />
+      <PipelineArrow />
+      <PipelineStep active={Boolean(status?.running)} detail={operations?.streamsInputTopics?.join(", ") || status?.inputTopic || "-"} icon={<Database size={18} />} label="MetricPoint topic" />
+      <PipelineArrow />
+      <PipelineStep active={Boolean(status?.running)} detail={operations?.streamsApplicationId ?? "-"} icon={<ServerCog size={18} />} label="Spring Boot topology" />
+      <PipelineArrow />
+      <PipelineStep active={(operations?.metrics.emittedEvents ?? 0) > 0 || (status?.consumedEvents.length ?? 0) > 0} detail={operations?.streamsOutputTopic || status?.outputTopic || "-"} icon={<ShieldAlert size={18} />} label="DriftEvent output" />
+    </div>
+  );
+}
+
+function PipelineStep({ active, detail, icon, label }: { active: boolean; detail: string; icon: ReactNode; label: string }) {
+  return (
+    <div className={active ? "pipeline-step active" : "pipeline-step"}>
+      <span>{icon}</span>
+      <strong>{label}</strong>
+      <small>{detail}</small>
+    </div>
+  );
+}
+
+function PipelineArrow() {
+  return (
+    <span className="pipeline-arrow" aria-hidden="true">
+      <ArrowRight size={16} />
+    </span>
   );
 }
 
