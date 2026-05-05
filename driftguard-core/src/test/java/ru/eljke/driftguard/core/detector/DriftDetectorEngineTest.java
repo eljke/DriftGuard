@@ -95,6 +95,32 @@ class DriftDetectorEngineTest {
         assertEquals(DriftEventPhase.RECOVERED, recovered.getFirst().phase());
     }
 
+    @Test
+    void doesNotRecoverDownwardEpisodeOnOppositeSignalFarFromBaseline() {
+        OppositeSignalAlgorithm algorithm = new OppositeSignalAlgorithm();
+        DetectorDefinition definition = new DetectorDefinition(
+                "opposite",
+                new OppositeSignalConfig(),
+                key -> true,
+                new EmissionPolicyConfig(1, Duration.ZERO, 1)
+        );
+        DriftDetectorEngine engine = new DriftDetectorEngine(
+                new SimpleDetectorRegistry(List.of(algorithm)),
+                new InMemoryDetectorStateStore(),
+                List.of(definition)
+        );
+        MetricKey key = MetricKey.of("checkout-service", "throughput");
+
+        assertEquals(DriftEventPhase.STARTED, engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:00Z"), 430)).getFirst().phase());
+        assertTrue(engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:01Z"), 460)).isEmpty());
+
+        List<DriftEvent> recovered = engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:02Z"), 980));
+
+        assertEquals(1, recovered.size());
+        assertEquals(DriftEventPhase.RECOVERED, recovered.getFirst().phase());
+        assertEquals(980.0, recovered.getFirst().currentValue());
+    }
+
     private record CountingConfig(int emitAt) implements DetectorConfig {
         @Override
         public String algorithm() {
@@ -265,6 +291,65 @@ class DriftDetectorEngineTest {
                     1,
                     point.value(),
                     config.baselineValue(),
+                    context.detectorName(),
+                    name(),
+                    "test",
+                    Map.of(),
+                    Map.of()
+            ));
+        }
+    }
+
+    private record OppositeSignalConfig() implements DetectorConfig {
+        @Override
+        public String algorithm() {
+            return "opposite-signal";
+        }
+    }
+
+    private record OppositeSignalState(int count) implements DetectorState {
+        @Override
+        public String algorithm() {
+            return "opposite-signal";
+        }
+    }
+
+    private static final class OppositeSignalAlgorithm implements DetectorAlgorithm<OppositeSignalConfig, OppositeSignalState> {
+        @Override
+        public String name() {
+            return "opposite-signal";
+        }
+
+        @Override
+        public Class<OppositeSignalConfig> configType() {
+            return OppositeSignalConfig.class;
+        }
+
+        @Override
+        public OppositeSignalState initialState(OppositeSignalConfig config) {
+            return new OppositeSignalState(0);
+        }
+
+        @Override
+        public DetectionResult<OppositeSignalState> detect(
+                MetricPoint point,
+                OppositeSignalState state,
+                OppositeSignalConfig config,
+                DetectionContext context
+        ) {
+            OppositeSignalState next = new OppositeSignalState(state.count() + 1);
+            DriftDirection direction = next.count() == 1 ? DriftDirection.DOWN : DriftDirection.UP;
+            return DetectionResult.drift(next, new DriftEvent(
+                    null,
+                    point.key(),
+                    point.timestamp(),
+                    point.timestamp(),
+                    point.timestamp(),
+                    direction,
+                    DriftSeverity.CRITICAL,
+                    1,
+                    point.value(),
+                    1000.0,
                     context.detectorName(),
                     name(),
                     "test",

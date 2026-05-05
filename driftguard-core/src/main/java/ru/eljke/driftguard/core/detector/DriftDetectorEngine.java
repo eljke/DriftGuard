@@ -168,7 +168,7 @@ public final class DriftDetectorEngine {
             int consecutiveNormal = previous.consecutiveNormal() + 1;
             boolean recovered = consecutiveNormal >= definition.emissionPolicy().recoveryConsecutiveNormal();
             DriftEvent recoveryEvent = recovered
-                    ? lastEvent.recoveredAt(point.timestamp(), definition.emissionPolicy().recoveryConsecutiveNormal())
+                    ? lastEvent.recoveredAt(point.timestamp(), definition.emissionPolicy().recoveryConsecutiveNormal(), point.value())
                     : null;
             EmissionState next = new EmissionState(
                     recovered ? 0 : previous.consecutiveSignals(),
@@ -211,7 +211,13 @@ public final class DriftDetectorEngine {
         int consecutiveSignals = previous.consecutiveSignals() + 1;
         DriftEvent lastEvent = previous.lastEmittedEventValue().orElse(null);
         if (isOppositeDirection(lastEvent, event)) {
-            DriftEvent recovered = lastEvent.recoveredAt(event.detectedAt(), definition.emissionPolicy().recoveryConsecutiveNormal());
+            if (!isBackNearBaseline(event, lastEvent)) {
+                return new EmissionTransition(
+                        new EmissionState(consecutiveSignals, previous.lastEmittedAt(), true, 0, previous.lastEmittedEvent()),
+                        List.of()
+                );
+            }
+            DriftEvent recovered = lastEvent.recoveredAt(event.detectedAt(), definition.emissionPolicy().recoveryConsecutiveNormal(), event.currentValue());
             return new EmissionTransition(
                     new EmissionState(0, event.detectedAt(), false, 0, recovered),
                     List.of(recovered)
@@ -239,6 +245,14 @@ public final class DriftDetectorEngine {
     }
 
     private static boolean isBackNearBaseline(MetricPoint point, DriftEvent previous) {
+        return previous == null || isBackNearBaseline(point.value(), previous);
+    }
+
+    private static boolean isBackNearBaseline(DriftEvent current, DriftEvent previous) {
+        return previous == null || isBackNearBaseline(current.currentValue(), previous);
+    }
+
+    private static boolean isBackNearBaseline(double value, DriftEvent previous) {
         if (previous == null) {
             return true;
         }
@@ -246,8 +260,8 @@ public final class DriftDetectorEngine {
         double driftValue = previous.currentValue();
         double tolerance = Math.abs(driftValue - baseline) * 0.25;
         return switch (previous.direction()) {
-            case UP -> point.value() <= baseline + tolerance;
-            case DOWN -> point.value() >= baseline - tolerance;
+            case UP -> value <= baseline + tolerance;
+            case DOWN -> value >= baseline - tolerance;
             case BOTH, DISTRIBUTION, UNKNOWN -> true;
         };
     }

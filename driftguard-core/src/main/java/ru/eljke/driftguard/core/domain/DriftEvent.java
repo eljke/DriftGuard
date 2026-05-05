@@ -112,6 +112,10 @@ public record DriftEvent(
     }
 
     public DriftEvent recoveredAt(Instant recoveredAt, int recoveryConsecutiveNormal) {
+        return recoveredAt(recoveredAt, recoveryConsecutiveNormal, currentValue);
+    }
+
+    public DriftEvent recoveredAt(Instant recoveredAt, int recoveryConsecutiveNormal, double recoveredValue) {
         Map<String, Object> recoveryDetails = new LinkedHashMap<>(details);
         recoveryDetails.put("recoveryConsecutiveNormal", recoveryConsecutiveNormal);
         recoveryDetails.put("episodeRecovered", true);
@@ -125,7 +129,7 @@ public record DriftEvent(
                 direction,
                 DriftSeverity.INFO,
                 0.0,
-                currentValue,
+                recoveredValue,
                 baselineValue,
                 detector,
                 algorithm,
