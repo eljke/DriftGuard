@@ -20,6 +20,12 @@ const severityColor: Record<string, string> = {
   CRITICAL: "#dc2626"
 };
 
+const phaseLabel: Record<string, string> = {
+  STARTED: "START",
+  ONGOING: "ONGOING",
+  RECOVERED: "RECOVERED"
+};
+
 export function TimeSeriesChart({ points, events, height = 260 }: TimeSeriesChartProps) {
   const elementRef = useRef<HTMLDivElement | null>(null);
   const option = useMemo(() => buildOption(points, events), [points, events]);
@@ -44,6 +50,7 @@ export function TimeSeriesChart({ points, events, height = 260 }: TimeSeriesChar
 function buildOption(points: MetricPoint[], events: DriftEvent[]): EChartsOption {
   const sortedPoints = [...points].sort((left, right) => Date.parse(left.timestamp) - Date.parse(right.timestamp));
   const values = sortedPoints.map((point) => [point.timestamp, point.value]);
+  const labeledEventIds = labeledMarkers(events);
   const markLines = events.map((event) => ({
     xAxis: event.detectedAt,
     lineStyle: {
@@ -52,7 +59,7 @@ function buildOption(points: MetricPoint[], events: DriftEvent[]): EChartsOption
       type: event.severity === "CRITICAL" ? "solid" as const : "dashed" as const
     },
     label: {
-      formatter: event.phase === "RECOVERED" ? event.phase : `${event.phase} · ${event.severity}`,
+      formatter: labeledEventIds.has(event.id) ? markerLabel(event) : "",
       color: severityColor[event.severity] ?? "#dc2626"
     }
   }));
@@ -61,7 +68,7 @@ function buildOption(points: MetricPoint[], events: DriftEvent[]): EChartsOption
     animation: false,
     color: ["#2563eb"],
     grid: {
-      top: 24,
+      top: 34,
       right: 18,
       bottom: 58,
       left: 54
@@ -118,4 +125,50 @@ function buildOption(points: MetricPoint[], events: DriftEvent[]): EChartsOption
       }
     ]
   };
+}
+
+function labeledMarkers(events: DriftEvent[]) {
+  const sortedEvents = [...events].sort((left, right) => Date.parse(left.detectedAt) - Date.parse(right.detectedAt));
+  const labeled = new Set<string>();
+  const firstOngoingByDetector = new Set<string>();
+  let lastLabeledAt = 0;
+  const minGapMillis = markerGapMillis(sortedEvents);
+
+  for (const event of sortedEvents) {
+    const timestamp = Date.parse(event.detectedAt);
+    const detectorKey = `${event.key.service}|${event.key.metric}|${event.key.operation ?? ""}|${event.detector}`;
+    const important = event.phase === "STARTED" || event.phase === "RECOVERED";
+    const firstOngoing = event.phase === "ONGOING" && !firstOngoingByDetector.has(detectorKey);
+
+    if (event.phase === "ONGOING") {
+      firstOngoingByDetector.add(detectorKey);
+    }
+    if (!important && !firstOngoing) {
+      continue;
+    }
+    if (!important && timestamp - lastLabeledAt < minGapMillis) {
+      continue;
+    }
+
+    labeled.add(event.id);
+    lastLabeledAt = timestamp;
+  }
+
+  return labeled;
+}
+
+function markerGapMillis(events: DriftEvent[]) {
+  if (events.length < 2) {
+    return 0;
+  }
+  const times = events.map((event) => Date.parse(event.detectedAt)).filter(Number.isFinite);
+  const span = Math.max(...times) - Math.min(...times);
+  return Math.max(20_000, span * 0.08);
+}
+
+function markerLabel(event: DriftEvent) {
+  if (event.phase === "RECOVERED") {
+    return phaseLabel[event.phase];
+  }
+  return `${phaseLabel[event.phase] ?? event.phase} · ${event.severity}`;
 }
