@@ -52,7 +52,7 @@ function buildOption(points: MetricPoint[], events: DriftEvent[]): EChartsOption
       type: event.severity === "CRITICAL" ? "solid" as const : "dashed" as const
     },
     label: {
-      formatter: `${event.phase} · ${event.severity}`,
+      formatter: event.phase === "RECOVERED" ? event.phase : `${event.phase} · ${event.severity}`,
       color: severityColor[event.severity] ?? "#dc2626"
     }
   }));
