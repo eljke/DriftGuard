@@ -209,6 +209,8 @@ export interface ToolLink {
   description: string;
 }
 
+export type DemoHelp = Record<string, string>;
+
 export interface DemoConfigurationView {
   aggressiveness: {
     level: string;

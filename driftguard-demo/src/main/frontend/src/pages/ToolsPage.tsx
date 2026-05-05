@@ -1,16 +1,38 @@
-import { Boxes } from "lucide-react";
-import type { ToolLink } from "../types";
+import { Boxes, ExternalLink, Route } from "lucide-react";
+import { Panel } from "../components/ui";
+import type { DemoHelp, ToolLink } from "../types";
 
-export function ToolsPage({ tools }: { tools: ToolLink[] }) {
+export function ToolsPage({ endpoints, tools }: { endpoints: DemoHelp; tools: ToolLink[] }) {
+  const endpointEntries = Object.entries(endpoints).sort(([left], [right]) => left.localeCompare(right));
   return (
-    <section className="tool-grid">
-      {tools.map((tool) => (
-        <a className="tool-card" href={tool.url} key={tool.id} rel="noreferrer" target={tool.url.startsWith("http") ? "_blank" : undefined}>
-          <Boxes size={22} />
-          <strong>{tool.title}</strong>
-          <span>{tool.description}</span>
-        </a>
-      ))}
+    <section className="stack">
+      <div className="tool-grid">
+        {tools.map((tool) => (
+          <a className="tool-card" href={tool.url} key={tool.id} rel="noreferrer" target={tool.url.startsWith("http") ? "_blank" : undefined}>
+            <span className="tool-icon"><Boxes size={22} /></span>
+            <strong>{tool.title}</strong>
+            <span>{tool.description}</span>
+            <small><ExternalLink size={13} />{tool.url}</small>
+          </a>
+        ))}
+      </div>
+      <Panel title="REST API surface">
+        {endpointEntries.length === 0 ? (
+          <div className="empty-state compact">Endpoint map загружается из /api/demo/help.</div>
+        ) : (
+          <div className="endpoint-grid">
+            {endpointEntries.map(([name, endpoint]) => (
+              <article className="endpoint-card" key={name}>
+                <Route size={16} />
+                <div>
+                  <strong>{name}</strong>
+                  <code>{endpoint}</code>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </Panel>
     </section>
   );
 }

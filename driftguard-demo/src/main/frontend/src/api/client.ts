@@ -3,6 +3,7 @@ import type {
   DemoConfigurationView,
   DetectionBenchmarkReport,
   DetectionMetrics,
+  DemoHelp,
   DemoRunResult,
   DemoScenarioDescriptor,
   DemoStoredDriftEvent,
@@ -70,6 +71,7 @@ export const api = {
     }),
     stopKafka: () => request<KafkaDemoStatus>("/api/demo/kafka/stop", {method: "POST"}),
     tools: () => request<ToolLink[]>("/api/demo/tools"),
+    help: () => request<DemoHelp>("/api/demo/help"),
     capabilities: () => request<DemoCapabilityGroup[]>("/api/demo/capabilities"),
     configuration: () => request<DemoConfigurationView>("/api/demo/configuration"),
     updateProfile: (profile: string) => request<DemoConfigurationView>(`/api/demo/configuration/profile/${profile}`, {method: "POST"})
