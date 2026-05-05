@@ -2,7 +2,7 @@ import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Panel } from "../../components/ui";
 import type { DriftEvent } from "../../types";
-import { eventExplanation, eventMatchesQuery } from "../../lib/drift";
+import { eventEvidence, eventExplanation, eventMatchesQuery } from "../../lib/drift";
 import { formatMoscow, formatNumber } from "../../lib/format";
 
 export function EventsTable({ events }: { events: DriftEvent[] }) {
@@ -55,7 +55,7 @@ export function EventsTable({ events }: { events: DriftEvent[] }) {
                       <td>{formatMoscow(event.detectedAt)}</td>
                       <td>
                         <div className="event-cell">
-                          <span className={`severity ${event.severity.toLowerCase()}`}>{event.severity}</span>
+                          {event.phase !== "RECOVERED" ? <span className={`severity ${event.severity.toLowerCase()}`}>{event.severity}</span> : null}
                           <span className={`phase ${event.phase.toLowerCase()}`}>{event.phase}</span>
                           <span className="muted-line">{event.algorithm}</span>
                         </div>
@@ -67,7 +67,9 @@ export function EventsTable({ events }: { events: DriftEvent[] }) {
                         </div>
                       </td>
                       <td><EventValueSummary event={event} /></td>
-                      <td className="event-explanation">{eventExplanation(event)}</td>
+                      <td className="event-explanation">
+                        <EventExplanation event={event} />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -128,6 +130,22 @@ function EventFilters({
         </select>
       </label>
       <span className="filter-counter">{visible}/{total} events</span>
+    </div>
+  );
+}
+
+function EventExplanation({ event }: { event: DriftEvent }) {
+  return (
+    <div className="event-explanation-stack">
+      <p>{eventExplanation(event)}</p>
+      <div className="evidence-list">
+        {eventEvidence(event).map((item) => (
+          <span className="evidence-pill" key={`${item.label}-${item.value}`}>
+            <b>{item.label}</b>
+            {item.value}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }

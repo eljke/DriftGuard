@@ -492,6 +492,40 @@ th {
     line-height: 1.45;
 }
 
+.event-explanation-stack {
+    display: grid;
+    gap: 8px;
+}
+
+.event-explanation-stack p {
+    margin: 0;
+}
+
+.evidence-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.evidence-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 24px;
+    padding: 3px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--text);
+    background: var(--surface-muted);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.evidence-pill b {
+    color: var(--muted);
+    font-weight: 700;
+}
+
 .severity.info {
     background: #dbeafe;
     color: #1d4ed8;

@@ -13,6 +13,11 @@ export interface DriftIncident {
   explanation: string;
 }
 
+export interface DriftEventEvidence {
+  label: string;
+  value: string;
+}
+
 export function streamId(key: MetricKey) {
   return `${key.service}|${key.metric}|${key.operation ?? ""}`;
 }
@@ -105,7 +110,9 @@ export function eventExplanation(event: DriftEvent) {
     ? detailNumber(event, "criticalThreshold")
     : detailNumber(event, "warningThreshold");
 
+  const lifecycle = lifecycleExplanation(event);
   const parts = [
+    lifecycle,
     `Current ${formatNumber(current)} vs baseline ${formatNumber(baseline)}`,
     relative === undefined ? undefined : `${relative >= 0 ? "+" : ""}${formatNumber(relative)}%`,
     threshold === undefined ? undefined : `threshold ${formatNumber(threshold)}`,
@@ -114,6 +121,29 @@ export function eventExplanation(event: DriftEvent) {
   ].filter(Boolean);
 
   return `${parts.join(" · ")}. ${event.reason}`;
+}
+
+export function eventEvidence(event: DriftEvent): DriftEventEvidence[] {
+  const relative = detailNumber(event, "relativeChangePercent");
+  const pValue = detailNumber(event, "pValue");
+  const statistic = detailNumber(event, "statistic") ?? detailNumber(event, "chiSquare");
+  const threshold = event.severity === "CRITICAL"
+    ? detailNumber(event, "criticalThreshold")
+    : detailNumber(event, "warningThreshold");
+  const consecutiveSignals = detailNumber(event, "consecutiveSignals");
+  const recoveryConsecutiveNormal = detailNumber(event, "recoveryConsecutiveNormal");
+
+  return [
+    { label: "Phase", value: event.phase },
+    { label: "Direction", value: event.direction },
+    { label: "Score", value: formatNumber(event.score) },
+    threshold === undefined ? undefined : { label: "Threshold", value: formatNumber(threshold) },
+    relative === undefined ? undefined : { label: "Change", value: `${relative >= 0 ? "+" : ""}${formatNumber(relative)}%` },
+    pValue === undefined ? undefined : { label: "p-value", value: formatNumber(pValue) },
+    statistic === undefined ? undefined : { label: "Statistic", value: formatNumber(statistic) },
+    consecutiveSignals === undefined ? undefined : { label: "Signals", value: formatNumber(consecutiveSignals) },
+    recoveryConsecutiveNormal === undefined ? undefined : { label: "Recovery normals", value: formatNumber(recoveryConsecutiveNormal) }
+  ].filter((item): item is DriftEventEvidence => Boolean(item));
 }
 
 function eventToIncident(event: DriftEvent, recoveredAt?: string): DriftIncident {
@@ -136,6 +166,22 @@ function incidentId(event: DriftEvent) {
 
 function severityRank(severity: string) {
   return severity === "CRITICAL" ? 3 : severity === "WARNING" ? 2 : severity === "INFO" ? 1 : 0;
+}
+
+function lifecycleExplanation(event: DriftEvent) {
+  if (event.phase === "RECOVERED") {
+    const normals = detailNumber(event, "recoveryConsecutiveNormal");
+    return normals === undefined
+      ? "Episode recovered near baseline"
+      : `Episode recovered after ${formatNumber(normals)} normal observations`;
+  }
+  if (event.phase === "ONGOING") {
+    const signals = detailNumber(event, "consecutiveSignals");
+    return signals === undefined
+      ? "Episode remains active"
+      : `Episode remains active after ${formatNumber(signals)} consecutive drift signals`;
+  }
+  return "New drift episode started";
 }
 
 function detailNumber(event: DriftEvent, key: string) {
