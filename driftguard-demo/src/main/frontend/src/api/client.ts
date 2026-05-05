@@ -70,7 +70,10 @@ export const api = {
     benchmarkProfiles: () => request<DetectionBenchmarkReport[]>("/api/demo/benchmark/profiles"),
     kafkaStatus: () => request<KafkaDemoStatus>("/api/demo/kafka"),
     kafkaOperations: () => request<KafkaOperationsSnapshot>("/api/demo/kafka/operations"),
-    startKafka: (scenario: string) => request<KafkaDemoStatus>(`/api/demo/kafka/start/${scenario}`, {method: "POST"}),
+    startKafka: (scenario: string, body?: DemoScenarioRequest) => request<KafkaDemoStatus>(`/api/demo/kafka/start/${scenario}`, {
+        method: "POST",
+        body: JSON.stringify(body ?? {})
+    }),
     replayKafka: (body: KafkaReplayRequest) => request<KafkaDemoStatus>("/api/demo/kafka/replay", {
         method: "POST",
         headers: {"Content-Type": "application/json"},

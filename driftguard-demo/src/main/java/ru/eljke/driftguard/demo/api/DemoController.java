@@ -158,8 +158,11 @@ public class DemoController {
 
     @PostMapping("/kafka/start/{scenario}")
     @Operation(summary = "Запускает Kafka producer, Kafka Streams topology и consumer событий")
-    public KafkaDemoStatus startKafkaScenario(@PathVariable("scenario") String scenario) {
-        return kafkaDemoService.start(scenario);
+    public KafkaDemoStatus startKafkaScenario(
+            @PathVariable("scenario") String scenario,
+            @RequestBody(required = false) DemoScenarioRequest request
+    ) {
+        return kafkaDemoService.start(scenario, request);
     }
 
     @PostMapping("/kafka/replay")

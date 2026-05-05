@@ -18,7 +18,7 @@ export function useKafkaDemo() {
   });
 
   const start = useMutation({
-    mutationFn: api.startKafka,
+    mutationFn: ({ scenario, request }: { scenario: string; request: DemoScenarioRequest }) => api.startKafka(scenario, request),
     onSuccess: (data) => queryClient.setQueryData(["kafka"], data)
   });
 
@@ -43,6 +43,10 @@ export function useKafkaDemo() {
     replay.mutate(request);
   };
 
+  const startScenario = (scenario: string) => {
+    start.mutate({ scenario, request: compactScenarioRequest(scenarioParams) });
+  };
+
   return {
     replaySpeed,
     replayProfile,
@@ -52,7 +56,7 @@ export function useKafkaDemo() {
     setReplayProfile,
     setResetState,
     setScenarioParams,
-    startScenario: start.mutate,
+    startScenario,
     replayScenario,
     stop: stop.mutate,
     busy: start.isPending || replay.isPending || stop.isPending,

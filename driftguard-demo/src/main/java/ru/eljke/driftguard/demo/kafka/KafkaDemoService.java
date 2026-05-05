@@ -99,6 +99,17 @@ public class KafkaDemoService {
         return startInternal(scenario, false, 1.0, false, null);
     }
 
+    public synchronized KafkaDemoStatus start(String scenario, DemoScenarioRequest request) {
+        return startInternal(
+                scenario,
+                false,
+                1.0,
+                false,
+                null,
+                request == null ? new DemoScenarioRequest(defaultSamples(scenario), null, null, null, null, null) : request
+        );
+    }
+
     public synchronized KafkaDemoStatus replay(KafkaReplayRequest request) {
         KafkaReplayRequest safeRequest = request == null
                 ? new KafkaReplayRequest("latency-step", 2.0, true, null, null, null, null, null, null, null)
