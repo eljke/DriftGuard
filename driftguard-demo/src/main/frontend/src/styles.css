@@ -559,8 +559,71 @@ th {
     gap: 10px;
 }
 
+.tool-card small {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    margin-top: auto;
+    color: var(--accent-strong);
+    font-size: 12px;
+    font-weight: 800;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tool-icon {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    color: var(--accent);
+    background: #eff6ff;
+}
+
 .tool-card:hover {
     border-color: var(--accent);
+}
+
+.endpoint-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.endpoint-card {
+    display: flex;
+    gap: 10px;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface-muted);
+}
+
+.endpoint-card svg {
+    flex: 0 0 auto;
+    margin-top: 2px;
+    color: var(--accent);
+}
+
+.endpoint-card strong,
+.endpoint-card code {
+    display: block;
+}
+
+.endpoint-card strong {
+    font-size: 13px;
+}
+
+.endpoint-card code {
+    margin-top: 5px;
+    color: #334155;
+    font-size: 12px;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .incident-layout {
@@ -1135,6 +1198,73 @@ th {
     box-shadow: 0 12px 28px rgba(154, 52, 18, 0.08);
 }
 
+.product-map {
+    overflow: hidden;
+}
+
+.workflow-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.workflow-step {
+    display: flex;
+    gap: 12px;
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.workflow-icon {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    border-radius: 8px;
+    color: #ffffff;
+    background: #1e293b;
+}
+
+.workflow-step strong,
+.workflow-step span {
+    display: block;
+}
+
+.workflow-step strong {
+    font-size: 14px;
+}
+
+.workflow-step span {
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.product-map-footer {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.product-map-footer span {
+    padding: 12px;
+    border-radius: 8px;
+    color: var(--muted);
+    background: var(--surface-muted);
+    font-size: 13px;
+}
+
+.product-map-footer strong {
+    color: var(--text);
+    font-size: 18px;
+}
+
 .api-status-head {
     display: flex;
     align-items: flex-start;
@@ -1203,6 +1333,25 @@ th {
     }
 
     .api-status-item small {
+        white-space: normal;
+    }
+}
+
+@media (max-width: 1180px) {
+    .workflow-strip,
+    .endpoint-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .workflow-strip,
+    .product-map-footer,
+    .endpoint-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tool-card small {
         white-space: normal;
     }
 }

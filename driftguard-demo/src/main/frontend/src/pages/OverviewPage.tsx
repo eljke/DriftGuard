@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Cable, FlaskConical, Loader2, Settings2, ShieldCheck } from "lucide-react";
+import type { ReactNode } from "react";
 import { api } from "../api/client";
 import { MetricCard, Notice, Panel } from "../components/ui";
 import { countSeverity } from "../lib/drift";
@@ -23,6 +24,10 @@ export function OverviewPage({
 }) {
   const queryClient = useQueryClient();
   const critical = countSeverity([...(result?.events ?? []), ...(kafka?.consumedEvents ?? [])], "CRITICAL");
+  const activeStreams = new Set(
+    [...(result?.samplePoints ?? []), ...(kafka?.samplePoints ?? [])].map((point) => `${point.key.service}|${point.key.metric}|${point.key.operation ?? ""}`)
+  ).size;
+  const storedCritical = storedEvents.filter(({ event }) => event.severity === "CRITICAL").length;
   const clearStoredEvents = useMutation({
     mutationFn: api.clearStoredEvents,
     onSuccess: () => queryClient.setQueryData(["stored-events"], [])
@@ -38,6 +43,18 @@ export function OverviewPage({
         value={`${kafka?.producedPoints ?? 0}/${kafka?.totalPoints ?? 0}`}
         helper={kafka?.inputTopic ?? "Topic не загружен"}
       />
+      <Panel className="wide product-map" title="Product workflow">
+        <div className="workflow-strip">
+          <WorkflowStep icon={<FlaskConical size={18} />} title="Synthetic stream" text={`${result?.processedPoints ?? 0} points processed`} />
+          <WorkflowStep icon={<Settings2 size={18} />} title="Runtime profile" text="Detector sensitivity can be changed without restarting UI" />
+          <WorkflowStep icon={<Cable size={18} />} title="Kafka topology" text={kafka?.running ? "Producer, Streams and consumer are active" : "Ready for stateful replay"} />
+          <WorkflowStep icon={<ShieldCheck size={18} />} title="Incidents" text={`${storedEvents.length} stored, ${storedCritical} critical`} />
+        </div>
+        <div className="product-map-footer">
+          <span><strong>{activeStreams}</strong> metric streams visible across synthetic and Kafka demos</span>
+          <span><strong>{capabilities.reduce((total, group) => total + group.capabilities.length, 0)}</strong> backend capabilities mapped to UI/API surfaces</span>
+        </div>
+      </Panel>
       <CapabilitiesPanel groups={capabilities} />
       <Panel className="wide" title="Последний synthetic запуск">
         <ScenarioSummary result={result} />
@@ -62,5 +79,17 @@ export function OverviewPage({
         <StoredEventsTable storedEvents={storedEvents} />
       </Panel>
     </section>
+  );
+}
+
+function WorkflowStep({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
+  return (
+    <article className="workflow-step">
+      <span className="workflow-icon">{icon}</span>
+      <div>
+        <strong>{title}</strong>
+        <span>{text}</span>
+      </div>
+    </article>
   );
 }

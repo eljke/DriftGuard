@@ -1,3 +1,4 @@
+import { CheckCircle2, CircleDashed, TriangleAlert } from "lucide-react";
 import { useMemo } from "react";
 import { Panel } from "../../components/ui";
 import type { DemoCapability, DemoCapabilityGroup, DemoCapabilityStatus } from "../../types";
@@ -23,16 +24,13 @@ export function CapabilitiesPanel({ groups }: { groups: DemoCapabilityGroup[] })
         <Panel className="wide capabilities-panel" title="Demo capability map">
             <div className="capability-summary">
                 <div>
-                    <span>Ready</span>
-                    <strong>{totals.READY}</strong>
+                    <h3>Backend coverage surfaced in UI</h3>
+                    <p>Каждая возможность связывает user-facing экран с REST endpoints, чтобы demo показывала реальные сценарии starter-а, Kafka module, testkit и engine.</p>
                 </div>
-                <div>
-                    <span>Partial</span>
-                    <strong>{totals.PARTIAL}</strong>
-                </div>
-                <div>
-                    <span>Planned</span>
-                    <strong>{totals.PLANNED}</strong>
+                <div className="capability-totals">
+                    <CapabilityTotal label="Ready" value={totals.READY} tone="ready" />
+                    <CapabilityTotal label="Partial" value={totals.PARTIAL} tone="partial" />
+                    <CapabilityTotal label="Planned" value={totals.PLANNED} tone="planned" />
                 </div>
             </div>
 
@@ -60,35 +58,46 @@ export function CapabilitiesPanel({ groups }: { groups: DemoCapabilityGroup[] })
 }
 
 function CapabilityCard({ capability }: { capability: DemoCapability }) {
+    const Icon = capability.status === "READY" ? CheckCircle2 : capability.status === "PARTIAL" ? TriangleAlert : CircleDashed;
     return (
-        <article className="capability-card">
+        <article className={`capability-card ${capability.status.toLowerCase()}`}>
             <div className="capability-card-head">
                 <div>
                     <strong>{capability.title}</strong>
-                    <span>{capability.description}</span>
                 </div>
                 <span className={`capability-status ${capability.status.toLowerCase()}`}>
-          {statusLabels[capability.status]}
-        </span>
+                    <Icon size={14} />
+                    {statusLabels[capability.status]}
+                </span>
             </div>
+            <p>{capability.description}</p>
 
-            <dl className="capability-meta">
+            <div className="capability-chips">
+                <span>UI</span>
                 <div>
-                    <dt>Category</dt>
-                    <dd>{capability.category}</dd>
+                    {capability.uiSurfaces.map((surface) => (
+                        <span className="capability-chip" key={surface}>{surface}</span>
+                    ))}
                 </div>
+            </div>
+            <div className="capability-chips">
+                <span>API</span>
                 <div>
-                    <dt>UI</dt>
-                    <dd>{capability.uiSurfaces.join(", ") || "—"}</dd>
+                    {capability.apiEndpoints.map((endpoint) => (
+                        <code className="capability-chip mono" key={endpoint}>{endpoint}</code>
+                    ))}
                 </div>
-            </dl>
-
-            <div className="capability-endpoints">
-                {capability.apiEndpoints.map((endpoint) => (
-                    <code key={endpoint}>{endpoint}</code>
-                ))}
             </div>
         </article>
+    );
+}
+
+function CapabilityTotal({ label, value, tone }: { label: string; value: number; tone: "ready" | "partial" | "planned" }) {
+    return (
+        <div className={`capability-total ${tone}`}>
+            <span>{label}</span>
+            <strong>{value}</strong>
+        </div>
     );
 }
 
