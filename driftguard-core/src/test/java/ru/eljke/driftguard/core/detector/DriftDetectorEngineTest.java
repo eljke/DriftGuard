@@ -6,6 +6,7 @@ import ru.eljke.driftguard.core.config.DetectorDefinition;
 import ru.eljke.driftguard.core.config.EmissionPolicyConfig;
 import ru.eljke.driftguard.core.domain.DriftDirection;
 import ru.eljke.driftguard.core.domain.DriftEvent;
+import ru.eljke.driftguard.core.domain.DriftEventPhase;
 import ru.eljke.driftguard.core.domain.DriftSeverity;
 import ru.eljke.driftguard.core.domain.MetricKey;
 import ru.eljke.driftguard.core.domain.MetricPoint;
@@ -61,7 +62,10 @@ class DriftDetectorEngineTest {
         assertTrue(engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:00Z"), 100)).isEmpty());
         assertEquals(1, engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:01Z"), 101)).size());
         assertTrue(engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:02Z"), 102)).isEmpty());
-        assertTrue(engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:12Z"), 103)).isEmpty());
+        List<DriftEvent> ongoingEvents = engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:12Z"), 103));
+
+        assertEquals(1, ongoingEvents.size());
+        assertEquals(DriftEventPhase.ONGOING, ongoingEvents.getFirst().phase());
     }
 
     private record CountingConfig(int emitAt) implements DetectorConfig {
