@@ -169,7 +169,7 @@ public class KafkaDemoService {
         error = null;
 
         long run = runSequence.incrementAndGet();
-        List<ProducerPlayback> playbacks = createProducerPlaybacks(scenarioId, run, request);
+        List<ProducerPlayback> playbacks = createProducerPlaybacks(scenarioId, run, request, !replayMode);
         producerPlaybacks.addAll(playbacks);
         totalPoints = playbacks.stream().mapToInt(ProducerPlayback::totalPoints).sum();
 
@@ -244,17 +244,17 @@ public class KafkaDemoService {
         }
     }
 
-    private List<ProducerPlayback> createProducerPlaybacks(String scenario, long run, DemoScenarioRequest request) {
+    private List<ProducerPlayback> createProducerPlaybacks(String scenario, long run, DemoScenarioRequest request, boolean liveClock) {
         int samples = request.normalizedSamples(defaultSamples(scenario));
         if ("microservices-system".equals(scenario)) {
             return List.of(
-                    playback("checkout-latency-producer", checkoutLatency(run, samples)),
-                    playback("payment-errors-producer", paymentErrors(run, samples)),
-                    playback("orders-queue-producer", ordersQueue(run, samples)),
-                    playback("checkout-throughput-producer", checkoutThroughput(run, samples))
+                    playback("checkout-latency-producer", checkoutLatency(run, samples), liveClock),
+                    playback("payment-errors-producer", paymentErrors(run, samples), liveClock),
+                    playback("orders-queue-producer", ordersQueue(run, samples), liveClock),
+                    playback("checkout-throughput-producer", checkoutThroughput(run, samples), liveClock)
             );
         }
-        return List.of(playback(scenario + "-producer", DemoScenarioService.createScenario(scenario, "kafka-run-" + run, request)));
+        return List.of(playback(scenario + "-producer", DemoScenarioService.createScenario(scenario, "kafka-run-" + run, request), liveClock));
     }
 
     private static MetricScenario checkoutLatency(long run, int samples) {
@@ -302,7 +302,7 @@ public class KafkaDemoService {
         );
     }
 
-    private ProducerPlayback playback(String id, MetricScenario scenario) {
+    private ProducerPlayback playback(String id, MetricScenario scenario, boolean liveClock) {
         List<MetricPoint> points = scenario.generate();
         MetricPoint first = points.getFirst();
         return new ProducerPlayback(
@@ -311,6 +311,7 @@ public class KafkaDemoService {
                 first.key().metric(),
                 first.key().operation(),
                 points,
+                liveClock,
                 new KafkaProducer<>(
                         producerProperties(),
                         new StringSerializer(),
@@ -487,6 +488,7 @@ public class KafkaDemoService {
         private final String metric;
         private final String operation;
         private final List<MetricPoint> points;
+        private final boolean liveClock;
         private final KafkaProducer<String, MetricPoint> producer;
         private final AtomicInteger index = new AtomicInteger();
         private volatile ScheduledFuture<?> task;
@@ -497,6 +499,7 @@ public class KafkaDemoService {
                 String metric,
                 String operation,
                 List<MetricPoint> points,
+                boolean liveClock,
                 KafkaProducer<String, MetricPoint> producer
         ) {
             this.id = id;
@@ -504,6 +507,7 @@ public class KafkaDemoService {
             this.metric = metric;
             this.operation = operation;
             this.points = points;
+            this.liveClock = liveClock;
             this.producer = producer;
         }
 
@@ -512,7 +516,7 @@ public class KafkaDemoService {
             if (current >= points.size()) {
                 return false;
             }
-            MetricPoint point = points.get(current);
+            MetricPoint point = liveClock ? points.get(current).observedAt(java.time.Instant.now()) : points.get(current);
             producedSamples.add(point);
             producer.send(new ProducerRecord<>(properties.getInputTopic(), metricKey(point), point), (metadata, exception) -> {
                 if (exception != null) {

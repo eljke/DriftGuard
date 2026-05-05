@@ -43,4 +43,8 @@ public record MetricPoint(
     public static MetricPoint gauge(MetricKey key, Instant timestamp, double value) {
         return new MetricPoint(key, timestamp, value, MetricKind.GAUGE, Map.of(), Map.of());
     }
+
+    public MetricPoint observedAt(Instant observedAt) {
+        return new MetricPoint(key, observedAt, value, kind, tags, attributes);
+    }
 }
