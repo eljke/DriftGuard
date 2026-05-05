@@ -1,7 +1,7 @@
 import { Loader2, Square } from "lucide-react";
 import { Notice, Panel } from "../../components/ui";
 import { readableError } from "../../lib/format";
-import type { DemoScenarioDescriptor, KafkaDemoStatus } from "../../types";
+import type { DemoScenarioDescriptor, DemoScenarioRequest, KafkaDemoStatus } from "../../types";
 import { ScenarioButtons } from "../common/ScenarioButtons";
 import { ReplayControls } from "./ReplayControls";
 
@@ -12,14 +12,14 @@ interface KafkaScenarioPanelProps {
   replayProfile: string;
   replaySpeed: number;
   resetState: boolean;
-  samples: number;
+  scenarioParams: Required<DemoScenarioRequest>;
   scenarios: DemoScenarioDescriptor[];
   status?: KafkaDemoStatus;
   stopping: boolean;
   onProfileChange: (profile: string) => void;
   onReplay: (scenario: string) => void;
   onResetStateChange: (reset: boolean) => void;
-  onSamplesChange: (samples: number) => void;
+  onScenarioParamsChange: (params: Required<DemoScenarioRequest>) => void;
   onRun: (scenario: string) => void;
   onSpeedChange: (speed: number) => void;
   onStop: () => void;
@@ -32,14 +32,14 @@ export function KafkaScenarioPanel({
   replayProfile,
   replaySpeed,
   resetState,
-  samples,
+  scenarioParams,
   scenarios,
   status,
   stopping,
   onProfileChange,
   onReplay,
   onResetStateChange,
-  onSamplesChange,
+  onScenarioParamsChange,
   onRun,
   onSpeedChange,
   onStop
@@ -53,12 +53,12 @@ export function KafkaScenarioPanel({
         disabled={busy || Boolean(status?.running)}
         profiles={profiles}
         resetState={resetState}
-        samples={samples}
+        scenarioParams={scenarioParams}
         selectedProfile={replayProfile}
         speed={replaySpeed}
         onProfileChange={onProfileChange}
         onResetStateChange={onResetStateChange}
-        onSamplesChange={onSamplesChange}
+        onScenarioParamsChange={onScenarioParamsChange}
         onSpeedChange={onSpeedChange}
       />
       <ScenarioButtons

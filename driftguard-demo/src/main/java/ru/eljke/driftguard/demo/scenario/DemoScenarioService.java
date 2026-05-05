@@ -101,7 +101,7 @@ public class DemoScenarioService {
         MetricScenario scenario = createScenario(
                 descriptor.id(),
                 "demo-run-" + runSequence.incrementAndGet(),
-                requestedSamples(descriptor.id(), request)
+                safeRequest(descriptor.id(), request)
         );
         List<MetricPoint> points = scenario.generate();
         List<DriftEvent> events = new ArrayList<>();
@@ -138,7 +138,7 @@ public class DemoScenarioService {
         MetricScenario scenario = createScenario(
                 descriptor.id(),
                 "live-run-" + runSequence.incrementAndGet(),
-                requestedSamples(descriptor.id(), request)
+                safeRequest(descriptor.id(), request)
         );
         List<MetricPoint> points = scenario.generate();
         List<MetricPoint> processed = new ArrayList<>();
@@ -236,60 +236,70 @@ public class DemoScenarioService {
     }
 
     public static MetricScenario createScenario(String scenarioId, String instance) {
-        return createScenario(scenarioId, instance, defaultSamples(scenarioId));
+        return createScenario(scenarioId, instance, safeRequest(scenarioId, null));
     }
 
     public static MetricScenario createScenario(String scenarioId, String instance, int samples) {
-        int safeSamples = new DemoScenarioRequest(samples).normalizedSamples(defaultSamples(scenarioId));
+        return createScenario(scenarioId, instance, new DemoScenarioRequest(samples, null, null, null, null, null));
+    }
+
+    public static MetricScenario createScenario(String scenarioId, String instance, DemoScenarioRequest request) {
+        DemoScenarioRequest safeRequest = safeRequest(scenarioId, request);
+        int safeSamples = safeRequest.normalizedSamples(defaultSamples(scenarioId));
+        double driftStartPercent = safeRequest.percentOrDefault(safeRequest.driftStartPercent(), defaultDriftStartPercent(scenarioId));
+        double spikeLengthPercent = safeRequest.percentOrDefault(safeRequest.spikeLengthPercent(), 20.0);
         return switch (scenarioId) {
             case "latency-step" -> new StepDriftScenario(
                 "latency-step-degradation",
                 config("checkout-service", "latency", instance, "POST /checkout", MetricKind.DURATION, safeSamples),
-                at(safeSamples, 0.50),
-                100.0,
-                260.0,
-                4.0
+                atPercent(safeSamples, driftStartPercent),
+                safeRequest.valueOrDefault(safeRequest.baselineValue(), 100.0, 1.0, 10_000.0),
+                safeRequest.valueOrDefault(safeRequest.driftValue(), 260.0, 1.0, 10_000.0),
+                safeRequest.valueOrDefault(safeRequest.noiseStdDev(), 4.0, 0.0, 500.0)
             );
             case "error-rate-spike" -> new PulseSpikeScenario(
                     "error-rate-spike",
                     config("checkout-service", "error-rate", instance, "POST /checkout", MetricKind.RATE, safeSamples),
-                    at(safeSamples, 0.43),
-                    length(safeSamples, 0.20),
-                    0.01,
-                    0.18,
-                    0.002
+                    atPercent(safeSamples, driftStartPercent),
+                    lengthPercent(safeSamples, driftStartPercent, spikeLengthPercent),
+                    safeRequest.valueOrDefault(safeRequest.baselineValue(), 0.01, 0.0, 1.0),
+                    safeRequest.valueOrDefault(safeRequest.driftValue(), 0.18, 0.0, 1.0),
+                    safeRequest.valueOrDefault(safeRequest.noiseStdDev(), 0.002, 0.0, 0.5)
             );
             case "throughput-drop" -> new ThroughputDropScenario(
                     "throughput-drop",
                     config("checkout-service", "throughput", instance, "POST /checkout", MetricKind.RATE, safeSamples),
-                    at(safeSamples, 0.47),
-                    1000.0,
-                    430.0,
-                    18.0
+                    atPercent(safeSamples, driftStartPercent),
+                    safeRequest.valueOrDefault(safeRequest.baselineValue(), 1000.0, 1.0, 1_000_000.0),
+                    Math.min(
+                            safeRequest.valueOrDefault(safeRequest.driftValue(), 430.0, 0.0, 1_000_000.0),
+                            safeRequest.valueOrDefault(safeRequest.baselineValue(), 1000.0, 1.0, 1_000_000.0) - 0.001
+                    ),
+                    safeRequest.valueOrDefault(safeRequest.noiseStdDev(), 18.0, 0.0, 10_000.0)
             );
             case "queue-growth" -> new GradualDriftScenario(
                     "queue-backlog-growth",
                     config("orders-worker", "queue-size", instance, "orders.created", MetricKind.SIZE, safeSamples),
-                    at(safeSamples, 0.34),
-                    40.0,
-                    2.6,
-                    4.0
+                    atPercent(safeSamples, driftStartPercent),
+                    safeRequest.valueOrDefault(safeRequest.baselineValue(), 40.0, 0.0, 1_000_000.0),
+                    safeRequest.valueOrDefault(safeRequest.driftValue(), 2.6, 0.0, 10_000.0),
+                    safeRequest.valueOrDefault(safeRequest.noiseStdDev(), 4.0, 0.0, 10_000.0)
             );
             case "seasonal-latency" -> new SeasonalNoiseScenario(
                     "seasonal-latency",
                     config("checkout-service", "latency", instance, "POST /checkout", MetricKind.DURATION, safeSamples),
-                    120.0,
-                    25.0,
+                    safeRequest.valueOrDefault(safeRequest.baselineValue(), 120.0, 1.0, 10_000.0),
+                    safeRequest.valueOrDefault(safeRequest.driftValue(), 25.0, 0.0, 10_000.0),
                     Math.max(20, at(safeSamples, 0.25)),
-                    2.0
+                    safeRequest.valueOrDefault(safeRequest.noiseStdDev(), 2.0, 0.0, 500.0)
             );
             case "microservices-system" -> new StepDriftScenario(
                     "microservices-system-latency",
                     config("checkout-service", "latency", instance, "POST /checkout", MetricKind.DURATION, safeSamples),
-                    at(safeSamples, 0.50),
-                    100.0,
-                    260.0,
-                    4.0
+                    atPercent(safeSamples, driftStartPercent),
+                    safeRequest.valueOrDefault(safeRequest.baselineValue(), 100.0, 1.0, 10_000.0),
+                    safeRequest.valueOrDefault(safeRequest.driftValue(), 260.0, 1.0, 10_000.0),
+                    safeRequest.valueOrDefault(safeRequest.noiseStdDev(), 4.0, 0.0, 500.0)
             );
             default -> throw new DriftGuardValidationException(DemoErrorReason.UNKNOWN_SCENARIO, scenarioId);
         };
@@ -372,10 +382,11 @@ public class DemoScenarioService {
                 .increment(events);
     }
 
-    private static int requestedSamples(String scenarioId, DemoScenarioRequest request) {
-        return request == null
-                ? defaultSamples(scenarioId)
-                : request.normalizedSamples(defaultSamples(scenarioId));
+    private static DemoScenarioRequest safeRequest(String scenarioId, DemoScenarioRequest request) {
+        if (request == null) {
+            return new DemoScenarioRequest(defaultSamples(scenarioId), null, null, null, null, null);
+        }
+        return request;
     }
 
     private static int defaultSamples(String scenarioId) {
@@ -391,7 +402,21 @@ public class DemoScenarioService {
         return Math.max(1, Math.min(samples - 2, (int) Math.round(samples * ratio)));
     }
 
-    private static int length(int samples, double ratio) {
-        return Math.max(8, Math.min(samples - at(samples, 0.43), (int) Math.round(samples * ratio)));
+    private static int atPercent(int samples, double percent) {
+        return at(samples, percent / 100.0);
+    }
+
+    private static int lengthPercent(int samples, double startPercent, double lengthPercent) {
+        int start = atPercent(samples, startPercent);
+        return Math.max(8, Math.min(samples - start, (int) Math.round(samples * lengthPercent / 100.0)));
+    }
+
+    private static double defaultDriftStartPercent(String scenarioId) {
+        return switch (scenarioId) {
+            case "error-rate-spike" -> 43.0;
+            case "throughput-drop" -> 47.0;
+            case "queue-growth" -> 34.0;
+            default -> 50.0;
+        };
     }
 }

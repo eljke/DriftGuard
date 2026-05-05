@@ -1,26 +1,32 @@
+import type { DemoScenarioRequest } from "../../types";
+
 export function ReplayControls({
   disabled,
   profiles,
   resetState,
-  samples,
+  scenarioParams,
   selectedProfile,
   speed,
   onProfileChange,
   onResetStateChange,
-  onSamplesChange,
+  onScenarioParamsChange,
   onSpeedChange
 }: {
   disabled: boolean;
   profiles: string[];
   resetState: boolean;
-  samples: number;
+  scenarioParams: Required<DemoScenarioRequest>;
   selectedProfile: string;
   speed: number;
   onProfileChange: (profile: string) => void;
   onResetStateChange: (reset: boolean) => void;
-  onSamplesChange: (samples: number) => void;
+  onScenarioParamsChange: (params: Required<DemoScenarioRequest>) => void;
   onSpeedChange: (speed: number) => void;
 }) {
+  const setParam = (key: keyof Required<DemoScenarioRequest>, next: number) => {
+    onScenarioParamsChange({ ...scenarioParams, [key]: next });
+  };
+
   return (
     <div className="replay-controls">
       <label className="field">
@@ -38,18 +44,7 @@ export function ReplayControls({
         </select>
       </label>
 
-      <label className="field">
-        <span>Sample points per stream</span>
-        <input
-          disabled={disabled}
-          max={600}
-          min={80}
-          step={10}
-          type="number"
-          value={samples}
-          onChange={(event) => onSamplesChange(Number(event.target.value))}
-        />
-      </label>
+      <NumberField disabled={disabled} label="Sample points" max={600} min={80} step={10} value={scenarioParams.samples} onChange={(next) => setParam("samples", next)} />
 
       <label className="field">
         <span>Detector profile</span>
@@ -75,9 +70,48 @@ export function ReplayControls({
         <span>Reset detector state before replay</span>
       </label>
 
+      <NumberField disabled={disabled} label="Baseline value" min={0} step={1} value={scenarioParams.baselineValue} onChange={(next) => setParam("baselineValue", next)} />
+      <NumberField disabled={disabled} label="Drift value" min={0} step={1} value={scenarioParams.driftValue} onChange={(next) => setParam("driftValue", next)} />
+      <NumberField disabled={disabled} label="Noise" min={0} step={0.1} value={scenarioParams.noiseStdDev} onChange={(next) => setParam("noiseStdDev", next)} />
+      <NumberField disabled={disabled} label="Drift start %" max={95} min={5} step={1} value={scenarioParams.driftStartPercent} onChange={(next) => setParam("driftStartPercent", next)} />
+      <NumberField disabled={disabled} label="Spike length %" max={95} min={5} step={1} value={scenarioParams.spikeLengthPercent} onChange={(next) => setParam("spikeLengthPercent", next)} />
+
       <p className="help-text">
-        Replay переигрывает тот же synthetic scenario через Kafka. Это удобно для сравнения профилей и скорости обнаружения на одинаковом потоке.
+        Use 0 for scenario defaults. Replay переигрывает тот же synthetic scenario через Kafka, поэтому points становятся Kafka messages per producer stream.
       </p>
     </div>
+  );
+}
+
+function NumberField({
+  disabled,
+  label,
+  max,
+  min,
+  step,
+  value,
+  onChange
+}: {
+  disabled: boolean;
+  label: string;
+  max?: number;
+  min: number;
+  step: number;
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <label className="field">
+      <span>{label}</span>
+      <input
+        disabled={disabled}
+        max={max}
+        min={min}
+        step={step}
+        type="number"
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+      />
+    </label>
   );
 }

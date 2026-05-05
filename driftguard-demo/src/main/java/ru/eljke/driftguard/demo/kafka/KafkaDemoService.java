@@ -21,6 +21,7 @@ import ru.eljke.driftguard.demo.error.DemoErrorReason;
 import ru.eljke.driftguard.demo.detection.DemoDetectionRuntime;
 import ru.eljke.driftguard.demo.detection.DemoDetectorProfile;
 import ru.eljke.driftguard.demo.event.DemoDriftEventRepository;
+import ru.eljke.driftguard.demo.scenario.DemoScenarioRequest;
 import ru.eljke.driftguard.demo.scenario.DemoScenarioService;
 import ru.eljke.driftguard.kafka.DriftGuardObjectMapper;
 import ru.eljke.driftguard.kafka.DriftGuardSerdes;
@@ -100,7 +101,7 @@ public class KafkaDemoService {
 
     public synchronized KafkaDemoStatus replay(KafkaReplayRequest request) {
         KafkaReplayRequest safeRequest = request == null
-                ? new KafkaReplayRequest("latency-step", 2.0, true, null, null)
+                ? new KafkaReplayRequest("latency-step", 2.0, true, null, null, null, null, null, null, null)
                 : request;
 
         return startInternal(
@@ -109,7 +110,7 @@ public class KafkaDemoService {
                 safeRequest.normalizedSpeed(),
                 safeRequest.resetState(),
                 safeRequest.profile(),
-                safeRequest.normalizedSamples(defaultSamples(safeRequest.normalizedScenario()))
+                safeRequest.scenarioRequest()
         );
     }
 
@@ -120,7 +121,14 @@ public class KafkaDemoService {
             boolean resetState,
             String profile
     ) {
-        return startInternal(scenario, replayMode, playbackSpeed, resetState, profile, defaultSamples(scenario));
+        return startInternal(
+                scenario,
+                replayMode,
+                playbackSpeed,
+                resetState,
+                profile,
+                new DemoScenarioRequest(defaultSamples(scenario), null, null, null, null, null)
+        );
     }
 
     private KafkaDemoStatus startInternal(
@@ -129,7 +137,7 @@ public class KafkaDemoService {
             double playbackSpeed,
             boolean resetState,
             String profile,
-            int samples
+            DemoScenarioRequest request
     ) {
         if (!properties.isEnabled()) {
             throw new DriftGuardValidationException(DemoErrorReason.KAFKA_DEMO_DISABLED);
@@ -150,7 +158,7 @@ public class KafkaDemoService {
         error = null;
 
         long run = runSequence.incrementAndGet();
-        List<ProducerPlayback> playbacks = createProducerPlaybacks(scenarioId, run, samples);
+        List<ProducerPlayback> playbacks = createProducerPlaybacks(scenarioId, run, request);
         producerPlaybacks.addAll(playbacks);
         totalPoints = playbacks.stream().mapToInt(ProducerPlayback::totalPoints).sum();
 
@@ -225,7 +233,8 @@ public class KafkaDemoService {
         }
     }
 
-    private List<ProducerPlayback> createProducerPlaybacks(String scenario, long run, int samples) {
+    private List<ProducerPlayback> createProducerPlaybacks(String scenario, long run, DemoScenarioRequest request) {
+        int samples = request.normalizedSamples(defaultSamples(scenario));
         if ("microservices-system".equals(scenario)) {
             return List.of(
                     playback("checkout-latency-producer", checkoutLatency(run, samples)),
@@ -234,7 +243,7 @@ public class KafkaDemoService {
                     playback("checkout-throughput-producer", checkoutThroughput(run, samples))
             );
         }
-        return List.of(playback(scenario + "-producer", DemoScenarioService.createScenario(scenario, "kafka-run-" + run, samples)));
+        return List.of(playback(scenario + "-producer", DemoScenarioService.createScenario(scenario, "kafka-run-" + run, request)));
     }
 
     private static MetricScenario checkoutLatency(long run, int samples) {

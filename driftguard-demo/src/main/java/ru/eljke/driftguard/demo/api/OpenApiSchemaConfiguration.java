@@ -121,6 +121,26 @@ public class OpenApiSchemaConfiguration {
                     "applicationId", "Kafka Streams application id.",
                     "playbackInterval", "Интервал публикации synthetic points producer-ами."
             ));
+            describe(schemas, "DemoScenarioRequest", "Параметры генерации synthetic scenario.", Map.of(
+                    "samples", "Число MetricPoint samples на stream.",
+                    "baselineValue", "Стабильное значение до drift-а. Null или 0 в demo UI оставляет дефолт scenario.",
+                    "driftValue", "Значение во время step/drop/spike drift-а. Для queue-growth это slope, для seasonal-latency это amplitude.",
+                    "noiseStdDev", "Стандартное отклонение synthetic noise.",
+                    "driftStartPercent", "Позиция начала drift-а в процентах длины потока.",
+                    "spikeLengthPercent", "Длительность spike-а в процентах длины потока."
+            ));
+            describe(schemas, "KafkaReplayRequest", "Запрос на воспроизводимый replay synthetic scenario через Kafka.", Map.of(
+                    "scenario", "Id synthetic scenario.",
+                    "speed", "Множитель скорости публикации MetricPoint.",
+                    "resetState", "Нужно ли сбросить runtime detector state перед replay.",
+                    "profile", "Detector profile, который нужно применить перед replay.",
+                    "samples", "Число MetricPoint samples на producer stream.",
+                    "baselineValue", "Стабильное значение до drift-а.",
+                    "driftValue", "Значение во время step/drop/spike drift-а.",
+                    "noiseStdDev", "Стандартное отклонение synthetic noise.",
+                    "driftStartPercent", "Позиция начала drift-а в процентах длины потока.",
+                    "spikeLengthPercent", "Длительность spike-а в процентах длины потока."
+            ));
             describe(schemas, "DetectorConfigurationView", "UI-представление одного detector definition.", Map.ofEntries(
                     Map.entry("name", "Имя detector-а."),
                     Map.entry("algorithm", "Алгоритм detector-а."),

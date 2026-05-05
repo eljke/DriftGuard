@@ -33,14 +33,14 @@ export function KafkaPage({
         replayProfile={kafkaDemo.replayProfile}
         replaySpeed={kafkaDemo.replaySpeed}
         resetState={kafkaDemo.resetState}
-        samples={kafkaDemo.samples}
+        scenarioParams={kafkaDemo.scenarioParams}
         scenarios={kafkaScenarios}
         status={status}
         stopping={kafkaDemo.stopping}
         onProfileChange={kafkaDemo.setReplayProfile}
         onReplay={kafkaDemo.replayScenario}
         onResetStateChange={kafkaDemo.setResetState}
-        onSamplesChange={kafkaDemo.setSamples}
+        onScenarioParamsChange={kafkaDemo.setScenarioParams}
         onRun={kafkaDemo.startScenario}
         onSpeedChange={kafkaDemo.setReplaySpeed}
         onStop={() => kafkaDemo.stop()}

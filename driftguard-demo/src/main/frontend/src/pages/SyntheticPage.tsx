@@ -10,17 +10,25 @@ import { StreamGrid } from "../features/common/StreamGrid";
 import { EventsTable } from "../features/events/EventsTable";
 import { IncidentsPanel } from "../features/events/IncidentsPanel";
 import { readableError } from "../lib/format";
-import type { DemoRunResult, DemoScenarioDescriptor } from "../types";
+import type { DemoRunResult, DemoScenarioDescriptor, DemoScenarioRequest } from "../types";
 
 export function SyntheticPage({ result, scenarios }: { result?: DemoRunResult; scenarios: DemoScenarioDescriptor[] }) {
   const queryClient = useQueryClient();
-  const [samples, setSamples] = useState(160);
+  const [scenarioParams, setScenarioParams] = useState<Required<DemoScenarioRequest>>({
+    samples: 160,
+    baselineValue: 0,
+    driftValue: 0,
+    noiseStdDev: 0,
+    driftStartPercent: 0,
+    spikeLengthPercent: 0
+  });
+  const request = compactScenarioRequest(scenarioParams);
   const run = useMutation({
-    mutationFn: (scenario: string) => api.runScenario(scenario, { samples }),
+    mutationFn: (scenario: string) => api.runScenario(scenario, request),
     onSuccess: (data) => queryClient.setQueryData(["overview"], data)
   });
   const live = useMutation({
-    mutationFn: (scenario: string) => api.startLive(scenario, { samples }),
+    mutationFn: (scenario: string) => api.startLive(scenario, request),
     onSuccess: (data) => queryClient.setQueryData(["overview"], data)
   });
   const stopLive = useMutation({
@@ -37,21 +45,7 @@ export function SyntheticPage({ result, scenarios }: { result?: DemoRunResult; s
       <Panel title="Synthetic scenarios">
         {busy && <Notice tone="info" text="Команда выполняется. Результат обновится автоматически." />}
         {error && <Notice tone="error" text={readableError(error)} />}
-        <div className="scenario-parameters">
-          <label className="field">
-            <span>Sample points per stream</span>
-            <input
-              disabled={busy}
-              max={600}
-              min={80}
-              step={10}
-              type="number"
-              value={samples}
-              onChange={(event) => setSamples(Number(event.target.value))}
-            />
-          </label>
-          <p className="help-text">Points are generated MetricPoint samples. In Kafka mode the same value becomes messages per producer stream.</p>
-        </div>
+        <ScenarioLabControls disabled={busy} value={scenarioParams} onChange={setScenarioParams} />
         <ScenarioButtons scenarios={scenarios} busy={busy} onRun={(id) => run.mutate(id)} onLive={(id) => live.mutate(id)} />
       </Panel>
       <BenchmarkPanel
@@ -79,4 +73,64 @@ export function SyntheticPage({ result, scenarios }: { result?: DemoRunResult; s
       <EventsTable events={result?.events ?? []} />
     </section>
   );
+}
+
+function ScenarioLabControls({
+  disabled,
+  value,
+  onChange
+}: {
+  disabled: boolean;
+  value: Required<DemoScenarioRequest>;
+  onChange: (value: Required<DemoScenarioRequest>) => void;
+}) {
+  const set = (key: keyof Required<DemoScenarioRequest>, next: number) => onChange({ ...value, [key]: next });
+
+  return (
+    <div className="scenario-parameters advanced">
+      <NumberField disabled={disabled} label="Sample points" max={600} min={80} step={10} value={value.samples} onChange={(next) => set("samples", next)} />
+      <NumberField disabled={disabled} label="Baseline value" max={1000000} min={0} step={1} value={value.baselineValue} onChange={(next) => set("baselineValue", next)} />
+      <NumberField disabled={disabled} label="Drift value" max={1000000} min={0} step={1} value={value.driftValue} onChange={(next) => set("driftValue", next)} />
+      <NumberField disabled={disabled} label="Noise" max={10000} min={0} step={0.1} value={value.noiseStdDev} onChange={(next) => set("noiseStdDev", next)} />
+      <NumberField disabled={disabled} label="Drift start %" max={95} min={5} step={1} value={value.driftStartPercent} onChange={(next) => set("driftStartPercent", next)} />
+      <NumberField disabled={disabled} label="Spike length %" max={80} min={5} step={1} value={value.spikeLengthPercent} onChange={(next) => set("spikeLengthPercent", next)} />
+      <p className="help-text">Use 0 for scenario defaults. Points are generated MetricPoint samples; in Kafka mode they become messages per producer stream.</p>
+    </div>
+  );
+}
+
+function NumberField({
+  disabled,
+  label,
+  max,
+  min,
+  step,
+  value,
+  onChange
+}: {
+  disabled: boolean;
+  label: string;
+  max: number;
+  min: number;
+  step: number;
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <label className="field">
+      <span>{label}</span>
+      <input disabled={disabled} max={max} min={min} step={step} type="number" value={value} onChange={(event) => onChange(Number(event.target.value))} />
+    </label>
+  );
+}
+
+function compactScenarioRequest(value: Required<DemoScenarioRequest>): DemoScenarioRequest {
+  return {
+    samples: value.samples,
+    baselineValue: value.baselineValue || undefined,
+    driftValue: value.driftValue || undefined,
+    noiseStdDev: value.noiseStdDev || undefined,
+    driftStartPercent: value.driftStartPercent || undefined,
+    spikeLengthPercent: value.spikeLengthPercent || undefined
+  };
 }

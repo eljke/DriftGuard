@@ -116,6 +116,11 @@ export interface DemoScenarioDescriptor {
 
 export interface DemoScenarioRequest {
   samples?: number;
+  baselineValue?: number;
+  driftValue?: number;
+  noiseStdDev?: number;
+  driftStartPercent?: number;
+  spikeLengthPercent?: number;
 }
 
 export interface KafkaProducerStatus {
@@ -179,12 +184,11 @@ export interface KafkaOperationsSnapshot {
   error?: string;
 }
 
-export interface KafkaReplayRequest {
+export interface KafkaReplayRequest extends DemoScenarioRequest {
   scenario: string;
   speed: number;
   resetState: boolean;
   profile?: string;
-  samples?: number;
 }
 
 
