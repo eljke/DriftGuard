@@ -88,7 +88,7 @@ function ScenarioLabControls({
 
   return (
     <div className="scenario-parameters advanced">
-      <NumberField disabled={disabled} label="Sample points" max={600} min={80} step={10} value={value.samples} onChange={(next) => set("samples", next)} />
+      <NumberField disabled={disabled} label="Sample points" max={2000} min={80} step={10} value={value.samples} onChange={(next) => set("samples", next)} />
       <NumberField disabled={disabled} label="Baseline value" max={1000000} min={0} step={1} value={value.baselineValue} onChange={(next) => set("baselineValue", next)} />
       <NumberField disabled={disabled} label="Drift value" max={1000000} min={0} step={1} value={value.driftValue} onChange={(next) => set("driftValue", next)} />
       <NumberField disabled={disabled} label="Noise" max={10000} min={0} step={0.1} value={value.noiseStdDev} onChange={(next) => set("noiseStdDev", next)} />

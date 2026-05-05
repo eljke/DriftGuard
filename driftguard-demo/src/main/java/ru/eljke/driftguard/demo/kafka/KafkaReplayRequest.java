@@ -38,7 +38,7 @@ public record KafkaReplayRequest(
 
     public int normalizedSamples(int fallback) {
         int value = samples == null || samples <= 0 ? fallback : samples;
-        return Math.max(80, Math.min(600, value));
+        return Math.max(80, Math.min(2000, value));
     }
 
     public DemoScenarioRequest scenarioRequest() {

@@ -20,7 +20,7 @@ public record DemoScenarioRequest(
 ) {
     public static final int DEFAULT_SAMPLES = 0;
     private static final int MIN_SAMPLES = 80;
-    private static final int MAX_SAMPLES = 600;
+    private static final int MAX_SAMPLES = 2000;
 
     public DemoScenarioRequest(Integer samples) {
         this(samples, null, null, null, null, null);

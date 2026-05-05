@@ -44,7 +44,7 @@ export function ReplayControls({
         </select>
       </label>
 
-      <NumberField disabled={disabled} label="Sample points" max={600} min={80} step={10} value={scenarioParams.samples} onChange={(next) => setParam("samples", next)} />
+      <NumberField disabled={disabled} label="Sample points" max={2000} min={80} step={10} value={scenarioParams.samples} onChange={(next) => setParam("samples", next)} />
 
       <label className="field">
         <span>Detector profile</span>
