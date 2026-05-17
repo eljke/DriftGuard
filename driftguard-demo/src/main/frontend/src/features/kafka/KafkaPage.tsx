@@ -7,6 +7,7 @@ import { KafkaOperationsPanel } from "./KafkaOperationsPanel";
 import { KafkaScenarioPanel } from "./KafkaScenarioPanel";
 import { ProducerStrip } from "./ProducerStrip";
 import { useKafkaDemo } from "./useKafkaDemo";
+import { useI18n } from "../../i18n";
 
 export function KafkaPage({
   status,
@@ -19,6 +20,7 @@ export function KafkaPage({
   scenarios: DemoScenarioDescriptor[];
   configuration?: DemoConfigurationView;
 }) {
+  const { t } = useI18n();
   const kafkaDemo = useKafkaDemo();
   const kafkaScenarios = scenarios.filter((scenario) => scenario.id !== "seasonal-latency");
   const profiles = configuration?.availableProfiles ?? [];
@@ -46,7 +48,7 @@ export function KafkaPage({
         onStop={() => kafkaDemo.stop()}
       />
       <ProducerStrip status={status} />
-      <Panel title="Kafka metric streams">
+      <Panel title={t("kafka.metricStreams")}>
         <StreamGrid points={status?.samplePoints ?? []} events={status?.consumedEvents ?? []} running={Boolean(status?.running)} />
       </Panel>
       <IncidentsPanel events={status?.consumedEvents ?? []} />

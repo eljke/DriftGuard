@@ -1,5 +1,6 @@
 import { BarChart3, Loader2 } from "lucide-react";
 import { MetricCard, Panel } from "../../components/ui";
+import { useI18n } from "../../i18n";
 import type { DetectionBenchmarkReport } from "../../types";
 import { boolCount, formatPercent, legacyPrecision, legacyRecall } from "../../lib/format";
 
@@ -18,46 +19,48 @@ export function BenchmarkPanel({
   onRun: () => void;
   onCompareProfiles: () => void;
 }) {
+  const { t } = useI18n();
+
   return (
-    <Panel title="Synthetic benchmark">
+    <Panel title={t("benchmark.title")}>
       <div className="actions">
         <button className="secondary-button" disabled={loading} onClick={onRun} type="button">
           {loading ? <Loader2 className="spin" size={16} /> : <BarChart3 size={16} />}
-          Run benchmark
+          {t("benchmark.run")}
         </button>
         <button className="secondary-button" disabled={profileLoading} onClick={onCompareProfiles} type="button">
           {profileLoading ? <Loader2 className="spin" size={16} /> : <BarChart3 size={16} />}
-          Compare profiles
+          {t("benchmark.compare")}
         </button>
       </div>
       {!benchmark ? (
         <div className="empty-state compact">
-          Benchmark прогоняет все synthetic scenarios на текущем detector profile и считает precision, recall, false positives и пропуски.
+          {t("benchmark.empty")}
         </div>
       ) : (
         <div className="benchmark-stack">
           <div className="summary-grid">
-            <MetricCard title="Profile" value={benchmark.label} helper="Runtime detector profile" />
+            <MetricCard title={t("benchmark.profile")} value={benchmark.label} helper={t("benchmark.profileHelper")} />
             <MetricCard
-              title="Detected"
+              title={t("benchmark.detected")}
               value={`${benchmark.summary.detectedScenarios}/${benchmark.summary.scenarios}`}
-              helper="Scenarios with expected drift detected"
+              helper={t("benchmark.detectedHelper")}
             />
-            <MetricCard title="Precision" value={formatPercent(benchmark.summary.precision)} helper={`${benchmark.summary.falsePositiveEvents} false positive events`} />
-            <MetricCard title="Recall" value={formatPercent(benchmark.summary.recall)} helper={`${benchmark.summary.missedDriftIntervals} missed intervals`} />
+            <MetricCard title={t("benchmark.precision")} value={formatPercent(benchmark.summary.precision)} helper={`${benchmark.summary.falsePositiveEvents} false positive events`} />
+            <MetricCard title={t("benchmark.recall")} value={formatPercent(benchmark.summary.recall)} helper={`${benchmark.summary.missedDriftIntervals} missed intervals`} />
           </div>
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Scenario</th>
-                  <th>Detected</th>
-                  <th>Events</th>
-                  <th>False positives</th>
-                  <th>Missed</th>
-                  <th>Precision</th>
-                  <th>Recall</th>
-                  <th>Delay</th>
+                  <th>{t("benchmark.scenario")}</th>
+                  <th>{t("benchmark.detected")}</th>
+                  <th>{t("benchmark.events")}</th>
+                  <th>{t("benchmark.falsePositive")}</th>
+                  <th>{t("benchmark.missed")}</th>
+                  <th>{t("benchmark.precision")}</th>
+                  <th>{t("benchmark.recall")}</th>
+                  <th>{t("benchmark.delay")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -80,19 +83,19 @@ export function BenchmarkPanel({
       )}
       {profileBenchmark.length > 0 && (
         <div className="profile-benchmark">
-          <h3>Profile comparison</h3>
+          <h3>{t("benchmark.profileComparison")}</h3>
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Profile</th>
-                  <th>Detected</th>
-                  <th>Events</th>
-                  <th>False positives</th>
-                  <th>Missed</th>
-                  <th>Precision</th>
-                  <th>Recall</th>
-                  <th>Mean delay</th>
+                  <th>{t("benchmark.profile")}</th>
+                  <th>{t("benchmark.detected")}</th>
+                  <th>{t("benchmark.events")}</th>
+                  <th>{t("benchmark.falsePositive")}</th>
+                  <th>{t("benchmark.missed")}</th>
+                  <th>{t("benchmark.precision")}</th>
+                  <th>{t("benchmark.recall")}</th>
+                  <th>{t("benchmark.meanDelay")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -112,7 +115,7 @@ export function BenchmarkPanel({
             </table>
           </div>
           <p className="help-text">
-            Сравнение профилей помогает увидеть компромисс: раннее обнаружение обычно увеличивает риск false positives, а консервативный профиль может повысить задержку или пропуски.
+            {t("benchmark.profileHelp")}
           </p>
         </div>
       )}

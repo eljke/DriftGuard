@@ -1,12 +1,14 @@
 import { useMemo } from "react";
 import { TimeSeriesChart } from "../../components/TimeSeriesChart";
+import { useI18n } from "../../i18n";
 import type { DriftEvent, MetricPoint } from "../../types";
 import { groupStreams, streamId } from "../../lib/drift";
 
 export function StreamGrid({ points, events, running = false }: { points: MetricPoint[]; events: DriftEvent[]; running?: boolean }) {
+  const { t } = useI18n();
   const groups = useMemo(() => groupStreams(points), [points]);
   if (groups.length === 0) {
-    return <div className="empty-state">Метрики пока не опубликованы.</div>;
+    return <div className="empty-state">{t("stream.empty")}</div>;
   }
   return (
     <div className="stream-grid">
@@ -19,10 +21,10 @@ export function StreamGrid({ points, events, running = false }: { points: Metric
                 <strong>{group.service}</strong>
                 <span>{group.metric} · {group.operation || "-"}</span>
               </div>
-              <span className="badge">{group.points.length} points · {streamEvents.length} events</span>
+              <span className="badge">{t("stream.badge", { points: group.points.length, events: streamEvents.length })}</span>
             </div>
             {running && streamEvents.length === 0 && (
-              <div className="inline-hint">Поток идёт, detector ждёт достаточное окно и подтверждение сигнала.</div>
+              <div className="inline-hint">{t("stream.waiting")}</div>
             )}
             <TimeSeriesChart points={group.points} events={streamEvents} />
           </article>

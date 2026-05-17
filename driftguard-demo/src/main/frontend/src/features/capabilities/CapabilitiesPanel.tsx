@@ -1,36 +1,32 @@
 import { CheckCircle2, CircleDashed, TriangleAlert } from "lucide-react";
 import { useMemo } from "react";
 import { Panel } from "../../components/ui";
+import { useI18n } from "../../i18n";
 import type { DemoCapability, DemoCapabilityGroup, DemoCapabilityStatus } from "../../types";
 
-const statusLabels: Record<DemoCapabilityStatus, string> = {
-    READY: "Ready",
-    PARTIAL: "Partial",
-    PLANNED: "Planned"
-};
-
 export function CapabilitiesPanel({ groups }: { groups: DemoCapabilityGroup[] }) {
+    const { t } = useI18n();
     const totals = useMemo(() => summarize(groups), [groups]);
 
     if (groups.length === 0) {
         return (
-            <Panel className="wide capabilities-panel" title="Demo capability map">
-                <div className="empty-state compact">Карта возможностей загружается.</div>
+            <Panel className="wide capabilities-panel" title={t("capabilities.title")}>
+                <div className="empty-state compact">{t("capabilities.loading")}</div>
             </Panel>
         );
     }
 
     return (
-        <Panel className="wide capabilities-panel" title="Demo capability map">
+        <Panel className="wide capabilities-panel" title={t("capabilities.title")}>
             <div className="capability-summary">
                 <div>
-                    <h3>Backend coverage surfaced in UI</h3>
-                    <p>Каждая возможность связывает user-facing экран с REST endpoints, чтобы demo показывала реальные сценарии starter-а, Kafka module, testkit и engine.</p>
+                    <h3>{t("capabilities.coverage")}</h3>
+                    <p>{t("capabilities.description")}</p>
                 </div>
                 <div className="capability-totals">
-                    <CapabilityTotal label="Ready" value={totals.READY} tone="ready" />
-                    <CapabilityTotal label="Partial" value={totals.PARTIAL} tone="partial" />
-                    <CapabilityTotal label="Planned" value={totals.PLANNED} tone="planned" />
+                    <CapabilityTotal label={t("capabilities.ready")} value={totals.READY} tone="ready" />
+                    <CapabilityTotal label={t("capabilities.partial")} value={totals.PARTIAL} tone="partial" />
+                    <CapabilityTotal label={t("capabilities.planned")} value={totals.PLANNED} tone="planned" />
                 </div>
             </div>
 
@@ -42,7 +38,7 @@ export function CapabilitiesPanel({ groups }: { groups: DemoCapabilityGroup[] })
                                 <h3>{group.title}</h3>
                                 <p>{group.description}</p>
                             </div>
-                            <span className="badge">{group.capabilities.length} items</span>
+                            <span className="badge">{t("capabilities.items", { count: group.capabilities.length })}</span>
                         </div>
 
                         <div className="capability-list">
@@ -58,7 +54,14 @@ export function CapabilitiesPanel({ groups }: { groups: DemoCapabilityGroup[] })
 }
 
 function CapabilityCard({ capability }: { capability: DemoCapability }) {
+    const { t } = useI18n();
     const Icon = capability.status === "READY" ? CheckCircle2 : capability.status === "PARTIAL" ? TriangleAlert : CircleDashed;
+    const translatedStatusLabels: Record<DemoCapabilityStatus, string> = {
+        READY: t("capabilities.ready"),
+        PARTIAL: t("capabilities.partial"),
+        PLANNED: t("capabilities.planned")
+    };
+
     return (
         <article className={`capability-card ${capability.status.toLowerCase()}`}>
             <div className="capability-card-head">
@@ -67,7 +70,7 @@ function CapabilityCard({ capability }: { capability: DemoCapability }) {
                 </div>
                 <span className={`capability-status ${capability.status.toLowerCase()}`}>
                     <Icon size={14} />
-                    {statusLabels[capability.status]}
+                    {translatedStatusLabels[capability.status]}
                 </span>
             </div>
             <p>{capability.description}</p>

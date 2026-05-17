@@ -1,8 +1,10 @@
 import { Boxes, ExternalLink, Route } from "lucide-react";
 import { Panel } from "../components/ui";
+import { useI18n } from "../i18n";
 import type { DemoHelp, ToolLink } from "../types";
 
 export function ToolsPage({ endpoints, tools }: { endpoints: DemoHelp; tools: ToolLink[] }) {
+  const { t } = useI18n();
   const endpointEntries = Object.entries(endpoints).sort(([left], [right]) => left.localeCompare(right));
   return (
     <section className="stack">
@@ -16,9 +18,9 @@ export function ToolsPage({ endpoints, tools }: { endpoints: DemoHelp; tools: To
           </a>
         ))}
       </div>
-      <Panel title="REST API surface">
+      <Panel title={t("tools.apiSurface")}>
         {endpointEntries.length === 0 ? (
-          <div className="empty-state compact">Endpoint map загружается из /api/demo/help.</div>
+          <div className="empty-state compact">{t("tools.loading")}</div>
         ) : (
           <div className="endpoint-grid">
             {endpointEntries.map(([name, endpoint]) => (

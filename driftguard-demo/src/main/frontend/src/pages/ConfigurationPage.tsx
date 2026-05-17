@@ -2,10 +2,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { api } from "../api/client";
 import { MetricCard, Notice, Panel } from "../components/ui";
+import { useI18n } from "../i18n";
 import { readableError } from "../lib/format";
 import type { DemoConfigurationView } from "../types";
 
 export function ConfigurationPage({ configuration }: { configuration?: DemoConfigurationView }) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const updateProfile = useMutation({
     mutationFn: api.updateProfile,
@@ -13,29 +15,29 @@ export function ConfigurationPage({ configuration }: { configuration?: DemoConfi
   });
 
   if (!configuration) {
-    return <Panel title="Configuration">Загрузка конфигурации...</Panel>;
+    return <Panel title={t("configuration.title")}>{t("common.loadingConfiguration")}</Panel>;
   }
 
   return (
     <section className="stack">
       <div className="page-grid">
-        <MetricCard title="Aggressiveness" value={configuration.aggressiveness.level} helper={configuration.aggressiveness.description} />
-        <MetricCard title="Kafka input" value={configuration.kafka.inputTopic} helper={configuration.kafka.bootstrapServers} />
-        <MetricCard title="Kafka output" value={configuration.kafka.outputTopic} helper={configuration.kafka.applicationId} />
-        <MetricCard title="Playback" value={configuration.kafka.playbackInterval} helper="Интервал публикации точек" />
+        <MetricCard title={t("configuration.aggressiveness")} value={configuration.aggressiveness.level} helper={configuration.aggressiveness.description} />
+        <MetricCard title={t("configuration.kafkaInput")} value={configuration.kafka.inputTopic} helper={configuration.kafka.bootstrapServers} />
+        <MetricCard title={t("configuration.kafkaOutput")} value={configuration.kafka.outputTopic} helper={configuration.kafka.applicationId} />
+        <MetricCard title={t("configuration.playback")} value={configuration.kafka.playbackInterval} helper={t("configuration.playbackHelper")} />
       </div>
-      <Panel title="Registered algorithms">
+      <Panel title={t("configuration.algorithms")}>
         <div className="algorithm-list">
           {configuration.registeredAlgorithms.map((algorithm) => (
             <span className="badge" key={algorithm}>{algorithm}</span>
           ))}
         </div>
         <p className="panel-note">
-          Starter автоматически объединяет встроенные алгоритмы DriftGuard и пользовательские DetectorAlgorithm bean-ы.
+          {t("configuration.algorithmsNote")}
         </p>
       </Panel>
-      <Panel title="Runtime detector profile">
-        {updateProfile.isPending && <Notice tone="info" text="Профиль применяется: engine пересоздаётся, состояние detector-ов сбрасывается." />}
+      <Panel title={t("configuration.runtimeProfile")}>
+        {updateProfile.isPending && <Notice tone="info" text={t("configuration.profilePending")} />}
         {updateProfile.error && <Notice tone="error" text={readableError(updateProfile.error)} />}
         <div className="actions">
           {configuration.availableProfiles.map((profile) => {
@@ -55,10 +57,10 @@ export function ConfigurationPage({ configuration }: { configuration?: DemoConfi
           })}
         </div>
         <p className="help-text">
-          Профиль реально меняет runtime DriftDetectorEngine. Kafka topology не пересобирается: она вызывает runtime.detect(), поэтому следующие сообщения сразу идут через новый engine.
+          {t("configuration.profileHelp")}
         </p>
       </Panel>
-      <Panel title="Detector definitions">
+      <Panel title={t("configuration.detectors")}>
         <div className="detector-grid">
           {configuration.detectors.map((detector) => (
             <article className="detector-card" key={detector.name}>
@@ -67,17 +69,21 @@ export function ConfigurationPage({ configuration }: { configuration?: DemoConfi
                 <span className="badge">{detector.sensitivity}</span>
               </div>
               <dl>
-                <dt>Algorithm</dt>
+                <dt>{t("configuration.algorithm")}</dt>
                 <dd>{detector.algorithm}</dd>
-                <dt>Metrics</dt>
-                <dd>{detector.metrics.join(", ") || "any"}</dd>
-                <dt>Warning</dt>
+                <dt>{t("configuration.metrics")}</dt>
+                <dd>{detector.metrics.join(", ") || t("common.any")}</dd>
+                <dt>{t("configuration.warning")}</dt>
                 <dd>{detector.warningThreshold} / p={detector.warningPValue}</dd>
-                <dt>Critical</dt>
+                <dt>{t("configuration.critical")}</dt>
                 <dd>{detector.criticalThreshold} / p={detector.criticalPValue}</dd>
-                <dt>Emission</dt>
+                <dt>{t("configuration.emission")}</dt>
                 <dd>
-                  {detector.emissionPolicy.minConsecutiveSignals} signals, {detector.emissionPolicy.cooldown}, recovery {detector.emissionPolicy.recoveryConsecutiveNormal}
+                  {t("configuration.emissionValue", {
+                    signals: detector.emissionPolicy.minConsecutiveSignals,
+                    cooldown: detector.emissionPolicy.cooldown,
+                    recovery: detector.emissionPolicy.recoveryConsecutiveNormal
+                  })}
                 </dd>
               </dl>
             </article>

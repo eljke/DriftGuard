@@ -9,6 +9,7 @@ import { CapabilitiesPanel } from "../features/capabilities/CapabilitiesPanel";
 import { ScenarioSummary } from "../features/common/ScenarioSummary";
 import { StreamGrid } from "../features/common/StreamGrid";
 import { StoredEventsTable } from "../features/events/StoredEventsTable";
+import { useI18n } from "../i18n";
 import type { DemoCapabilityGroup, DemoRunResult, DemoStoredDriftEvent, KafkaDemoStatus } from "../types";
 
 export function OverviewPage({
@@ -22,6 +23,7 @@ export function OverviewPage({
   storedEvents: DemoStoredDriftEvent[];
   capabilities: DemoCapabilityGroup[];
 }) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const critical = countSeverity([...(result?.events ?? []), ...(kafka?.consumedEvents ?? [])], "CRITICAL");
   const activeStreams = new Set(
@@ -35,36 +37,36 @@ export function OverviewPage({
 
   return (
     <section className="page-grid">
-      <MetricCard title="Synthetic events" value={result?.events.length ?? 0} helper={result?.title ?? "Нет данных"} />
-      <MetricCard title="Kafka events" value={kafka?.consumedEvents.length ?? 0} helper={kafka?.scenario ?? "Нет данных"} />
-      <MetricCard title="Critical events" value={critical} helper="По всем demo-источникам" tone="danger" />
+      <MetricCard title={t("overview.syntheticEvents")} value={result?.events.length ?? 0} helper={result?.title ?? t("common.noData")} />
+      <MetricCard title={t("overview.kafkaEvents")} value={kafka?.consumedEvents.length ?? 0} helper={kafka?.scenario ?? t("common.noData")} />
+      <MetricCard title={t("overview.criticalEvents")} value={critical} helper={t("overview.criticalHelper")} tone="danger" />
       <MetricCard
-        title="Kafka progress"
+        title={t("overview.kafkaProgress")}
         value={`${kafka?.producedPoints ?? 0}/${kafka?.totalPoints ?? 0}`}
-        helper={kafka?.inputTopic ?? "Topic не загружен"}
+        helper={kafka?.inputTopic ?? t("overview.topicMissing")}
       />
-      <Panel className="wide product-map" title="Product workflow">
+      <Panel className="wide product-map" title={t("overview.workflow")}>
         <div className="workflow-strip">
-          <WorkflowStep icon={<FlaskConical size={18} />} title="Synthetic stream" text={`${result?.processedPoints ?? 0} points processed`} />
-          <WorkflowStep icon={<Settings2 size={18} />} title="Runtime profile" text="Detector sensitivity can be changed without restarting UI" />
-          <WorkflowStep icon={<Cable size={18} />} title="Kafka topology" text={kafka?.running ? "Producer, Streams and consumer are active" : "Ready for stateful replay"} />
-          <WorkflowStep icon={<ShieldCheck size={18} />} title="Incidents" text={`${storedEvents.length} stored, ${storedCritical} critical`} />
+          <WorkflowStep icon={<FlaskConical size={18} />} title={t("overview.syntheticStream")} text={t("overview.pointsProcessed", { count: result?.processedPoints ?? 0 })} />
+          <WorkflowStep icon={<Settings2 size={18} />} title={t("overview.runtimeProfile")} text={t("overview.runtimeProfileText")} />
+          <WorkflowStep icon={<Cable size={18} />} title={t("overview.kafkaTopology")} text={kafka?.running ? t("overview.kafkaActive") : t("overview.kafkaReady")} />
+          <WorkflowStep icon={<ShieldCheck size={18} />} title={t("overview.incidents")} text={t("overview.incidentCounts", { stored: storedEvents.length, critical: storedCritical })} />
         </div>
         <div className="product-map-footer">
-          <span><strong>{activeStreams}</strong> metric streams visible across synthetic and Kafka demos</span>
-          <span><strong>{capabilities.reduce((total, group) => total + group.capabilities.length, 0)}</strong> backend capabilities mapped to UI/API surfaces</span>
+          <span>{t("overview.visibleStreams", { count: activeStreams })}</span>
+          <span>{t("overview.capabilitiesCount", { count: capabilities.reduce((total, group) => total + group.capabilities.length, 0) })}</span>
         </div>
       </Panel>
       <CapabilitiesPanel groups={capabilities} />
-      <Panel className="wide" title="Последний synthetic запуск">
+      <Panel className="wide" title={t("overview.lastSynthetic")}>
         <ScenarioSummary result={result} />
       </Panel>
-      <Panel className="wide" title="Kafka streams">
+      <Panel className="wide" title={t("overview.kafkaStreams")}>
         <StreamGrid points={kafka?.samplePoints ?? []} events={kafka?.consumedEvents ?? []} running={Boolean(kafka?.running)} />
       </Panel>
-      <Panel className="wide" title="Recent stored drift events">
+      <Panel className="wide" title={t("overview.recentStored")}>
         <div className="panel-toolbar">
-          <span className="help-text">Общий recent stream из synthetic, live и Kafka demo.</span>
+          <span className="help-text">{t("overview.recentStoredHelp")}</span>
           <button
             className="secondary-button"
             disabled={storedEvents.length === 0 || clearStoredEvents.isPending}
@@ -72,7 +74,7 @@ export function OverviewPage({
             type="button"
           >
             {clearStoredEvents.isPending ? <Loader2 className="spin" size={16} /> : null}
-            Clear stored events
+            {t("overview.clearStored")}
           </button>
         </div>
         {clearStoredEvents.error && <Notice tone="error" text={readableError(clearStoredEvents.error)} />}

@@ -1,5 +1,6 @@
 import { Loader2, Square } from "lucide-react";
 import { Notice, Panel } from "../../components/ui";
+import { useI18n } from "../../i18n";
 import { readableError } from "../../lib/format";
 import type { DemoScenarioDescriptor, DemoScenarioRequest, KafkaDemoStatus } from "../../types";
 import { ScenarioButtons } from "../common/ScenarioButtons";
@@ -44,9 +45,11 @@ export function KafkaScenarioPanel({
   onSpeedChange,
   onStop
 }: KafkaScenarioPanelProps) {
+  const { t } = useI18n();
+
   return (
-    <Panel title="Run Kafka scenario" className="control-panel">
-      {busy && <Notice tone="info" text="Kafka demo запускается. Создаются topic-и, topology, producer и consumer." />}
+    <Panel title={t("kafka.runScenario")} className="control-panel">
+      {busy && <Notice tone="info" text={t("kafka.busy")} />}
       {status?.error && <Notice tone="error" text={status.error} />}
       {error ? <Notice tone="error" text={readableError(error)} /> : null}
       <ReplayControls
@@ -64,14 +67,14 @@ export function KafkaScenarioPanel({
       <ScenarioButtons
         scenarios={scenarios}
         busy={busy || Boolean(status?.running)}
-        runLabel="Live run"
+        runLabel={t("kafka.liveRun")}
         onRun={onRun}
         onReplay={onReplay}
       />
       <div className="actions">
         <button className="secondary-button" disabled={!status?.running || stopping} onClick={onStop} type="button">
           {stopping ? <Loader2 className="spin" size={16} /> : <Square size={16} />}
-          Stop Kafka demo
+          {t("kafka.stop")}
         </button>
       </div>
     </Panel>

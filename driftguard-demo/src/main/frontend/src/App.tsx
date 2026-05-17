@@ -8,9 +8,11 @@ import { ConfigurationPage } from "./pages/ConfigurationPage";
 import { OverviewPage } from "./pages/OverviewPage";
 import { SyntheticPage } from "./pages/SyntheticPage";
 import { ToolsPage } from "./pages/ToolsPage";
+import { useI18n } from "./i18n";
 
 export default function App() {
   const [page, setPage] = useState<Page>("overview");
+  const { t } = useI18n();
   const queries = useDemoQueries();
   const { capabilities, configuration, help, kafka, kafkaOperations, overview, scenarios, storedEvents, tools } = queries;
 
@@ -18,13 +20,13 @@ export default function App() {
     <AppShell page={page} onPageChange={setPage} overview={overview.data} kafka={kafka.data}>
       <ApiStatusBanner
         items={[
-          { label: "Overview", error: overview.error, retry: () => overview.refetch() },
-          { label: "Scenarios", error: scenarios.error, retry: () => scenarios.refetch() },
-          { label: "Kafka status", error: kafka.error, retry: () => kafka.refetch() },
-          { label: "Kafka operations", error: kafkaOperations.error, retry: () => kafkaOperations.refetch() },
-          { label: "Configuration", error: configuration.error, retry: () => configuration.refetch() },
-          { label: "Stored events", error: storedEvents.error, retry: () => storedEvents.refetch() },
-          { label: "Capabilities", error: capabilities.error, retry: () => capabilities.refetch() },
+          { label: t("nav.overview"), error: overview.error, retry: () => overview.refetch() },
+          { label: t("synthetic.title"), error: scenarios.error, retry: () => scenarios.refetch() },
+          { label: t("status.kafka"), error: kafka.error, retry: () => kafka.refetch() },
+          { label: t("kafka.operations"), error: kafkaOperations.error, retry: () => kafkaOperations.refetch() },
+          { label: t("nav.configuration"), error: configuration.error, retry: () => configuration.refetch() },
+          { label: t("overview.recentStored"), error: storedEvents.error, retry: () => storedEvents.refetch() },
+          { label: t("capabilities.title"), error: capabilities.error, retry: () => capabilities.refetch() },
           { label: "Help", error: help.error, retry: () => help.refetch() }
         ]}
       />

@@ -1,22 +1,24 @@
 import { Panel } from "../../components/ui";
+import { useI18n } from "../../i18n";
 import type { DriftIncident } from "../../lib/drift";
 import { buildIncidents } from "../../lib/drift";
 import { formatDuration, formatMoscow } from "../../lib/format";
 import type { DriftEvent } from "../../types";
 
 export function IncidentsPanel({ events }: { events: DriftEvent[] }) {
-  const incidents = buildIncidents(events);
+  const { locale, t } = useI18n();
+  const incidents = buildIncidents(events, locale);
   const active = incidents.filter((incident) => !incident.recoveredAt);
   const recovered = incidents.filter((incident) => incident.recoveredAt);
 
   return (
-    <Panel title="Drift incidents">
+    <Panel title={t("incidents.title")}>
       {incidents.length === 0 ? (
-        <div className="empty-state">Активных или завершённых drift episodes пока нет.</div>
+        <div className="empty-state">{t("incidents.empty")}</div>
       ) : (
         <div className="incident-layout">
-          <IncidentColumn title="Active incidents" incidents={active} emptyText="Активных incident-ов нет." />
-          <IncidentColumn title="Recovered incidents" incidents={recovered} emptyText="Завершённых incident-ов нет." />
+          <IncidentColumn title={t("incidents.active")} incidents={active} emptyText={t("incidents.activeEmpty")} />
+          <IncidentColumn title={t("incidents.recovered")} incidents={recovered} emptyText={t("incidents.recoveredEmpty")} />
         </div>
       )}
     </Panel>
@@ -24,6 +26,8 @@ export function IncidentsPanel({ events }: { events: DriftEvent[] }) {
 }
 
 function IncidentColumn({ title, incidents, emptyText }: { title: string; incidents: DriftIncident[]; emptyText: string }) {
+  const { t } = useI18n();
+
   return (
     <div className="incident-column">
       <h3>{title}</h3>
@@ -41,11 +45,11 @@ function IncidentColumn({ title, incidents, emptyText }: { title: string; incide
                 <span className={`severity ${incident.severity.toLowerCase()}`}>{incident.severity}</span>
               </div>
               <dl className="incident-meta">
-                <dt>Detector</dt>
+                <dt>{t("events.detector")}</dt>
                 <dd>{incident.detector}</dd>
-                <dt>Started</dt>
+                <dt>{t("incidents.started")}</dt>
                 <dd>{formatMoscow(incident.startedAt)}</dd>
-                <dt>Duration</dt>
+                <dt>{t("incidents.duration")}</dt>
                 <dd>{formatDuration(incident.startedAt, incident.recoveredAt)}</dd>
               </dl>
               <p>{incident.explanation}</p>

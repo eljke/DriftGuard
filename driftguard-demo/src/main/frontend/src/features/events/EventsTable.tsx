@@ -1,11 +1,13 @@
 import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Panel } from "../../components/ui";
+import { useI18n } from "../../i18n";
 import type { DriftEvent } from "../../types";
 import { eventEvidence, eventExplanation, eventMatchesQuery } from "../../lib/drift";
 import { formatMoscow, formatNumber } from "../../lib/format";
 
 export function EventsTable({ events }: { events: DriftEvent[] }) {
+  const { locale, t } = useI18n();
   const [severity, setSeverity] = useState("ALL");
   const [phase, setPhase] = useState("ALL");
   const [query, setQuery] = useState("");
@@ -20,9 +22,9 @@ export function EventsTable({ events }: { events: DriftEvent[] }) {
   );
 
   return (
-    <Panel title="Drift events">
+    <Panel title={t("events.title")}>
       {events.length === 0 ? (
-        <div className="empty-state">Событий drift-а пока нет.</div>
+        <div className="empty-state">{t("events.empty")}</div>
       ) : (
         <>
           <EventFilters
@@ -36,17 +38,17 @@ export function EventsTable({ events }: { events: DriftEvent[] }) {
             onSeverityChange={setSeverity}
           />
           {visibleEvents.length === 0 ? (
-            <div className="empty-state compact">По текущим фильтрам событий нет.</div>
+            <div className="empty-state compact">{t("events.emptyFiltered")}</div>
           ) : (
             <div className="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Time MSK</th>
-                    <th>Event</th>
-                    <th>Metric</th>
-                    <th>Values</th>
-                    <th>Explanation</th>
+                    <th>{t("events.time")}</th>
+                    <th>{t("events.event")}</th>
+                    <th>{t("events.metric")}</th>
+                    <th>{t("events.values")}</th>
+                    <th>{t("events.explanation")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -68,7 +70,7 @@ export function EventsTable({ events }: { events: DriftEvent[] }) {
                       </td>
                       <td><EventValueSummary event={event} /></td>
                       <td className="event-explanation">
-                        <EventExplanation event={event} />
+                        <EventExplanation event={event} locale={locale} />
                       </td>
                     </tr>
                   ))}
@@ -101,45 +103,47 @@ function EventFilters({
   onQueryChange: (query: string) => void;
   onSeverityChange: (severity: string) => void;
 }) {
+  const { t } = useI18n();
+
   return (
     <div className="event-filters">
       <label className="search-field">
         <Search size={16} />
         <input
-          placeholder="Search service, metric, detector, algorithm or reason"
+          placeholder={t("events.search")}
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
         />
       </label>
       <label className="field compact-field">
-        <span>Severity</span>
+        <span>{t("events.severity")}</span>
         <select value={severity} onChange={(event) => onSeverityChange(event.target.value)}>
-          <option value="ALL">All</option>
+          <option value="ALL">{t("events.all")}</option>
           <option value="INFO">INFO</option>
           <option value="WARNING">WARNING</option>
           <option value="CRITICAL">CRITICAL</option>
         </select>
       </label>
       <label className="field compact-field">
-        <span>Phase</span>
+        <span>{t("events.phase")}</span>
         <select value={phase} onChange={(event) => onPhaseChange(event.target.value)}>
-          <option value="ALL">All</option>
+          <option value="ALL">{t("events.all")}</option>
           <option value="STARTED">STARTED</option>
           <option value="ONGOING">ONGOING</option>
           <option value="RECOVERED">RECOVERED</option>
         </select>
       </label>
-      <span className="filter-counter">{visible}/{total} events</span>
+      <span className="filter-counter">{t("events.counter", { visible, total })}</span>
     </div>
   );
 }
 
-function EventExplanation({ event }: { event: DriftEvent }) {
+function EventExplanation({ event, locale }: { event: DriftEvent; locale: "ru" | "en" }) {
   return (
     <div className="event-explanation-stack">
-      <p>{eventExplanation(event)}</p>
+      <p>{eventExplanation(event, locale)}</p>
       <div className="evidence-list">
-        {eventEvidence(event).map((item) => (
+        {eventEvidence(event, locale).map((item) => (
           <span className="evidence-pill" key={`${item.label}-${item.value}`}>
             <b>{item.label}</b>
             {item.value}
@@ -151,18 +155,20 @@ function EventExplanation({ event }: { event: DriftEvent }) {
 }
 
 function EventValueSummary({ event }: { event: DriftEvent }) {
+  const { t } = useI18n();
+
   return (
     <dl className="event-values">
       <div>
-        <dt>Current</dt>
+        <dt>{t("events.current")}</dt>
         <dd>{formatNumber(event.currentValue)}</dd>
       </div>
       <div>
-        <dt>Baseline</dt>
+        <dt>{t("events.baseline")}</dt>
         <dd>{formatNumber(event.baselineValue)}</dd>
       </div>
       <div>
-        <dt>Score</dt>
+        <dt>{t("events.score")}</dt>
         <dd>{formatNumber(event.score)}</dd>
       </div>
     </dl>

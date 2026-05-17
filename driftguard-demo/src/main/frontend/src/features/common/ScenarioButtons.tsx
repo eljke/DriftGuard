@@ -1,10 +1,11 @@
 import { Loader2, Play } from "lucide-react";
+import { useI18n } from "../../i18n";
 import type { DemoScenarioDescriptor } from "../../types";
 
 export function ScenarioButtons({
   scenarios,
   busy,
-  runLabel = "Run",
+  runLabel,
   onRun,
   onReplay,
   onLive
@@ -16,6 +17,9 @@ export function ScenarioButtons({
   onReplay?: (scenario: string) => void;
   onLive?: (scenario: string) => void;
 }) {
+  const { t } = useI18n();
+  const effectiveRunLabel = runLabel ?? t("scenario.run");
+
   return (
     <div className="scenario-grid">
       {scenarios.map((scenario) => (
@@ -27,16 +31,16 @@ export function ScenarioButtons({
           <div className="scenario-actions">
             <button className="primary-button" disabled={busy} onClick={() => onRun(scenario.id)} type="button">
               {busy ? <Loader2 className="spin" size={16} /> : <Play size={16} />}
-              {runLabel}
+              {effectiveRunLabel}
             </button>
             {onReplay && (
               <button className="secondary-button" disabled={busy} onClick={() => onReplay(scenario.id)} type="button">
-                Replay
+                {t("scenario.replay")}
               </button>
             )}
             {onLive && (
               <button className="secondary-button" disabled={busy} onClick={() => onLive(scenario.id)} type="button">
-                Live
+                {t("scenario.live")}
               </button>
             )}
           </div>

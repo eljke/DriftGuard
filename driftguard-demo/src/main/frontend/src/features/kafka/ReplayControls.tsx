@@ -1,4 +1,5 @@
 import type { DemoScenarioRequest } from "../../types";
+import { useI18n } from "../../i18n";
 
 export function ReplayControls({
   disabled,
@@ -23,6 +24,7 @@ export function ReplayControls({
   onScenarioParamsChange: (params: Required<DemoScenarioRequest>) => void;
   onSpeedChange: (speed: number) => void;
 }) {
+  const { t } = useI18n();
   const setParam = (key: keyof Required<DemoScenarioRequest>, next: number) => {
     onScenarioParamsChange({ ...scenarioParams, [key]: next });
   };
@@ -30,7 +32,7 @@ export function ReplayControls({
   return (
     <div className="replay-controls">
       <label className="field">
-        <span>Replay speed</span>
+        <span>{t("replay.speed")}</span>
         <select
           disabled={disabled}
           value={speed}
@@ -44,16 +46,16 @@ export function ReplayControls({
         </select>
       </label>
 
-      <NumberField disabled={disabled} label="Sample points" max={2000} min={80} step={10} value={scenarioParams.samples} onChange={(next) => setParam("samples", next)} />
+      <NumberField disabled={disabled} label={t("synthetic.samplePoints")} max={2000} min={80} step={10} value={scenarioParams.samples} onChange={(next) => setParam("samples", next)} />
 
       <label className="field">
-        <span>Detector profile</span>
+        <span>{t("replay.profile")}</span>
         <select
           disabled={disabled || profiles.length === 0}
           value={selectedProfile}
           onChange={(event) => onProfileChange(event.target.value)}
         >
-          <option value="">Current profile</option>
+          <option value="">{t("replay.currentProfile")}</option>
           {profiles.map((profile) => (
             <option key={profile} value={profile}>{profile}</option>
           ))}
@@ -67,17 +69,17 @@ export function ReplayControls({
           type="checkbox"
           onChange={(event) => onResetStateChange(event.target.checked)}
         />
-        <span>Reset detector state before replay</span>
+        <span>{t("replay.reset")}</span>
       </label>
 
-      <NumberField disabled={disabled} label="Baseline value" min={0} step={1} value={scenarioParams.baselineValue} onChange={(next) => setParam("baselineValue", next)} />
-      <NumberField disabled={disabled} label="Drift value" min={0} step={1} value={scenarioParams.driftValue} onChange={(next) => setParam("driftValue", next)} />
-      <NumberField disabled={disabled} label="Noise" min={0} step={0.1} value={scenarioParams.noiseStdDev} onChange={(next) => setParam("noiseStdDev", next)} />
-      <NumberField disabled={disabled} label="Drift start %" max={95} min={5} step={1} value={scenarioParams.driftStartPercent} onChange={(next) => setParam("driftStartPercent", next)} />
-      <NumberField disabled={disabled} label="Spike length %" max={95} min={5} step={1} value={scenarioParams.spikeLengthPercent} onChange={(next) => setParam("spikeLengthPercent", next)} />
+      <NumberField disabled={disabled} label={t("synthetic.baselineValue")} min={0} step={1} value={scenarioParams.baselineValue} onChange={(next) => setParam("baselineValue", next)} />
+      <NumberField disabled={disabled} label={t("synthetic.driftValue")} min={0} step={1} value={scenarioParams.driftValue} onChange={(next) => setParam("driftValue", next)} />
+      <NumberField disabled={disabled} label={t("synthetic.noise")} min={0} step={0.1} value={scenarioParams.noiseStdDev} onChange={(next) => setParam("noiseStdDev", next)} />
+      <NumberField disabled={disabled} label={t("synthetic.driftStart")} max={95} min={5} step={1} value={scenarioParams.driftStartPercent} onChange={(next) => setParam("driftStartPercent", next)} />
+      <NumberField disabled={disabled} label={t("synthetic.spikeLength")} max={95} min={5} step={1} value={scenarioParams.spikeLengthPercent} onChange={(next) => setParam("spikeLengthPercent", next)} />
 
       <p className="help-text">
-        Use 0 for scenario defaults. Live run publishes new MetricPoint timestamps now; Replay keeps a reproducible historical timeline. Points become Kafka messages per producer stream.
+        {t("replay.help")}
       </p>
     </div>
   );

@@ -1,7 +1,10 @@
 import { Gauge } from "lucide-react";
 import { navigation, type Page } from "../../app/navigation";
+import { useI18n } from "../../i18n";
 
 export function Sidebar({ page, onPageChange }: { page: Page; onPageChange: (page: Page) => void }) {
+  const { t } = useI18n();
+
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -10,7 +13,7 @@ export function Sidebar({ page, onPageChange }: { page: Page; onPageChange: (pag
         </div>
         <div>
           <strong>DriftGuard</strong>
-          <span>stream drift detection</span>
+          <span>{t("app.subtitle")}</span>
         </div>
       </div>
       <nav className="nav">
@@ -24,7 +27,7 @@ export function Sidebar({ page, onPageChange }: { page: Page; onPageChange: (pag
               type="button"
             >
               <Icon size={18} />
-              {item.label}
+              {t(item.labelKey)}
             </button>
           );
         })}

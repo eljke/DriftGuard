@@ -1,16 +1,19 @@
 import { MetricCard } from "../../components/ui";
+import { useI18n } from "../../i18n";
 import type { DemoRunResult } from "../../types";
 
 export function ScenarioSummary({ result }: { result?: DemoRunResult }) {
+  const { t } = useI18n();
+
   if (!result) {
-    return <div className="empty-state">Результат ещё не загружен.</div>;
+    return <div className="empty-state">{t("summary.empty")}</div>;
   }
   return (
     <div className="summary-grid">
-      <MetricCard title="Scenario" value={result.title} helper={result.mode} />
-      <MetricCard title="Processed" value={`${result.processedPoints}/${result.metricPoints}`} helper="Metric points" />
-      <MetricCard title="Events" value={result.events.length} helper="Detected drift events" />
-      <MetricCard title="Quality" value={result.quality.detected ? "Detected" : "No drift"} helper={`Delay: ${result.quality.detectionDelaySamples} samples`} />
+      <MetricCard title={t("summary.scenario")} value={result.title} helper={result.mode} />
+      <MetricCard title={t("summary.processed")} value={`${result.processedPoints}/${result.metricPoints}`} helper={t("summary.metricPoints")} />
+      <MetricCard title={t("summary.events")} value={result.events.length} helper={t("summary.detectedEvents")} />
+      <MetricCard title={t("summary.quality")} value={result.quality.detected ? t("summary.detected") : t("summary.noDrift")} helper={t("summary.delay", { count: result.quality.detectionDelaySamples ?? 0 })} />
     </div>
   );
 }

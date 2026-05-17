@@ -1,4 +1,5 @@
 import type { DriftEvent, MetricKey, MetricPoint } from "../types";
+import type { Locale } from "../i18n";
 import { formatNumber } from "./format";
 
 export interface DriftIncident {
@@ -67,7 +68,7 @@ export function countSeverity(events: DriftEvent[], severity: string) {
   return events.filter((event) => event.severity === severity).length;
 }
 
-export function buildIncidents(events: DriftEvent[]) {
+export function buildIncidents(events: DriftEvent[], locale: Locale = "en") {
   const incidents = new Map<string, DriftIncident>();
 
   for (const event of events.slice().sort((left, right) => left.detectedAt.localeCompare(right.detectedAt))) {
@@ -78,13 +79,13 @@ export function buildIncidents(events: DriftEvent[]) {
       if (current) {
         incidents.set(id, { ...current, recoveredAt: event.detectedAt });
       } else {
-        incidents.set(id, eventToIncident(event, event.detectedAt));
+        incidents.set(id, eventToIncident(event, locale, event.detectedAt));
       }
       continue;
     }
 
     if (!current) {
-      incidents.set(id, eventToIncident(event));
+      incidents.set(id, eventToIncident(event, locale));
       continue;
     }
 
@@ -92,7 +93,7 @@ export function buildIncidents(events: DriftEvent[]) {
       incidents.set(id, {
         ...current,
         severity: event.severity,
-        explanation: eventExplanation(event)
+        explanation: eventExplanation(event, locale)
       });
     }
   }
@@ -100,7 +101,7 @@ export function buildIncidents(events: DriftEvent[]) {
   return [...incidents.values()].sort((left, right) => right.startedAt.localeCompare(left.startedAt));
 }
 
-export function eventExplanation(event: DriftEvent) {
+export function eventExplanation(event: DriftEvent, locale: Locale = "en") {
   const current = detailNumber(event, "currentMean") ?? event.currentValue;
   const baseline = detailNumber(event, "baselineMean") ?? event.baselineValue;
   const relative = detailNumber(event, "relativeChangePercent");
@@ -110,20 +111,22 @@ export function eventExplanation(event: DriftEvent) {
     ? detailNumber(event, "criticalThreshold")
     : detailNumber(event, "warningThreshold");
 
-  const lifecycle = lifecycleExplanation(event);
+  const lifecycle = lifecycleExplanation(event, locale);
   const parts = [
     lifecycle,
-    `Current ${formatNumber(current)} vs baseline ${formatNumber(baseline)}`,
+    locale === "ru"
+      ? `Текущее ${formatNumber(current)} против baseline ${formatNumber(baseline)}`
+      : `Current ${formatNumber(current)} vs baseline ${formatNumber(baseline)}`,
     relative === undefined ? undefined : `${relative >= 0 ? "+" : ""}${formatNumber(relative)}%`,
-    threshold === undefined ? undefined : `threshold ${formatNumber(threshold)}`,
+    threshold === undefined ? undefined : `${locale === "ru" ? "порог" : "threshold"} ${formatNumber(threshold)}`,
     pValue === undefined ? undefined : `p-value ${formatNumber(pValue)}`,
-    statistic === undefined ? undefined : `statistic ${formatNumber(statistic)}`
+    statistic === undefined ? undefined : `${locale === "ru" ? "статистика" : "statistic"} ${formatNumber(statistic)}`
   ].filter(Boolean);
 
   return `${parts.join(" · ")}. ${event.reason}`;
 }
 
-export function eventEvidence(event: DriftEvent): DriftEventEvidence[] {
+export function eventEvidence(event: DriftEvent, locale: Locale = "en"): DriftEventEvidence[] {
   const relative = detailNumber(event, "relativeChangePercent");
   const pValue = detailNumber(event, "pValue");
   const statistic = detailNumber(event, "statistic") ?? detailNumber(event, "chiSquare");
@@ -134,19 +137,19 @@ export function eventEvidence(event: DriftEvent): DriftEventEvidence[] {
   const recoveryConsecutiveNormal = detailNumber(event, "recoveryConsecutiveNormal");
 
   return [
-    { label: "Phase", value: event.phase },
-    { label: "Direction", value: event.direction },
+    { label: locale === "ru" ? "Phase" : "Phase", value: event.phase },
+    { label: locale === "ru" ? "Direction" : "Direction", value: event.direction },
     { label: "Score", value: formatNumber(event.score) },
-    threshold === undefined ? undefined : { label: "Threshold", value: formatNumber(threshold) },
-    relative === undefined ? undefined : { label: "Change", value: `${relative >= 0 ? "+" : ""}${formatNumber(relative)}%` },
+    threshold === undefined ? undefined : { label: locale === "ru" ? "Порог" : "Threshold", value: formatNumber(threshold) },
+    relative === undefined ? undefined : { label: locale === "ru" ? "Изменение" : "Change", value: `${relative >= 0 ? "+" : ""}${formatNumber(relative)}%` },
     pValue === undefined ? undefined : { label: "p-value", value: formatNumber(pValue) },
-    statistic === undefined ? undefined : { label: "Statistic", value: formatNumber(statistic) },
-    consecutiveSignals === undefined ? undefined : { label: "Signals", value: formatNumber(consecutiveSignals) },
-    recoveryConsecutiveNormal === undefined ? undefined : { label: "Recovery normals", value: formatNumber(recoveryConsecutiveNormal) }
+    statistic === undefined ? undefined : { label: locale === "ru" ? "Статистика" : "Statistic", value: formatNumber(statistic) },
+    consecutiveSignals === undefined ? undefined : { label: locale === "ru" ? "Сигналы" : "Signals", value: formatNumber(consecutiveSignals) },
+    recoveryConsecutiveNormal === undefined ? undefined : { label: locale === "ru" ? "Recovery normals" : "Recovery normals", value: formatNumber(recoveryConsecutiveNormal) }
   ].filter((item): item is DriftEventEvidence => Boolean(item));
 }
 
-function eventToIncident(event: DriftEvent, recoveredAt?: string): DriftIncident {
+function eventToIncident(event: DriftEvent, locale: Locale, recoveredAt?: string): DriftIncident {
   return {
     id: incidentId(event),
     service: event.key.service,
@@ -156,7 +159,7 @@ function eventToIncident(event: DriftEvent, recoveredAt?: string): DriftIncident
     severity: event.severity,
     startedAt: event.detectedAt,
     recoveredAt,
-    explanation: eventExplanation(event)
+    explanation: eventExplanation(event, locale)
   };
 }
 
@@ -168,20 +171,20 @@ function severityRank(severity: string) {
   return severity === "CRITICAL" ? 3 : severity === "WARNING" ? 2 : severity === "INFO" ? 1 : 0;
 }
 
-function lifecycleExplanation(event: DriftEvent) {
+function lifecycleExplanation(event: DriftEvent, locale: Locale) {
   if (event.phase === "RECOVERED") {
     const normals = detailNumber(event, "recoveryConsecutiveNormal");
     return normals === undefined
-      ? "Episode recovered near baseline"
-      : `Episode recovered after ${formatNumber(normals)} normal observations`;
+      ? (locale === "ru" ? "Episode восстановился около baseline" : "Episode recovered near baseline")
+      : (locale === "ru" ? `Episode восстановился после нормальных наблюдений: ${formatNumber(normals)}` : `Episode recovered after ${formatNumber(normals)} normal observations`);
   }
   if (event.phase === "ONGOING") {
     const signals = detailNumber(event, "consecutiveSignals");
     return signals === undefined
-      ? "Episode remains active"
-      : `Episode remains active after ${formatNumber(signals)} consecutive drift signals`;
+      ? (locale === "ru" ? "Episode остаётся активным" : "Episode remains active")
+      : (locale === "ru" ? `Episode остаётся активным после drift-сигналов подряд: ${formatNumber(signals)}` : `Episode remains active after ${formatNumber(signals)} consecutive drift signals`);
   }
-  return "New drift episode started";
+  return locale === "ru" ? "Начался новый drift episode" : "New drift episode started";
 }
 
 function detailNumber(event: DriftEvent, key: string) {
