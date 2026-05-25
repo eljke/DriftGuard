@@ -41,18 +41,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Запускает synthetic scenario через настоящий DriftGuard engine и хранит
- * результат для REST API.
+ * English demo documentation.
+ * stores the result for the REST API.
  */
 @Service
 public class DemoScenarioService {
     private static final List<DemoScenarioDescriptor> SCENARIOS = List.of(
-            new DemoScenarioDescriptor("latency-step", "Latency step degradation", "latency", "Резкий рост latency checkout endpoint-а."),
-            new DemoScenarioDescriptor("error-rate-spike", "Error rate spike", "error-rate", "Кратковременный всплеск доли ошибок."),
-            new DemoScenarioDescriptor("throughput-drop", "Throughput drop", "throughput", "Падение пропускной способности сервиса."),
-            new DemoScenarioDescriptor("queue-growth", "Queue backlog growth", "queue-size", "Плавный рост размера очереди."),
-            new DemoScenarioDescriptor("seasonal-latency", "Seasonal latency", "latency", "Регулярная сезонность без ожидаемого drift-а."),
-            new DemoScenarioDescriptor("microservices-system", "Microservices system", "mixed", "Несколько сервисов одновременно публикуют latency, error rate и queue size.")
+            new DemoScenarioDescriptor("latency-step", "Latency step degradation", "latency", "Sharp latency increase for the checkout endpoint."),
+            new DemoScenarioDescriptor("error-rate-spike", "Error rate spike", "error-rate", "Short error-rate spike."),
+            new DemoScenarioDescriptor("throughput-drop", "Throughput drop", "throughput", "Service throughput degradation."),
+            new DemoScenarioDescriptor("queue-growth", "Queue backlog growth", "queue-size", "Gradual queue backlog growth."),
+            new DemoScenarioDescriptor("seasonal-latency", "Seasonal latency", "latency", "Regular seasonality without expected drift."),
+            new DemoScenarioDescriptor("microservices-system", "Microservices system", "mixed", "Several services publish latency, error rate and queue size at the same time.")
     );
 
     private final DemoDetectionRuntime runtime;
@@ -420,3 +420,5 @@ public class DemoScenarioService {
         };
     }
 }
+
+

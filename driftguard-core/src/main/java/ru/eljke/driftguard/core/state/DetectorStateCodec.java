@@ -4,41 +4,43 @@ import ru.eljke.driftguard.core.detector.DetectorState;
 import ru.eljke.driftguard.core.error.DriftGuardErrors;
 
 /**
- * Кодек для сериализации снимков состояния конкретного detector-а.
+ * Codec for serializing state snapshots of a concrete detector.
  *
- * <p>Core-модуль намеренно не выбирает JSON, Avro, Protobuf или другой физический формат.
- * Инфраструктурные адаптеры предоставляют конкретные кодеки и используют этот SPI,
- * чтобы сохранять opaque-реализации {@link DetectorState} без протаскивания зависимостей
- * адаптеров в доменную модель.</p>
+ * <p>The core module deliberately does not choose JSON, Avro, Protobuf or another physical format.
+ * Infrastructure adapters provide concrete codecs and use this SPI to persist opaque
+ * {@link DetectorState} implementations without pulling adapter dependencies into
+ * the domain model.</p>
  *
- * @param <S> конкретный тип состояния detector-а, который поддерживает этот кодек
+ * @param <S> concrete detector state type supported by this codec
  */
 public interface DetectorStateCodec<S extends DetectorState> {
     /**
-     * Стабильное имя алгоритма, возвращаемое {@link DetectorState#algorithm()}.
+     * Stable algorithm name returned by {@link DetectorState#algorithm()}.
      */
     String algorithm();
 
     /**
-     * Конкретный класс состояния, который обрабатывает этот кодек.
+     * Concrete state class handled by this codec.
      */
     Class<S> stateType();
 
     /**
-     * Сериализует конкретное состояние detector-а в байты формата адаптера.
+     * Serializes a concrete detector state to adapter-format bytes.
      */
     byte[] serialize(S state);
 
     /**
-     * Восстанавливает конкретное состояние detector-а из байтов формата адаптера.
+     * Restores a concrete detector state from adapter-format bytes.
      */
     S deserialize(byte[] payload);
 
     /**
-     * Runtime-safe точка входа для сериализации из инфраструктурных адаптеров.
+     * Runtime-safe serialization entry point for infrastructure adapters.
      */
     default byte[] serializeState(DetectorState state) {
         DriftGuardErrors.requireNonNull(state, "state");
         return serialize(stateType().cast(state));
     }
 }
+
+

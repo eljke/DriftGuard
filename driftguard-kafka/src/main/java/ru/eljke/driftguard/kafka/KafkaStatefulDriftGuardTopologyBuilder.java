@@ -26,11 +26,11 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * Kafka Streams topology builder с state store-ом для runtime-состояния detector-ов.
+ * Kafka Streams topology builder with a state store for detector runtime state.
  *
- * <p>Этот builder создаёт {@link DriftDetectorEngine} внутри stream task-а и привязывает
- * его к локальному Kafka state store. Поэтому detector state и emission state переживают
- * restart/rebalance через changelog Kafka Streams.</p>
+ * <p>This builder creates {@link DriftDetectorEngine} inside a stream task and binds
+ * it to the local Kafka state store. This lets detector state and emission state survive
+ * restart/rebalance through the Kafka Streams changelog.</p>
  */
 public final class KafkaStatefulDriftGuardTopologyBuilder {
     private final ObjectMapper objectMapper;
@@ -168,7 +168,7 @@ public final class KafkaStatefulDriftGuardTopologyBuilder {
 
         @Override
         public void close() {
-            // Kafka Streams управляет жизненным циклом state store-а.
+            // Kafka Streams manages the state store lifecycle.
         }
     }
 
@@ -208,3 +208,5 @@ public final class KafkaStatefulDriftGuardTopologyBuilder {
         return events == null ? List.of() : events;
     }
 }
+
+

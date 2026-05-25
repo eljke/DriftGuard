@@ -3,7 +3,7 @@ package ru.eljke.driftguard.core.error;
 import java.util.Objects;
 
 /**
- * Базовое unchecked-исключение DriftGuard с типизированной причиной.
+ * Base unchecked DriftGuard exception with a typed reason.
  */
 public class DriftGuardException extends RuntimeException {
     private final ErrorReason reason;
@@ -26,3 +26,4 @@ public class DriftGuardException extends RuntimeException {
         return reason.code();
     }
 }
+

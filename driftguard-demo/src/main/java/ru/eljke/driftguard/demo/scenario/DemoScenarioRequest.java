@@ -1,14 +1,14 @@
 package ru.eljke.driftguard.demo.scenario;
 
 /**
- * Параметры запуска synthetic scenario.
+ * Synthetic scenario run parameters.
  *
- * @param samples сколько MetricPoint сгенерировать на один stream
- * @param baselineValue стабильное значение до drift-а
- * @param driftValue значение во время step/drop/spike drift-а
- * @param noiseStdDev стандартное отклонение шума
- * @param driftStartPercent позиция начала drift-а в процентах длины потока
- * @param spikeLengthPercent длительность spike-а в процентах длины потока
+ * @param samples number of MetricPoint objects to generate for one stream
+ * @param baselineValue stable value before drift
+ * @param driftValue value during step/drop/spike drift
+ * @param noiseStdDev noise standard deviation
+ * @param driftStartPercent drift start position as a percentage of stream length
+ * @param spikeLengthPercent spike duration as a percentage of stream length
  */
 public record DemoScenarioRequest(
         Integer samples,
@@ -42,3 +42,5 @@ public record DemoScenarioRequest(
         return valueOrDefault(value, fallback, 5.0, 95.0);
     }
 }
+
+

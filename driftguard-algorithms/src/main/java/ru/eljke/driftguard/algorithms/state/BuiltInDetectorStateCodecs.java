@@ -6,7 +6,7 @@ import ru.eljke.driftguard.core.state.SimpleDetectorStateCodecRegistry;
 import java.util.List;
 
 /**
- * Фабрика codec-ов для состояний встроенных detector-ов.
+ * English API documentation.
  */
 public final class BuiltInDetectorStateCodecs {
     private BuiltInDetectorStateCodecs() {
@@ -26,3 +26,5 @@ public final class BuiltInDetectorStateCodecs {
         return new SimpleDetectorStateCodecRegistry(all());
     }
 }
+
+

@@ -8,29 +8,29 @@ import java.util.LinkedHashMap;
 import java.util.UUID;
 
 /**
- * Публичное событие, которое создаётся, когда detector делает вывод о дрейфе
- * потока метрик.
+ * Public event created when a detector concludes that a metric stream has drifted
+ * .
  *
- * <p>Событие содержит компактную общую схему и расширяемые map-поля. Общие
- * поля подходят для Kafka topic-ов, REST API, логов и UI-таблиц.
- * Алгоритм-специфичные доказательства следует помещать в {@link #details()}.</p>
+ * <p>The event contains a compact shared schema and extensible map fields. Shared
+ * fields fit Kafka topics, REST APIs, logs and UI tables.
+ * Algorithm-specific evidence should be placed in {@link #details()}.</p>
  *
- * @param id уникальный id события; генерируется автоматически, если не задан
- * @param key поток метрик, в котором обнаружен drift
- * @param detectedAt время генерации события detector-ом
- * @param windowStart начало анализируемого окна, если известно
- * @param windowEnd конец анализируемого окна, если известно
- * @param phase фаза жизненного цикла drift episode
- * @param direction направление или тип drift-а
- * @param severity уровень важности, вычисленный по настроенным порогам
- * @param score алгоритм-специфичная оценка drift-а
- * @param currentValue репрезентативное текущее значение
- * @param baselineValue репрезентативное baseline-значение
- * @param detector имя настроенного экземпляра detector-а
- * @param algorithm имя реализации алгоритма
- * @param reason короткое человекочитаемое объяснение
- * @param tags скопированные или обогащённые теги метрики
- * @param details алгоритм-специфичные детали и доказательства
+ * @param id unique event id; generated automatically when omitted
+ * @param key metric stream where drift was detected
+ * @param detectedAt time when the detector generated the event
+ * @param windowStart start of the analyzed window, when known
+ * @param windowEnd end of the analyzed window, when known
+ * @param phase drift episode lifecycle phase
+ * @param direction drift direction or type
+ * @param severity severity level computed from configured thresholds
+ * @param score algorithm-specific drift score
+ * @param currentValue representative current value
+ * @param baselineValue representative baseline value
+ * @param detector configured detector instance name
+ * @param algorithm algorithm implementation name
+ * @param reason short human-readable explanation
+ * @param tags copied or enriched metric tags
+ * @param details algorithm-specific details and evidence
  */
 public record DriftEvent(
         String id,
@@ -148,3 +148,5 @@ public record DriftEvent(
         return DriftGuardErrors.requireNonBlank(value, field);
     }
 }
+
+

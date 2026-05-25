@@ -12,7 +12,7 @@ import ru.eljke.driftguard.core.detector.SimpleDetectorRegistry;
 import java.util.List;
 
 /**
- * Фабрика встроенного набора алгоритмов, поставляемого с DriftGuard.
+ * Factory for the built-in algorithm set shipped with DriftGuard.
  */
 public final class DefaultAlgorithms {
     private DefaultAlgorithms() {
@@ -29,9 +29,11 @@ public final class DefaultAlgorithms {
     }
 
     /**
-     * Создаёт registry со всеми встроенными реализациями алгоритмов.
+     * Creates a registry with all built-in algorithm implementations.
      */
     public static DetectorRegistry registry() {
         return new SimpleDetectorRegistry(all());
     }
 }
+
+

@@ -3,7 +3,7 @@ package ru.eljke.driftguard.spring;
 import ru.eljke.driftguard.core.error.ErrorReason;
 
 /**
- * Причины ошибок Spring Boot starter-а.
+ * Spring Boot starter error reasons.
  */
 public enum SpringDriftGuardErrorReason implements ErrorReason {
     UNSUPPORTED_ALGORITHM("DG-SPRING-001", "Unsupported DriftGuard algorithm: {}"),
@@ -31,3 +31,5 @@ public enum SpringDriftGuardErrorReason implements ErrorReason {
         return description;
     }
 }
+
+

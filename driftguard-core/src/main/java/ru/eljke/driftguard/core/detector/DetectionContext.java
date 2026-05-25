@@ -3,9 +3,9 @@ package ru.eljke.driftguard.core.detector;
 import ru.eljke.driftguard.core.error.DriftGuardErrors;
 
 /**
- * Метаданные одного вызова, которые engine передаёт алгоритму.
+ * Metadata of one call that the engine passes to an algorithm.
  *
- * @param detectorName имя настроенного экземпляра detector-а, а не только имя алгоритма
+ * @param detectorName documented value
  */
 public record DetectionContext(
         String detectorName
@@ -14,3 +14,5 @@ public record DetectionContext(
         detectorName = DriftGuardErrors.requireNonBlank(detectorName, "detectorName");
     }
 }
+
+

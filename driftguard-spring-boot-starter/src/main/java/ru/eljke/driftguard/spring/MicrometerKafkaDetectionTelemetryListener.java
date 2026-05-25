@@ -13,11 +13,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Micrometer listener для технических метрик Kafka detection pipeline.
+ * English API documentation.
  *
- * <p>Core listener {@link MicrometerDriftDetectionListener} измеряет общий detection pipeline.
- * Этот listener дополняет его Kafka-специфичными счётчиками: ошибки внутри topology,
- * маршрутизация ошибок в error topic и длительность обработки внутри Kafka task.</p>
+ * English API documentation.
+ * English API documentation.
+ * English API documentation.
  */
 public final class MicrometerKafkaDetectionTelemetryListener implements KafkaDetectionTelemetryListener {
     private final MeterRegistry registry;
@@ -30,7 +30,7 @@ public final class MicrometerKafkaDetectionTelemetryListener implements KafkaDet
     public void onDetectionCompleted(MetricPoint point, List<DriftEvent> events, long durationNanos) {
         MetricKey key = point.key();
         Counter.builder("driftguard.kafka.detection.points")
-                .description("Количество MetricPoint, обработанных Kafka topology")
+                .description("Number of MetricPoint objects processed by the Kafka topology")
                 .tag("service", tag(key.service()))
                 .tag("metric", tag(key.metric()))
                 .tag("outcome", "success")
@@ -38,7 +38,7 @@ public final class MicrometerKafkaDetectionTelemetryListener implements KafkaDet
                 .increment();
 
         Timer.builder("driftguard.kafka.detection.duration")
-                .description("Длительность обработки MetricPoint внутри Kafka topology")
+                .description("MetricPoint processing duration inside Kafka topology")
                 .tag("service", tag(key.service()))
                 .tag("metric", tag(key.metric()))
                 .tag("outcome", "success")
@@ -47,7 +47,7 @@ public final class MicrometerKafkaDetectionTelemetryListener implements KafkaDet
 
         for (DriftEvent event : safeEvents(events)) {
             Counter.builder("driftguard.kafka.detection.events")
-                    .description("Количество DriftEvent, созданных Kafka topology")
+                    .description("Number of DriftEvent objects created by Kafka topology")
                     .tag("service", tag(event.key().service()))
                     .tag("metric", tag(event.key().metric()))
                     .tag("detector", tag(event.detector()))
@@ -63,7 +63,7 @@ public final class MicrometerKafkaDetectionTelemetryListener implements KafkaDet
     public void onDetectionFailed(MetricPoint point, RuntimeException exception, long durationNanos) {
         MetricKey key = point.key();
         Counter.builder("driftguard.kafka.detection.errors")
-                .description("Количество ошибок detector-а внутри Kafka topology")
+                .description("Number of detector errors inside Kafka topology")
                 .tag("service", tag(key.service()))
                 .tag("metric", tag(key.metric()))
                 .tag("exception", tag(exception.getClass().getSimpleName()))
@@ -71,7 +71,7 @@ public final class MicrometerKafkaDetectionTelemetryListener implements KafkaDet
                 .increment();
 
         Timer.builder("driftguard.kafka.detection.duration")
-                .description("Длительность обработки MetricPoint внутри Kafka topology")
+                .description("MetricPoint processing duration inside Kafka topology")
                 .tag("service", tag(key.service()))
                 .tag("metric", tag(key.metric()))
                 .tag("outcome", "error")
@@ -83,7 +83,7 @@ public final class MicrometerKafkaDetectionTelemetryListener implements KafkaDet
     public void onDetectionErrorRouted(KafkaDetectionError error) {
         MetricKey key = error.point().key();
         Counter.builder("driftguard.kafka.detection.errors.routed")
-                .description("Количество diagnostic-сообщений, отправленных в Kafka error topic")
+                .description("Number of diagnostic messages sent to the Kafka error topic")
                 .tag("service", tag(key.service()))
                 .tag("metric", tag(key.metric()))
                 .tag("exception", tag(simpleClassName(error.exceptionClass())))
@@ -107,3 +107,5 @@ public final class MicrometerKafkaDetectionTelemetryListener implements KafkaDet
         return value == null || value.isBlank() ? "unknown" : value;
     }
 }
+
+

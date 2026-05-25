@@ -14,10 +14,10 @@ import java.util.Arrays;
 import java.util.Map;
 
 /**
- * Хи-квадрат detector для изменений binned-распределения.
+ * Chi-square detector for binned distribution changes.
  *
- * <p>Этот detector наиболее полезен, когда метрику можно осмысленно разбить
- * на bucket-ы и в каждом bucket-е достаточно expected-наблюдений.</p>
+ * <p>This detector is most useful when a metric can be meaningfully split
+ * into buckets and each bucket has enough expected observations.</p>
  */
 public final class ChiSquareDetector implements DetectorAlgorithm<ChiSquareConfig, ChiSquareState> {
     private static final ChiSquareTest TEST = new ChiSquareTest();
@@ -113,3 +113,5 @@ public final class ChiSquareDetector implements DetectorAlgorithm<ChiSquareConfi
     private record ChiSquareScore(double statistic, double pValue, int degreesOfFreedom) {
     }
 }
+
+

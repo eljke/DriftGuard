@@ -4,14 +4,14 @@ import lombok.Builder;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 
 /**
- * Конфигурация Population Stability Index для обнаружения drift-а распределения.
+ * Configuration for Population Stability Index distribution drift detection.
  *
- * @param baselineWindowSize число наблюдений в reference-распределении
- * @param currentWindowSize число последних наблюдений, сравниваемых с baseline
- * @param buckets число equal-width bucket-ов для сравнения распределений
- * @param warningThreshold значение PSI для warning events
- * @param criticalThreshold значение PSI для critical events
- * @param epsilon минимальная доля bucket-а, используемая для защиты от деления на ноль
+ * @param baselineWindowSize number of observations in the reference distribution
+ * @param currentWindowSize number of latest observations compared with the baseline
+ * @param buckets documented value
+ * @param warningThreshold PSI value for warning events
+ * @param criticalThreshold PSI value for critical events
+ * @param epsilon minimum bucket share used to avoid division by zero
  */
 @Builder(toBuilder = true)
 public record PsiConfig(
@@ -44,3 +44,5 @@ public record PsiConfig(
         return ALGORITHM;
     }
 }
+
+

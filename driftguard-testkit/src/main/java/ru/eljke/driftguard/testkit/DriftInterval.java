@@ -4,10 +4,10 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * Ожидаемый интервал деградации в синтетическом сценарии.
+ * English API documentation.
  *
- * @param start момент, с которого поток считается дрейфующим
- * @param end момент окончания drift-интервала
+ * @param start documented value
+ * @param end documented value
  */
 public record DriftInterval(
         Instant start,
@@ -25,3 +25,5 @@ public record DriftInterval(
         return !timestamp.isBefore(start) && !timestamp.isAfter(end);
     }
 }
+
+

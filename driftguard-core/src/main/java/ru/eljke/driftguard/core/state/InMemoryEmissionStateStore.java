@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.UnaryOperator;
 
 /**
- * In-memory хранилище состояния emission-политик.
+ * In-memory store for emission policy state.
  */
 public final class InMemoryEmissionStateStore implements EmissionStateStore {
     private final Map<DetectorInstanceKey, EmissionState> states = new ConcurrentHashMap<>();
@@ -35,3 +35,4 @@ public final class InMemoryEmissionStateStore implements EmissionStateStore {
         });
     }
 }
+

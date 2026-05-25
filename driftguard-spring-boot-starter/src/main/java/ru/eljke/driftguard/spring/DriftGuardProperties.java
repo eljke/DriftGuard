@@ -10,52 +10,51 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Настройки DriftGuard, читаемые из {@code application.yml}.
+ * DriftGuard settings read from {@code application.yml}.
  *
- * <p>Класс является публичным configuration contract-ом starter-а. Все поля
- * используют Spring Boot relaxed binding: например {@code baselineWindowSize}
- * задаётся как {@code baseline-window-size}. Если список {@link #detectors}
- * пустой, starter создаёт небольшой набор detector-ов по умолчанию для
- * demo/quick-start режима.</p>
+ * <p>The class is the public configuration contract of the starter. All fields
+ * use Spring Boot relaxed binding: for example {@code baselineWindowSize}
+ * is configured as {@code baseline-window-size}. If {@link #detectors} is empty,
+ * the starter creates a small default detector set for demo/quick-start mode.</p>
  */
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "driftguard")
 public class DriftGuardProperties {
     /**
-     * Включает auto-configuration DriftGuard.
+     * Enables DriftGuard auto-configuration.
      *
-     * <p>При {@code false} starter не создаёт registry, state store, detector
-     * definitions и {@code DriftDetectorEngine}.</p>
+     * <p>When {@code false} starter does not create registry, state store, detector
+     * definitions and {@code DriftDetectorEngine}.</p>
      */
     private boolean enabled = true;
 
     /**
-     * Набор detector definitions, применяемых к входящим {@code MetricPoint}.
+     * Set of detector definitions applied to incoming {@code MetricPoint}.
      *
-     * <p>Каждый элемент задаёт алгоритм, фильтр потоков метрик, окна, пороги и
-     * политику публикации событий.</p>
+     * <p>Each item configures an algorithm, metric-stream filter, windows, thresholds and
+     * event publication policy.</p>
      */
     private List<DetectorProperties> detectors = new ArrayList<>();
 
     /**
-     * Глобальный флаг включения detector definitions из application.yml.
+     * Global flag for detector definitions declared in {@code application.yml}.
      */
     private boolean detectorsEnabled = true;
 
     /**
-     * Настройки runtime-метрик DriftGuard.
+     * DriftGuard runtime metrics settings.
      */
     private MetricsProperties metrics = new MetricsProperties();
 
     /**
-     * Настройки Kafka Streams adapter-а.
+     * Kafka Streams adapter settings.
      *
-     * <p>Kafka-часть выключена по умолчанию, потому что не каждому Spring
-     * приложению нужен transport adapter. Если включить {@code kafka.enabled},
-     * starter создаст и запустит Kafka Streams topology, которая читает
-     * {@code MetricPoint} из input topic-ов и пишет {@code DriftEvent} в output
-     * topic.</p>
+     * <p>The Kafka part is disabled by default because not every Spring
+     * application needs a transport adapter. When {@code kafka.enabled} is true,
+     * the starter creates and starts a Kafka Streams topology that reads
+     * {@code MetricPoint} objects from input topics and writes {@code DriftEvent}
+     * objects to the output topic.</p>
      */
     private KafkaProperties kafka = new KafkaProperties();
 
@@ -75,130 +74,130 @@ public class DriftGuardProperties {
     @Setter
     public static class DetectorProperties {
         /**
-         * Позволяет временно выключить detector без удаления его конфигурации.
+         * Allows temporarily disabling a detector without removing its configuration.
          */
         private boolean enabled = true;
 
         /**
-         * Имя detector-а в {@code DriftEvent.detector} и ключе состояния.
+         * Detector name stored in {@code DriftEvent.detector} and in the state key.
          */
         private String name;
 
         /**
-         * Имя алгоритма: {@code page-hinkley}, {@code adwin}, {@code psi},
-         * {@code ks} или {@code chi-square}.
+         * Algorithm name: {@code page-hinkley}, {@code adwin}, {@code psi},
+         * {@code ks} or {@code chi-square}.
          */
         private String algorithm;
 
         /**
-         * Разрешённые значения {@code MetricKey.service}. Пустой список
-         * означает, что detector применяется к любому сервису.
+         * Allowed values of {@code MetricKey.service}. An empty list
+         * means the detector applies to any service.
          */
         private List<String> services = new ArrayList<>();
 
         /**
-         * Разрешённые значения {@code MetricKey.metric}. Пустой список
-         * означает, что detector применяется к любой метрике.
+         * Allowed values of {@code MetricKey.metric}. An empty list
+         * means the detector applies to any metric.
          */
         private List<String> metrics = new ArrayList<>();
 
         /**
-         * Разрешённые значения {@code MetricKey.operation}. Пустой список
-         * означает, что detector применяется к любой операции.
+         * Allowed values of {@code MetricKey.operation}. An empty list
+         * means the detector applies to any operation.
          */
         private List<String> operations = new ArrayList<>();
 
         /**
-         * Разрешённые значения {@code MetricKey.instance}. Пустой список
-         * означает, что detector применяется к любому instance id.
+         * Allowed values of {@code MetricKey.instance}. An empty list
+         * means the detector applies to any instance id.
          */
         private List<String> instances = new ArrayList<>();
 
         /**
-         * Размер baseline-окна для PSI, KS и chi-square.
+         * Baseline window size for PSI, KS and chi-square.
          */
         private int baselineWindowSize = 40;
 
         /**
-         * Размер current-окна для PSI, KS и chi-square.
+         * Current window size for PSI, KS and chi-square.
          */
         private int currentWindowSize = 40;
 
         /**
-         * Размер адаптивного окна для ADWIN.
+         * Adaptive window size for ADWIN.
          */
         private int windowSize = 40;
 
         /**
-         * Минимальный размер каждой части окна при поиске разреза в ADWIN.
+         * Minimum size of each window side when searching for an ADWIN cut.
          */
         private int minSubWindowSize = 10;
 
         /**
-         * Число первых samples, используемых Page-Hinkley для прогрева baseline.
+         * Number of initial samples used by Page-Hinkley to warm up the baseline.
          */
         private int warmupSamples = 20;
 
         /**
-         * Количество bucket-ов для PSI и chi-square.
+         * Number of buckets for PSI and chi-square.
          */
         private int buckets = 5;
 
         /**
-         * Warning-порог для PSI или Page-Hinkley.
+         * Warning threshold for PSI or Page-Hinkley.
          */
         private double warningThreshold = 0.1;
 
         /**
-         * Critical-порог для PSI или Page-Hinkley.
+         * Critical threshold for PSI or Page-Hinkley.
          */
         private double criticalThreshold = 0.25;
 
         /**
-         * P-value граница warning-события для KS и chi-square.
+         * P-value boundary for warning events in KS and chi-square.
          */
         private double warningPValue = 0.05;
 
         /**
-         * P-value граница critical-события для KS и chi-square.
+         * P-value boundary for critical events in KS and chi-square.
          */
         private double criticalPValue = 0.01;
 
         /**
-         * Sensitivity/confidence параметр для ADWIN и Page-Hinkley.
+         * Sensitivity/confidence parameter for ADWIN and Page-Hinkley.
          */
         private double delta = 0.1;
 
         /**
-         * Скорость адаптации среднего в Page-Hinkley.
+         * Mean adaptation speed in Page-Hinkley.
          */
         private double alpha = 0.05;
 
         /**
-         * Направление сдвига среднего, которое ищет Page-Hinkley.
+         * Mean-shift direction searched by Page-Hinkley.
          *
-         * <p>{@code UP} подходит для latency, error-rate и queue-size.
-         * {@code DOWN} подходит для throughput и других метрик, где опасно падение.</p>
+         * <p>{@code UP} fits latency, error-rate and queue-size.
+         * {@code DOWN} fits throughput and other metrics where a drop is dangerous.</p>
          */
         private DriftDirection direction = DriftDirection.UP;
 
         /**
-         * Сглаживание bucket-ов в PSI, защищающее от деления на ноль.
+         * PSI bucket smoothing that protects against division by zero.
          */
         private double epsilon = 1e-4;
 
         /**
-         * Множитель score, после которого ADWIN создаёт critical-событие.
+         * Score multiplier after which ADWIN creates a critical event.
          */
         private double criticalMultiplier = 2.0;
 
         /**
-         * Минимальная ожидаемая частота bucket-а для chi-square.
+         * Minimum expected bucket frequency for chi-square.
          */
         private double minExpectedCount = 1.0;
 
         /**
-         * Политика публикации событий поверх сырых сигналов алгоритма.
+         * Event publication policy over raw algorithm signals.
          */
         private EmissionPolicyProperties emissionPolicy = new EmissionPolicyProperties();
 
@@ -227,20 +226,20 @@ public class DriftGuardProperties {
     @Setter
     public static class EmissionPolicyProperties {
         /**
-         * Сколько последовательных сигналов алгоритма требуется перед
-         * публикацией {@code DriftEvent}.
+         * How many consecutive algorithm signals are required before
+         * publishing {@code DriftEvent}.
          */
         private int minConsecutiveSignals = 1;
 
         /**
-         * Минимальная пауза между опубликованными событиями одного detector-а
-         * для одного потока метрик.
+         * Minimum pause between published events of one detector
+         * for one metric stream.
          */
         private Duration cooldown = Duration.ZERO;
 
         /**
-         * Сколько нормальных точек подряд должно прийти, чтобы текущий drift
-         * episode считался завершённым и detector снова мог публиковать событие.
+         * How many consecutive normal points are required for the current drift
+         * episode to be considered finished so the detector can publish again.
          */
         private int recoveryConsecutiveNormal = 1;
     }
@@ -249,18 +248,19 @@ public class DriftGuardProperties {
     @Setter
     public static class MetricsProperties {
         /**
-         * Включает Micrometer listener для runtime-метрик detection pipeline.
+         * Enables the Micrometer listener for runtime detection metrics.
          *
-         * <p>Listener создаётся только если в приложении есть {@code MeterRegistry}.
-         * Например, в Spring Boot приложении его обычно добавляет Actuator.</p>
+         * <p>The listener is created only when a {@code MeterRegistry} is present.
+         * In a Spring Boot application it is usually provided by Actuator.</p>
          */
         private boolean enabled = true;
 
         /**
-         * Включает Kafka-специфичные Micrometer-метрики topology.
+         * Enables Kafka-specific Micrometer topology metrics.
          *
-         * <p>Эти метрики дополняют общий detection listener и показывают ошибки,
-         * routed error-сообщения и длительность обработки внутри Kafka Streams task.</p>
+         * <p>These metrics complement the generic detection listener with topology
+         * errors, routed diagnostic messages and processing duration inside Kafka
+         * Streams tasks.</p>
          */
         private boolean kafkaEnabled = true;
     }
@@ -269,12 +269,12 @@ public class DriftGuardProperties {
     @Setter
     public static class KafkaProperties {
         /**
-         * Включает Kafka Streams topology DriftGuard.
+         * Enables the DriftGuard Kafka Streams topology.
          */
         private boolean enabled = false;
 
         /**
-         * Kafka bootstrap servers, например {@code localhost:9092}.
+         * Kafka bootstrap servers, for example {@code localhost:9092}.
          */
         private String bootstrapServers = "localhost:9092";
 
@@ -284,23 +284,23 @@ public class DriftGuardProperties {
         private String applicationId = "driftguard";
 
         /**
-         * Topic-и с JSON {@code MetricPoint}.
+         * Topics containing JSON {@code MetricPoint} messages.
          */
         private List<String> inputTopics = new ArrayList<>();
 
         /**
-         * Topic, куда topology пишет JSON {@code DriftEvent}.
+         * Topic where the topology writes JSON {@code DriftEvent} messages.
          */
         private String outputTopic = "driftguard.drift-events";
 
         /**
-         * Локальная директория state store-ов Kafka Streams. Если пусто,
-         * используется значение Kafka Streams по умолчанию.
+         * Local Kafka Streams state-store directory. When empty, Kafka Streams uses
+         * its default value.
          */
         private String stateDir;
 
         /**
-         * Запускать ли topology автоматически при старте Spring context-а.
+         * Whether the topology should start automatically with the Spring context.
          */
         private boolean autoStartup = true;
 
@@ -309,3 +309,5 @@ public class DriftGuardProperties {
         }
     }
 }
+
+

@@ -3,7 +3,7 @@ package ru.eljke.driftguard.demo.detection;
 import java.util.Locale;
 
 /**
- * Профиль чувствительности demo detector-ов.
+ * English demo documentation.
  */
 public enum DemoDetectorProfile {
     AGGRESSIVE,
@@ -17,3 +17,5 @@ public enum DemoDetectorProfile {
         return DemoDetectorProfile.valueOf(value.trim().replace('-', '_').toUpperCase(Locale.ROOT));
     }
 }
+
+

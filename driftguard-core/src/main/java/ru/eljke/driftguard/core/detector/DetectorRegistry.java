@@ -4,16 +4,17 @@ import java.util.Collection;
 import java.util.Optional;
 
 /**
- * Registry, который сопоставляет настроенные имена алгоритмов с реализациями.
+ * Registry that maps configured algorithm names to implementations.
  */
 public interface DetectorRegistry {
     /**
-     * Ищет зарегистрированный алгоритм по его стабильному имени.
+     * Finds a registered algorithm by its stable name.
      */
     Optional<DetectorAlgorithm<?, ?>> find(String name);
 
     /**
-     * Возвращает имена всех зарегистрированных алгоритмов.
+     * Returns names of all registered algorithms.
      */
     Collection<String> algorithmNames();
 }
+

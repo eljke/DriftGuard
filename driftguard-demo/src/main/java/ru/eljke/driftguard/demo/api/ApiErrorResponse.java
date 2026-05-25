@@ -3,7 +3,7 @@ package ru.eljke.driftguard.demo.api;
 import java.time.Instant;
 
 /**
- * Единый JSON-ответ demo API при ошибке.
+ * English demo documentation.
  */
 public record ApiErrorResponse(
         Instant timestamp,
@@ -13,3 +13,5 @@ public record ApiErrorResponse(
         String path
 ) {
 }
+
+

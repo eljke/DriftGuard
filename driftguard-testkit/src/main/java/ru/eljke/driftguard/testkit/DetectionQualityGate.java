@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Набор минимальных требований к качеству детекции.
+ * Set of minimum detection quality requirements.
  *
- * <p>Quality gate используется в тестах и CI, чтобы новые изменения алгоритмов
- * не ухудшали precision, recall, число false positive или задержку обнаружения.
- * Все пороги опциональны: если значение не задано, соответствующая проверка
- * пропускается.</p>
+ * <p>Quality gates are used in tests and CI so algorithm changes
+ * English API documentation.
+ * All thresholds are optional: when a value is absent, the corresponding check
+ * is skipped.</p>
  */
 public record DetectionQualityGate(
         Double minPrecision,
@@ -137,3 +137,5 @@ public record DetectionQualityGate(
         }
     }
 }
+
+

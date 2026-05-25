@@ -3,27 +3,27 @@ package ru.eljke.driftguard.demo.kafka.ops;
 import java.util.List;
 
 /**
- * Операционный снимок Kafka demo и Kafka Streams topology.
+ * English demo documentation.
  *
- * @param enabled включён ли Kafka demo режим
- * @param running выполняется ли demo playback
- * @param replay выполняется ли replay-прогон
- * @param scenario текущий сценарий
- * @param inputTopic topic входных метрик demo producer-а
- * @param outputTopic topic событий drift-а
+ * @param enabled documented value
+ * @param running documented value
+ * @param replay documented value
+ * @param scenario documented value
+ * @param inputTopic documented value
+ * @param outputTopic documented value
  * @param bootstrapServers Kafka bootstrap servers
- * @param producedPoints сколько точек опубликовано demo producer-ом
- * @param totalPoints сколько точек должно быть опубликовано
- * @param consumedEvents сколько событий прочитал demo consumer
- * @param progressPercent прогресс producer playback в процентах
+ * @param producedPoints documented value
+ * @param totalPoints documented value
+ * @param consumedEvents documented value
+ * @param progressPercent documented value
  * @param streamsApplicationId Kafka Streams application id
- * @param streamsInputTopics topic-и, из которых читает topology
- * @param streamsOutputTopic topic, куда пишет topology
- * @param runtimeStateStoreName имя Kafka Streams state store-а runtime-состояния
- * @param detectionErrorMode стратегия обработки ошибок detector-а
- * @param telemetryEnabled доступны ли Micrometer-метрики Kafka topology
- * @param metrics агрегированные метрики Kafka detection pipeline
- * @param error последняя runtime-ошибка demo-контура
+ * @param streamsInputTopics documented value
+ * @param streamsOutputTopic documented value
+ * @param runtimeStateStoreName documented value
+ * @param detectionErrorMode documented value
+ * @param telemetryEnabled documented value
+ * @param metrics documented value
+ * @param error documented value
  */
 public record KafkaOperationsSnapshot(
         boolean enabled,
@@ -47,3 +47,5 @@ public record KafkaOperationsSnapshot(
         String error
 ) {
 }
+
+

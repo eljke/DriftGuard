@@ -1,7 +1,7 @@
 package ru.eljke.driftguard.testkit;
 
 /**
- * Ошибка quality gate, которую удобно использовать в unit/CI тестах.
+ * English API documentation.
  */
 public final class DetectionQualityGateException extends AssertionError {
     private final DetectionQualityReport report;
@@ -15,3 +15,5 @@ public final class DetectionQualityGateException extends AssertionError {
         return report;
     }
 }
+
+

@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * Стабильный сезонный поток без ожидаемого drift-а.
+ * Stable seasonal stream without expected drift.
  *
- * <p>Сценарий нужен для проверки, что detector не принимает регулярную
- * суточную или минутную волну за деградацию.</p>
+ * <p>This scenario verifies that a detector does not treat a regular
+ * English API documentation.
  */
 public final class SeasonalNoiseScenario implements MetricScenario {
     private final String name;
@@ -57,3 +57,5 @@ public final class SeasonalNoiseScenario implements MetricScenario {
         return List.of();
     }
 }
+
+

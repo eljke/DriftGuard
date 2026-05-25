@@ -9,30 +9,30 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 /**
- * Абстракция хранилища состояний detector-ов.
+ * Storage abstraction for detector states.
  *
- * <p>Core предоставляет in-memory реализацию. Kafka Streams должен адаптировать
- * этот контракт к state store, а другие окружения могут использовать БД,
- * встроенные cache-и или временное хранилище для replay-сценариев.</p>
+ * <p>Core provides an in-memory implementation. Kafka Streams should adapt
+ * this contract to a state store, while other environments can use databases,
+ * embedded caches or temporary storage for replay scenarios.</p>
  */
 public interface DetectorStateStore {
     /**
-     * Читает состояние для пары metric/detector.
+     * Reads state for a metric/detector pair.
      */
     Optional<DetectorState> get(DetectorInstanceKey key);
 
     /**
-     * Сохраняет последнее состояние для пары metric/detector.
+     * Saves the latest state for a metric/detector pair.
      */
     void put(DetectorInstanceKey key, DetectorState state);
 
     /**
-     * Атомарно читает, изменяет и сохраняет состояние detector-а.
+     * Atomically reads, modifies and saves detector state.
      *
-     * <p>Это основной контракт для runtime-кода. Простые реализации могут
-     * наследовать synchronized fallback, а production-хранилища должны
-     * переопределять метод нативной атомарной операцией: compute, transaction,
-     * compare-and-set или state-store update.</p>
+     * <p>This is the main contract used by the runtime pipeline. Simple stores
+     * can inherit the synchronized fallback, while production stores should
+     * override the method with a native atomic operation such as compute,
+     * transaction, compare-and-set or a state-store update.</p>
      */
     default DetectorState update(
             DetectorInstanceKey key,
@@ -50,3 +50,5 @@ public interface DetectorStateStore {
         }
     }
 }
+
+

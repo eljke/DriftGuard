@@ -5,11 +5,11 @@ import ru.eljke.driftguard.core.error.DriftGuardValidationException;
 import java.util.List;
 
 /**
- * Минимальная конфигурация Kafka Streams topology DriftGuard.
+ * Minimal DriftGuard Kafka Streams topology configuration.
  *
- * @param inputTopics topic-и с входными {@code MetricPoint}
- * @param outputTopic topic для выходных {@code DriftEvent}
- * @param detectionErrorTopic опциональный topic для ошибок detector-а
+ * @param inputTopics topics with input {@code MetricPoint}
+ * @param outputTopic topic for output {@code DriftEvent}
+ * @param detectionErrorTopic optional topic for detector errors
  */
 public record KafkaDriftGuardTopologyConfig(
         List<String> inputTopics,
@@ -37,4 +37,6 @@ public record KafkaDriftGuardTopologyConfig(
         }
     }
 }
+
+
 

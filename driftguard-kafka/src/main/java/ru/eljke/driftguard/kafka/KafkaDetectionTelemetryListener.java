@@ -6,37 +6,37 @@ import ru.eljke.driftguard.core.domain.MetricPoint;
 import java.util.List;
 
 /**
- * Listener для технических событий Kafka detection pipeline.
+ * English API documentation.
  *
- * <p>Контракт намеренно лёгкий: Kafka adapter не зависит от Micrometer,
- * logging framework-ов или Spring. Интеграционный слой может повесить сюда
- * собственные counters/timers/tracing, а core-логика останется независимой.</p>
+ * English API documentation.
+ * English API documentation.
+ * English API documentation.
  */
 public interface KafkaDetectionTelemetryListener {
     /**
-     * Вызывается после успешной обработки метрики detector-ом.
+     * English API documentation.
      *
-     * @param point исходная метрика
-     * @param events события drift-а, созданные по этой метрике
-     * @param durationNanos длительность обработки в наносекундах
+     * @param point documented value
+     * @param events documented value
+     * @param durationNanos processing duration in nanoseconds
      */
     default void onDetectionCompleted(MetricPoint point, List<DriftEvent> events, long durationNanos) {
     }
 
     /**
-     * Вызывается, если detector бросил исключение.
+     * English API documentation.
      *
-     * @param point исходная метрика
-     * @param exception исключение detector-а
-     * @param durationNanos длительность обработки до ошибки в наносекундах
+     * @param point documented value
+     * @param exception documented value
+     * @param durationNanos processing duration before the failure, in nanoseconds
      */
     default void onDetectionFailed(MetricPoint point, RuntimeException exception, long durationNanos) {
     }
 
     /**
-     * Вызывается перед отправкой diagnostic payload-а в error topic.
+     * English API documentation.
      *
-     * @param error диагностическое сообщение
+     * @param error documented value
      */
     default void onDetectionErrorRouted(KafkaDetectionError error) {
     }
@@ -46,3 +46,5 @@ public interface KafkaDetectionTelemetryListener {
         };
     }
 }
+
+

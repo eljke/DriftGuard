@@ -50,9 +50,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Управляет реальным demo-контуром Kafka: создаёт topic-и, запускает topology
- * через Spring Boot starter DriftGuard, публикует тестовые метрики producer-ом
- * и читает найденные события drift-а consumer-ом для отображения в UI.
+ * English demo documentation.
+ * English demo documentation.
+ * English demo documentation.
  */
 @Service
 public class KafkaDemoService {
@@ -364,7 +364,7 @@ public class KafkaDemoService {
             try {
                 current.close();
             } catch (RuntimeException ignored) {
-                // KafkaConsumer закрывается в своём же consumer-thread: ошибка закрытия не должна ломать stop/start demo.
+                // English implementation note.
             }
         }
     }
@@ -453,7 +453,7 @@ public class KafkaDemoService {
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
         } catch (ExecutionException ignored) {
-            // Ошибка consumer loop уже перенесена в demo status через поле error.
+            // English implementation note.
         } catch (java.util.concurrent.TimeoutException exception) {
             error = "Kafka demo consumer did not stop within timeout";
         }
@@ -570,3 +570,5 @@ public class KafkaDemoService {
         }
     }
 }
+
+

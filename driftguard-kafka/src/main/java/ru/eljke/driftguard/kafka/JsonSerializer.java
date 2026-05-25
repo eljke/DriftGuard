@@ -5,7 +5,7 @@ import org.apache.kafka.common.serialization.Serializer;
 import ru.eljke.driftguard.core.error.DriftGuardException;
 
 /**
- * Kafka JSON serializer для DriftGuard DTO и record-типов.
+ * Kafka JSON serializer for DriftGuard DTOs and record types.
  */
 public final class JsonSerializer<T> implements Serializer<T> {
     private final ObjectMapper objectMapper;
@@ -26,3 +26,5 @@ public final class JsonSerializer<T> implements Serializer<T> {
         }
     }
 }
+
+

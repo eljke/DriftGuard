@@ -7,7 +7,7 @@ import ru.eljke.driftguard.core.domain.MetricPoint;
 import ru.eljke.driftguard.core.state.DetectorRuntimeStateSnapshot;
 
 /**
- * Готовые Kafka SerDes для публичных DriftGuard-сообщений.
+ * English API documentation.
  */
 public final class DriftGuardSerdes {
     private DriftGuardSerdes() {
@@ -29,3 +29,5 @@ public final class DriftGuardSerdes {
         return new JsonSerde<>(objectMapper, KafkaDetectionError.class);
     }
 }
+
+

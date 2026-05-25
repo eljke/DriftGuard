@@ -1,13 +1,15 @@
 package ru.eljke.driftguard.testkit;
 
 /**
- * Результат benchmark-а для одного synthetic scenario.
+ * English API documentation.
  *
- * @param scenario технический id или имя сценария
- * @param metrics метрики качества детекции
+ * @param scenario documented value
+ * @param metrics documented value
  */
 public record DetectionBenchmarkResult(
         String scenario,
         DetectionMetrics metrics
 ) {
 }
+
+

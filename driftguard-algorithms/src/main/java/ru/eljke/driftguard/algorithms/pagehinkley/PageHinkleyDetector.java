@@ -10,10 +10,10 @@ import ru.eljke.driftguard.core.domain.MetricPoint;
 import java.util.Map;
 
 /**
- * Онлайн detector для однонаправленного сдвига скользящего среднего.
+ * Online detector for a one-direction moving-mean shift.
  *
- * <p>По умолчанию detector ищет рост среднего. Для метрик вроде throughput,
- * где опасно устойчивое падение, используйте {@link DriftDirection#DOWN}.</p>
+ * <p>By default, the detector searches for a mean increase. For metrics such as throughput,
+ * where a sustained drop is dangerous, use {@link DriftDirection#DOWN}.</p>
  */
 public final class PageHinkleyDetector implements DetectorAlgorithm<PageHinkleyConfig, PageHinkleyState> {
     @Override
@@ -98,3 +98,5 @@ public final class PageHinkleyDetector implements DetectorAlgorithm<PageHinkleyC
         return direction == DriftDirection.DOWN ? -value : value;
     }
 }
+
+

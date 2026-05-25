@@ -3,7 +3,7 @@ package ru.eljke.driftguard.demo.error;
 import ru.eljke.driftguard.core.error.ErrorReason;
 
 /**
- * Причины ошибок demo API.
+ * English demo documentation.
  */
 public enum DemoErrorReason implements ErrorReason {
     UNKNOWN_SCENARIO("DG-DEMO-001", "Unknown demo scenario: {}"),
@@ -30,3 +30,5 @@ public enum DemoErrorReason implements ErrorReason {
         return description;
     }
 }
+
+

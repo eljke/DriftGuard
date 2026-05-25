@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Неизменяемый in-memory registry для тестов, demo и Spring auto-configuration.
+ * Immutable in-memory registry for tests, demos and Spring auto-configuration.
  */
 public final class SimpleDetectorRegistry implements DetectorRegistry {
     private final Map<String, DetectorAlgorithm<?, ?>> algorithms;
@@ -39,3 +39,4 @@ public final class SimpleDetectorRegistry implements DetectorRegistry {
         return algorithms.keySet();
     }
 }
+

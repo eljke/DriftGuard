@@ -6,11 +6,11 @@ import ru.eljke.driftguard.core.error.DriftGuardErrors;
 import java.time.Duration;
 
 /**
- * Политика генерации публичных drift events поверх внутренних сигналов алгоритма.
+ * Policy for generating public drift events from internal algorithm signals.
  *
- * @param minConsecutiveSignals сколько подряд сигналов нужно получить перед событием
- * @param cooldown минимальная пауза между событиями одного detector instance
- * @param recoveryConsecutiveNormal сколько подряд нормальных точек нужно для закрытия текущего drift episode
+ * @param minConsecutiveSignals number of consecutive signals required before an event
+ * @param cooldown minimum pause between events of one detector instance
+ * @param recoveryConsecutiveNormal number of consecutive normal points required to close the current drift episode
  */
 public record EmissionPolicyConfig(
         int minConsecutiveSignals,
@@ -43,3 +43,4 @@ public record EmissionPolicyConfig(
         );
     }
 }
+

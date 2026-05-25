@@ -4,14 +4,14 @@ import java.time.Duration;
 import java.util.List;
 
 /**
- * Снимок runtime-конфигурации demo-приложения, который UI показывает без
- * прямого чтения {@code application.yml}.
+ * English demo documentation.
+ * English demo documentation.
  *
- * @param aggressiveness агрегированная оценка чувствительности detector-ов
- * @param availableProfiles профили чувствительности, доступные для runtime-переключения
- * @param registeredAlgorithms алгоритмы, доступные в текущем registry
- * @param kafka настройки Kafka demo и Kafka Streams adapter-а
- * @param detectors detector definitions, активные в текущем Spring context-е
+ * @param aggressiveness documented value
+ * @param availableProfiles documented value
+ * @param registeredAlgorithms documented value
+ * @param kafka documented value
+ * @param detectors documented value
  */
 public record DemoConfigurationView(
         AggressivenessView aggressiveness,
@@ -21,23 +21,23 @@ public record DemoConfigurationView(
         List<DetectorConfigurationView> detectors
 ) {
     /**
-     * UI-представление текущей чувствительности.
+     * English demo documentation.
      *
-     * @param level человекочитаемый уровень чувствительности
-     * @param description пояснение, как интерпретировать уровень
+     * @param level documented value
+     * @param description documented value
      */
     public record AggressivenessView(String level, String description) {
     }
 
     /**
-     * Kafka-настройки, важные для демонстрационного контура.
+     * English demo documentation.
      *
-     * @param demoEnabled включён ли Kafka demo endpoint
+     * @param demoEnabled documented value
      * @param bootstrapServers Kafka bootstrap servers
-     * @param inputTopic topic входных metric points
-     * @param outputTopic topic найденных drift events
+     * @param inputTopic documented value
+     * @param outputTopic documented value
      * @param applicationId Kafka Streams application id
-     * @param playbackInterval интервал публикации synthetic points
+     * @param playbackInterval documented value
      */
     public record KafkaConfigurationView(
             boolean demoEnabled,
@@ -50,19 +50,19 @@ public record DemoConfigurationView(
     }
 
     /**
-     * Конфигурация одного detector-а из {@code driftguard.detectors}.
+     * English demo documentation.
      *
-     * @param name имя detector-а
-     * @param algorithm алгоритм detector-а
-     * @param services фильтр по сервисам
-     * @param metrics фильтр по метрикам
-     * @param warningThreshold warning-порог score
-     * @param criticalThreshold critical-порог score
-     * @param warningPValue warning-порог p-value
-     * @param criticalPValue critical-порог p-value
-     * @param warmupSamples число samples для прогрева
-     * @param emissionPolicy политика публикации событий
-     * @param sensitivity оценка чувствительности конкретного detector-а
+     * @param name documented value
+     * @param algorithm documented value
+     * @param services documented value
+     * @param metrics documented value
+     * @param warningThreshold documented value
+     * @param criticalThreshold documented value
+     * @param warningPValue documented value
+     * @param criticalPValue documented value
+     * @param warmupSamples documented value
+     * @param emissionPolicy documented value
+     * @param sensitivity documented value
      */
     public record DetectorConfigurationView(
             String name,
@@ -80,12 +80,14 @@ public record DemoConfigurationView(
     }
 
     /**
-     * Runtime-представление политики подавления повторяющихся событий.
+     * English demo documentation.
      *
-     * @param minConsecutiveSignals сколько подряд сигналов нужно перед событием
-     * @param cooldown минимальная пауза между событиями одного detector-а
-     * @param recoveryConsecutiveNormal сколько нормальных точек подряд закрывают drift episode
+     * @param minConsecutiveSignals documented value
+     * @param cooldown documented value
+     * @param recoveryConsecutiveNormal documented value
      */
     public record EmissionPolicyView(int minConsecutiveSignals, Duration cooldown, int recoveryConsecutiveNormal) {
     }
 }
+
+

@@ -12,7 +12,7 @@ import ru.eljke.driftguard.spring.DriftGuardProperties;
 import java.util.List;
 
 /**
- * Собирает безопасное представление конфигурации для demo UI.
+ * English demo documentation.
  */
 @Service
 public class DemoConfigurationService {
@@ -101,18 +101,18 @@ public class DemoConfigurationService {
         if (runtime.profile() == DemoDetectorProfile.AGGRESSIVE) {
             return new DemoConfigurationView.AggressivenessView(
                     "Aggressive",
-                    "Detector-ы настроены на раннее обнаружение drift-а ценой большего риска ложных тревог."
+                    "English demo text."
             );
         }
         if (runtime.profile() == DemoDetectorProfile.CONSERVATIVE) {
             return new DemoConfigurationView.AggressivenessView(
                     "Conservative",
-                    "Detector-ы требуют более сильного подтверждения drift-а и реже создают события."
+                    "English demo text."
             );
         }
         return new DemoConfigurationView.AggressivenessView(
                 "Balanced",
-                "Detector-ы используют умеренные пороги: быстрый сигнал сохраняется, но события сглаживаются emission policy."
+                "English demo text."
         );
     }
 
@@ -124,3 +124,5 @@ public class DemoConfigurationService {
         return parts.length == 0 ? List.of() : List.of(parts[0]);
     }
 }
+
+

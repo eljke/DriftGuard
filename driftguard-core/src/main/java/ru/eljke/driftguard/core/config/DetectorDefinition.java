@@ -7,15 +7,15 @@ import ru.eljke.driftguard.core.error.DriftGuardErrors;
 import java.util.function.Predicate;
 
 /**
- * Runtime-связка между именованным экземпляром detector-а, его типизированной
- * конфигурацией и ключами метрик, к которым он применяется.
+ * Runtime binding between a named detector instance, its typed
+ * configuration and the metric keys it applies to.
  *
- * <p>Несколько definitions могут ссылаться на один и тот же алгоритм, но иметь
- * разные пороги или фильтры метрик.</p>
+ * <p>Several definitions can refer to the same algorithm while having
+ * different thresholds or metric filters.</p>
  *
- * @param name имя настроенного экземпляра detector-а
- * @param config типизированная конфигурация алгоритма
- * @param appliesTo predicate, определяющий, нужно ли обрабатывать поток метрик
+ * @param name configured detector instance name
+ * @param config typed algorithm configuration
+ * @param appliesTo predicate that decides whether a metric stream should be processed
  */
 @Builder(toBuilder = true)
 public record DetectorDefinition(
@@ -43,3 +43,4 @@ public record DetectorDefinition(
         return DriftGuardErrors.requireNonBlank(value, field);
     }
 }
+

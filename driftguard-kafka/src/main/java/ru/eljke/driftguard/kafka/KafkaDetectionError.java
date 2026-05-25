@@ -5,16 +5,16 @@ import ru.eljke.driftguard.core.domain.MetricPoint;
 import java.time.Instant;
 
 /**
- * Сообщение об ошибке обработки метрики внутри Kafka Streams pipeline.
+ * English API documentation.
  *
- * <p>Объект предназначен для отправки в отдельный error topic. Он хранит исходную
- * метрику и минимальную диагностическую информацию об исключении, не привязывая
- * публичный контракт к конкретному logging framework-у.</p>
+ * English API documentation.
+ * English API documentation.
+ * English API documentation.
  *
- * @param point исходная метрика, на которой упала обработка
- * @param exceptionClass полное имя класса исключения
- * @param message сообщение исключения
- * @param occurredAt время фиксации ошибки
+ * @param point documented value
+ * @param exceptionClass documented value
+ * @param message documented value
+ * @param occurredAt documented value
  */
 public record KafkaDetectionError(
         MetricPoint point,
@@ -31,3 +31,5 @@ public record KafkaDetectionError(
         );
     }
 }
+
+

@@ -8,19 +8,19 @@ import java.time.Instant;
 import java.util.Map;
 
 /**
- * Одно наблюдаемое значение в потоке технических метрик.
+ * One observed value in a technical metric stream.
  *
- * <p>Это основной входной контракт core-модуля. Тип намеренно не содержит
- * Kafka-, Spring-, JSON- или Prometheus-специфичных полей. Adapter-ы должны
- * преобразовать свой нативный формат события в этот record перед вызовом
+ * <p>This is the main input contract of the core module. The type intentionally contains no
+ * Kafka-, Spring-, JSON- or Prometheus-specific fields. Adapters should
+ * convert their native event format to this record before calling
  * detection engine.</p>
  *
- * @param key стабильная идентичность метрики для маршрутизации и поиска состояния
- * @param timestamp event timestamp наблюдаемого значения
- * @param value числовое значение метрики; должно быть конечным
- * @param kind семантический тип метрики
- * @param tags индексируемые строковые измерения для фильтрации и вывода событий
- * @param attributes дополнительная неиндексируемая нагрузка для adapter-ов и диагностики
+ * @param key stable metric identity for routing and state lookup
+ * @param timestamp event timestamp of the observed value
+ * @param value numeric metric value; must be finite
+ * @param kind semantic metric kind
+ * @param tags indexed string dimensions for filtering and event output
+ * @param attributes additional non-indexed payload for adapters and diagnostics
  */
 @Builder(toBuilder = true)
 public record MetricPoint(
@@ -50,3 +50,4 @@ public record MetricPoint(
         return new MetricPoint(key, observedAt, value, kind, tags, attributes);
     }
 }
+

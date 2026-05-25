@@ -8,10 +8,10 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * Набор synthetic scenarios, который запускается как единый benchmark.
+ * English API documentation.
  *
- * <p>Suite нужен для CI-quality-gates: один detector прогоняется через несколько
- * типовых сценариев, после чего агрегированный отчёт проверяется единым gate-ом.</p>
+ * English API documentation.
+ * English API documentation.
  */
 public record DetectionBenchmarkSuite(
         String label,
@@ -47,3 +47,5 @@ public record DetectionBenchmarkSuite(
         return gate.evaluate(report);
     }
 }
+
+

@@ -1,12 +1,12 @@
 package ru.eljke.driftguard.testkit;
 
 /**
- * Одно нарушение quality gate.
+ * English API documentation.
  *
- * @param metric имя проверяемой метрики
- * @param expected ожидаемое пороговое значение
- * @param actual фактическое значение
- * @param direction направление нарушения
+ * @param metric documented value
+ * @param expected documented value
+ * @param actual documented value
+ * @param direction documented value
  */
 public record DetectionQualityViolation(
         String metric,
@@ -34,3 +34,5 @@ public record DetectionQualityViolation(
         };
     }
 }
+
+

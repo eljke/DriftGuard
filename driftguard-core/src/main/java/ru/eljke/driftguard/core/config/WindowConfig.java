@@ -3,10 +3,10 @@ package ru.eljke.driftguard.core.config;
 import ru.eljke.driftguard.core.error.DriftGuardErrors;
 
 /**
- * Общие настройки фиксированного окна.
+ * Shared fixed-window settings.
  *
- * @param size максимальное число наблюдений, удерживаемых в окне
- * @param minSamples минимальное число наблюдений, после которого разрешена детекция
+ * @param size maximum number of observations retained in the window
+ * @param minSamples minimum number of observations required before detection is allowed
  */
 public record WindowConfig(
         int size,
@@ -17,3 +17,4 @@ public record WindowConfig(
         DriftGuardErrors.require(minSamples > 0 && minSamples <= size, "minSamples must be in range [1, size]");
     }
 }
+

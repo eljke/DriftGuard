@@ -4,14 +4,14 @@ import lombok.Builder;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 
 /**
- * Конфигурация binned хи-квадрат detector-а для drift-а распределения.
+ * Configuration for the binned chi-square distribution drift detector.
  *
- * @param baselineWindowSize число наблюдений в expected-распределении
- * @param currentWindowSize число последних наблюдений в observed-распределении
- * @param buckets число equal-width bucket-ов
- * @param warningPValue максимальный p-value, при котором создаётся warning event
- * @param criticalPValue максимальный p-value, при котором создаётся critical event
- * @param minExpectedCount bucket-ы с меньшим expected count игнорируются
+ * @param baselineWindowSize number of observations in the expected distribution
+ * @param currentWindowSize number of latest observations in the observed distribution
+ * @param buckets number of equal-width buckets
+ * @param warningPValue maximum p-value that produces a warning event
+ * @param criticalPValue maximum p-value that produces a critical event
+ * @param minExpectedCount buckets with lower expected count are ignored
  */
 @Builder(toBuilder = true)
 public record ChiSquareConfig(
@@ -44,3 +44,5 @@ public record ChiSquareConfig(
         return ALGORITHM;
     }
 }
+
+

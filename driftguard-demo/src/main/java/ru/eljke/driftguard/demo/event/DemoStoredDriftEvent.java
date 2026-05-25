@@ -5,12 +5,12 @@ import ru.eljke.driftguard.core.domain.DriftEvent;
 import java.time.Instant;
 
 /**
- * Drift event вместе с demo-specific метаданными хранения.
+ * English demo documentation.
  *
- * @param source источник события: synthetic, live или kafka
- * @param runId id конкретного demo-прогона
- * @param receivedAt время попадания события в demo-хранилище
- * @param event исходное событие DriftGuard
+ * @param source documented value
+ * @param runId documented value
+ * @param receivedAt documented value
+ * @param event documented value
  */
 public record DemoStoredDriftEvent(
         String source,
@@ -24,3 +24,4 @@ public record DemoStoredDriftEvent(
         receivedAt = receivedAt == null ? Instant.now() : receivedAt;
     }
 }
+

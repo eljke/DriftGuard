@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Результат проверки benchmark-отчёта через quality gate.
+ * English API documentation.
  *
- * @param benchmarkReport исходный benchmark-отчёт
- * @param gate применённый набор порогов
- * @param violations найденные нарушения
+ * @param benchmarkReport documented value
+ * @param gate documented value
+ * @param violations documented value
  */
 public record DetectionQualityReport(
         DetectionBenchmarkReport benchmarkReport,
@@ -33,3 +33,5 @@ public record DetectionQualityReport(
                 + String.join("\n", violations.stream().map(DetectionQualityViolation::describe).toList());
     }
 }
+
+

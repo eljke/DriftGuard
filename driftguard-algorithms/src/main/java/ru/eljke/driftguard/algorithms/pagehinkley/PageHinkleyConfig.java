@@ -5,14 +5,14 @@ import ru.eljke.driftguard.core.config.DetectorConfig;
 import ru.eljke.driftguard.core.domain.DriftDirection;
 
 /**
- * Конфигурация онлайн detector-а Page-Hinkley для обнаружения сдвига среднего.
+ * Configuration for the online Page-Hinkley mean-shift detector.
  *
- * @param warmupSamples число начальных точек, после которых разрешена генерация событий
- * @param delta допустимое малое изменение, вычитаемое из кумулятивной статистики
- * @param warningThreshold порог кумулятивной статистики для warning events
- * @param criticalThreshold порог кумулятивной статистики для critical events
- * @param alpha коэффициент обновления среднего; меньшие значения делают baseline медленнее
- * @param direction направление сдвига среднего, которое должен искать detector
+ * @param warmupSamples number of initial points before event generation is allowed
+ * @param delta allowed small change subtracted from the cumulative statistic
+ * @param warningThreshold cumulative statistic threshold for warning events
+ * @param criticalThreshold cumulative statistic threshold for critical events
+ * @param alpha mean update coefficient; lower values make the baseline slower
+ * @param direction mean-shift direction that the detector should search for
  */
 @Builder(toBuilder = true)
 public record PageHinkleyConfig(
@@ -59,3 +59,5 @@ public record PageHinkleyConfig(
         return ALGORITHM;
     }
 }
+
+

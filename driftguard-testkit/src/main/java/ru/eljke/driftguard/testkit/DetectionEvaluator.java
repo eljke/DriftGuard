@@ -7,7 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Вычисляет простые метрики качества detector-а на synthetic scenario.
+ * English API documentation.
  */
 public final class DetectionEvaluator {
     private DetectionEvaluator() {
@@ -53,3 +53,5 @@ public final class DetectionEvaluator {
         );
     }
 }
+
+

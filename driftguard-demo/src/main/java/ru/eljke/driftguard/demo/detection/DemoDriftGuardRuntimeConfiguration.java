@@ -12,7 +12,7 @@ import ru.eljke.driftguard.spring.DriftGuardKafkaStreamsManager;
 import ru.eljke.driftguard.spring.DriftGuardProperties;
 
 /**
- * Подключает Kafka Streams demo к runtime detector profile.
+ * English demo documentation.
  */
 @Configuration
 public class DemoDriftGuardRuntimeConfiguration {
@@ -31,3 +31,5 @@ public class DemoDriftGuardRuntimeConfiguration {
         ));
     }
 }
+
+

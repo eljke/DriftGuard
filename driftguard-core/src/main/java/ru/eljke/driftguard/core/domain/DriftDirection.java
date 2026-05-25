@@ -1,7 +1,7 @@
 package ru.eljke.driftguard.core.domain;
 
 /**
- * Направление или форма обнаруженного drift-а.
+ * Direction or shape of detected drift.
  */
 public enum DriftDirection {
     UP,
@@ -10,3 +10,4 @@ public enum DriftDirection {
     DISTRIBUTION,
     UNKNOWN
 }
+

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * Сценарий плавной деградации, например memory leak или рост queue backlog.
+ * English API documentation.
  */
 public final class GradualDriftScenario implements MetricScenario {
     private final String name;
@@ -56,3 +56,5 @@ public final class GradualDriftScenario implements MetricScenario {
         return List.of(new DriftInterval(start, end));
     }
 }
+
+

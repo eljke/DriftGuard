@@ -10,12 +10,12 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 /**
- * Compatibility-adapter поверх старых раздельных хранилищ.
+ * Compatibility adapter over the older split stores.
  *
- * <p>Новый код должен предпочитать {@link DetectorRuntimeStateStore}. Этот
- * адаптер нужен, чтобы существующие конструкторы и пользовательские
- * реализации {@link DetectorStateStore}/{@link EmissionStateStore} продолжили
- * работать без немедленной миграции.</p>
+ * <p>New code should prefer {@link DetectorRuntimeStateStore}. This
+ * adapter exists so existing constructors and user-provided
+ * implementations {@link DetectorStateStore}/{@link EmissionStateStore} continue to
+ * work without an immediate migration.</p>
  */
 public final class SplitDetectorRuntimeStateStore implements DetectorRuntimeStateStore {
     private final DetectorStateStore detectorStateStore;
@@ -62,3 +62,5 @@ public final class SplitDetectorRuntimeStateStore implements DetectorRuntimeStat
         }
     }
 }
+
+

@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 
 /**
- * Codec состояния хи-квадрат detector-а.
+ * Codec for chi-square detector state.
  */
 public final class ChiSquareStateCodec implements DetectorStateCodec<ChiSquareState> {
     @Override
@@ -52,3 +52,5 @@ public final class ChiSquareStateCodec implements DetectorStateCodec<ChiSquareSt
         }
     }
 }
+
+

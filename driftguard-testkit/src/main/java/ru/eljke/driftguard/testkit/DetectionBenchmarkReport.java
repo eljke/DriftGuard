@@ -3,11 +3,11 @@ package ru.eljke.driftguard.testkit;
 import java.util.List;
 
 /**
- * Итог benchmark-прогона набора synthetic scenarios.
+ * English API documentation.
  *
- * @param label человекочитаемая метка benchmark-а, например профиль detector-ов
- * @param results результаты по отдельным сценариям
- * @param summary агрегированные метрики качества
+ * @param label documented value
+ * @param results documented value
+ * @param summary documented value
  */
 public record DetectionBenchmarkReport(
         String label,
@@ -20,3 +20,5 @@ public record DetectionBenchmarkReport(
         summary = summary == null ? DetectionBenchmarkSummary.empty() : summary;
     }
 }
+
+

@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 
 /**
- * Настройки интеграционного demo-контура, в котором метрики проходят через
- * Kafka producer, Kafka Streams topology DriftGuard и Kafka consumer событий.
+ * English demo documentation.
+ * English demo documentation.
  */
 @Getter
 @Setter
@@ -17,40 +17,42 @@ import java.time.Duration;
 @ConfigurationProperties(prefix = "demo.kafka")
 public class DemoKafkaProperties {
     /**
-     * Включает REST endpoints Kafka demo. При выключении UI может продолжать
-     * показывать synthetic demo без обращения к Kafka.
+     * English demo documentation.
+     * English demo documentation.
      */
     private boolean enabled = true;
 
     /**
-     * Kafka bootstrap servers для producer, consumer, admin client и streams.
+     * English demo documentation.
      */
     private String bootstrapServers = "localhost:9092";
 
     /**
-     * Topic, куда demo producer публикует {@code MetricPoint}.
+     * English demo documentation.
      */
     private String inputTopic = "driftguard.demo.metrics";
 
     /**
-     * Topic, куда DriftGuard Kafka topology публикует {@code DriftEvent}.
+     * English demo documentation.
      */
     private String outputTopic = "driftguard.demo.drift-events";
 
     /**
-     * Базовый Kafka Streams application id. Для каждого запуска demo к нему
-     * добавляется номер run-а, чтобы состояние предыдущих прогонов не мешало
-     * текущей демонстрации.
+     * English demo documentation.
+     * English demo documentation.
+     * English demo documentation.
      */
     private String applicationId = "driftguard-demo-streams";
 
     /**
-     * Базовый consumer group id для чтения событий в demo UI.
+     * English demo documentation.
      */
     private String consumerGroup = "driftguard-demo-ui";
 
     /**
-     * Интервал публикации тестовых метрик producer-ом.
+     * English demo documentation.
      */
     private Duration playbackInterval = Duration.ofMillis(150);
 }
+
+

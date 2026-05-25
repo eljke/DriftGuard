@@ -8,7 +8,7 @@ import ru.eljke.driftguard.testkit.DriftInterval;
 import java.util.List;
 
 /**
- * Snapshot результата последнего demo-прогона.
+ * Snapshot of the latest demo run result.
  */
 public record DemoRunResult(
         String scenario,
@@ -23,3 +23,5 @@ public record DemoRunResult(
         DetectionMetrics quality
 ) {
 }
+
+

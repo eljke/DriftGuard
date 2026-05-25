@@ -6,22 +6,22 @@ import ru.eljke.driftguard.core.domain.MetricPoint;
 import java.util.List;
 
 /**
- * Снимок состояния интеграционного Kafka demo.
+ * English demo documentation.
  *
- * @param enabled включён ли Kafka demo режим в конфигурации
- * @param running выполняется ли сейчас producer playback
- * @param replay выполняется ли сценарий в replay-режиме
- * @param scenario id запущенного сценария
- * @param inputTopic topic входных метрик
- * @param outputTopic topic событий drift-а
- * @param speed множитель скорости публикации точек
+ * @param enabled documented value
+ * @param running documented value
+ * @param replay documented value
+ * @param scenario documented value
+ * @param inputTopic documented value
+ * @param outputTopic documented value
+ * @param speed documented value
  * @param bootstrapServers Kafka bootstrap servers
- * @param producedPoints сколько точек уже опубликовано producer-ом
- * @param totalPoints сколько точек должно быть опубликовано всего
- * @param producers состояние отдельных тестовых producer-ов
- * @param consumedEvents события drift-а, прочитанные из output topic-а
- * @param samplePoints точки, опубликованные в Kafka и отображаемые на графике
- * @param error последняя ошибка интеграционного режима, если она была
+ * @param producedPoints documented value
+ * @param totalPoints documented value
+ * @param producers documented value
+ * @param consumedEvents documented value
+ * @param samplePoints documented value
+ * @param error documented value
  */
 public record KafkaDemoStatus(
         boolean enabled,
@@ -40,3 +40,5 @@ public record KafkaDemoStatus(
         String error
 ) {
 }
+
+

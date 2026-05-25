@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
- * Factory Jackson mapper-а для Kafka JSON payload-ов DriftGuard.
+ * Factory for the Jackson mapper used by DriftGuard Kafka JSON payloads.
  */
 public final class DriftGuardObjectMapper {
     private DriftGuardObjectMapper() {
@@ -16,3 +16,5 @@ public final class DriftGuardObjectMapper {
                 .findAndRegisterModules();
     }
 }
+
+

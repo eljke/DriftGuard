@@ -6,11 +6,11 @@ import ru.eljke.driftguard.core.error.DriftGuardErrors;
 import java.util.Optional;
 
 /**
- * Результат обработки одной точки метрики одним экземпляром detector-а.
+ * English API documentation.
  *
- * @param state обновлённое состояние алгоритма, которое нужно сохранить даже без события
- * @param event необязательный drift event
- * @param <S> конкретный тип состояния detector-а
+ * @param state documented value
+ * @param event documented value
+ * English API documentation.
  */
 public record DetectionResult<S extends DetectorState>(
         S state,
@@ -32,3 +32,5 @@ public record DetectionResult<S extends DetectorState>(
         return Optional.ofNullable(event);
     }
 }
+
+

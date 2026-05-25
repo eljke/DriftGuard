@@ -3,7 +3,7 @@ package ru.eljke.driftguard.core.error;
 import java.util.Objects;
 
 /**
- * Внутренние helper-методы для единообразной валидации core-модели.
+ * Internal helper methods for consistent core-model validation.
  */
 public final class DriftGuardErrors {
     private DriftGuardErrors() {
@@ -35,3 +35,4 @@ public final class DriftGuardErrors {
         return new DriftGuardValidationException(Objects.requireNonNull(reason, "reason must not be null"), args);
     }
 }
+

@@ -9,7 +9,7 @@ import ru.eljke.driftguard.core.error.DriftGuardErrors;
 import ru.eljke.driftguard.core.state.DetectorRuntimeStateSnapshot;
 
 /**
- * Factory Kafka Streams state store-ов, которые использует DriftGuard.
+ * Factory for Kafka Streams state stores used by DriftGuard.
  */
 public final class KafkaDriftGuardStateStores {
     public static final String DEFAULT_RUNTIME_STATE_STORE = "driftguard-runtime-state";
@@ -36,3 +36,5 @@ public final class KafkaDriftGuardStateStores {
         );
     }
 }
+
+

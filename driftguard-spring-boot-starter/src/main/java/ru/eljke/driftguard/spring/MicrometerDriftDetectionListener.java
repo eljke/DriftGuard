@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Micrometer listener для базовых метрик detection pipeline.
+ * Micrometer listener for basic detection pipeline metrics.
  */
 public final class MicrometerDriftDetectionListener implements DriftDetectionListener {
     private final MeterRegistry registry;
@@ -25,14 +25,14 @@ public final class MicrometerDriftDetectionListener implements DriftDetectionLis
     public void onDetectionCompleted(MetricPoint point, List<DriftEvent> events, long durationNanos) {
         MetricKey key = point.key();
         Counter.builder("driftguard.detection.points")
-                .description("Количество обработанных MetricPoint")
+                .description("Number of processed MetricPoint objects")
                 .tag("service", tag(key.service()))
                 .tag("metric", tag(key.metric()))
                 .register(registry)
                 .increment();
 
         Timer.builder("driftguard.detection.duration")
-                .description("Длительность обработки одной MetricPoint")
+                .description("Processing duration of one MetricPoint")
                 .tag("service", tag(key.service()))
                 .tag("metric", tag(key.metric()))
                 .register(registry)
@@ -40,7 +40,7 @@ public final class MicrometerDriftDetectionListener implements DriftDetectionLis
 
         for (DriftEvent event : events) {
             Counter.builder("driftguard.detection.events")
-                    .description("Количество опубликованных DriftEvent")
+                    .description("Number of published DriftEvent objects")
                     .tag("service", tag(event.key().service()))
                     .tag("metric", tag(event.key().metric()))
                     .tag("detector", tag(event.detector()))
@@ -56,7 +56,7 @@ public final class MicrometerDriftDetectionListener implements DriftDetectionLis
     public void onDetectionFailed(MetricPoint point, RuntimeException exception, long durationNanos) {
         MetricKey key = point.key();
         Counter.builder("driftguard.detection.errors")
-                .description("Количество ошибок detection pipeline")
+                .description("Number of detection pipeline errors")
                 .tag("service", tag(key.service()))
                 .tag("metric", tag(key.metric()))
                 .tag("exception", tag(exception.getClass().getSimpleName()))
@@ -64,7 +64,7 @@ public final class MicrometerDriftDetectionListener implements DriftDetectionLis
                 .increment();
 
         Timer.builder("driftguard.detection.duration")
-                .description("Длительность обработки одной MetricPoint")
+                .description("Processing duration of one MetricPoint")
                 .tag("service", tag(key.service()))
                 .tag("metric", tag(key.metric()))
                 .tag("outcome", "error")
@@ -76,3 +76,5 @@ public final class MicrometerDriftDetectionListener implements DriftDetectionLis
         return value == null || value.isBlank() ? "unknown" : value;
     }
 }
+
+

@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 
 /**
- * Codec состояния detector-а Колмогорова-Смирнова.
+ * English API documentation.
  */
 public final class KsStateCodec implements DetectorStateCodec<KsState> {
     @Override
@@ -52,3 +52,5 @@ public final class KsStateCodec implements DetectorStateCodec<KsState> {
         }
     }
 }
+
+

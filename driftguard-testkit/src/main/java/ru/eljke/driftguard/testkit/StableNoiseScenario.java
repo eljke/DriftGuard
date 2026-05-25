@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * Стабильный поток с шумом. Используется для проверки false positive rate.
+ * English API documentation.
  */
 public final class StableNoiseScenario implements MetricScenario {
     private final String name;
@@ -46,3 +46,5 @@ public final class StableNoiseScenario implements MetricScenario {
         return List.of();
     }
 }
+
+

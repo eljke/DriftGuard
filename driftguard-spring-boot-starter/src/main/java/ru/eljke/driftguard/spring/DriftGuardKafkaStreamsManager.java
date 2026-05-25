@@ -11,12 +11,12 @@ import java.util.Properties;
 import java.util.function.Supplier;
 
 /**
- * Управляет жизненным циклом Kafka Streams topology DriftGuard внутри Spring
- * приложения.
+ * Manages the DriftGuard Kafka Streams topology lifecycle inside a Spring
+ * application.
  *
- * <p>Класс создаёт {@link KafkaStreams} лениво при {@link #start()}, чтобы
- * Spring context мог загружаться даже в тестах, где auto-start отключён. При
- * остановке context-а streams закрывается через штатный {@code close()}.</p>
+ * English API documentation.
+ * the Spring context can load even in tests where auto-start is disabled. On
+ * context shutdown, streams are closed through the standard {@code close()}.</p>
  */
 public class DriftGuardKafkaStreamsManager implements SmartLifecycle {
     private final DriftGuardProperties.KafkaProperties properties;
@@ -94,3 +94,5 @@ public class DriftGuardKafkaStreamsManager implements SmartLifecycle {
         }
     }
 }
+
+

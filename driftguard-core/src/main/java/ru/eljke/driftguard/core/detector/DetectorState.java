@@ -1,15 +1,17 @@
 package ru.eljke.driftguard.core.detector;
 
 /**
- * Snapshot состояния, принадлежащий алгоритму.
+ * State snapshot owned by an algorithm.
  *
- * <p>Core считает состояние detector-а opaque-объектом. Kafka-, Spring- или
- * file-based adapter-ы могут сериализовать реализации по-разному, но должны
- * сохранять значение {@link #algorithm()} для проверок совместимости.</p>
+ * <p>Core treats detector state as an opaque object. Kafka-, Spring- or
+ * file-based adapters can serialize implementations differently, but must
+ * preserve the value of {@link #algorithm()} for compatibility checks.</p>
  */
 public interface DetectorState {
     /**
-     * Имя алгоритма, который создал это состояние.
+     * Algorithm name that created this state.
      */
     String algorithm();
 }
+
+

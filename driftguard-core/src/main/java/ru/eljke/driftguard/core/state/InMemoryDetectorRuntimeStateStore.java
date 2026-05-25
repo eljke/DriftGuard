@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 /**
- * Потокобезопасное in-memory хранилище полного runtime state.
+ * Thread-safe in-memory store for full runtime state.
  */
 public final class InMemoryDetectorRuntimeStateStore implements DetectorRuntimeStateStore {
     private final Map<DetectorInstanceKey, DetectorRuntimeState> states = new ConcurrentHashMap<>();
@@ -40,3 +40,4 @@ public final class InMemoryDetectorRuntimeStateStore implements DetectorRuntimeS
         });
     }
 }
+

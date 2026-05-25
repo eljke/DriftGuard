@@ -6,11 +6,11 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Хранилище drift events для demo-приложения.
+ * English demo documentation.
  *
- * <p>Это не часть core-библиотеки. Demo использует этот слой, чтобы UI мог
- * показывать последние события независимо от конкретного источника:
- * synthetic run, live playback или Kafka demo.</p>
+ * English demo documentation.
+ * English demo documentation.
+ * synthetic run, live playback or Kafka demo.</p>
  */
 public interface DemoDriftEventRepository {
     void append(String source, String runId, DriftEvent event);
@@ -28,3 +28,5 @@ public interface DemoDriftEventRepository {
 
     void clear();
 }
+
+

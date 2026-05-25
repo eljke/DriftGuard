@@ -3,18 +3,18 @@ package ru.eljke.driftguard.demo.kafka;
 import ru.eljke.driftguard.demo.scenario.DemoScenarioRequest;
 
 /**
- * Запрос на воспроизводимый replay synthetic-сценария через Kafka.
+ * English demo documentation.
  *
- * @param scenario id synthetic-сценария
- * @param speed множитель скорости публикации точек
- * @param resetState нужно ли сбросить runtime detector state перед replay
- * @param profile detector profile, который нужно применить перед replay
- * @param samples сколько MetricPoint опубликовать на один producer stream
- * @param baselineValue стабильное значение до drift-а
- * @param driftValue значение во время step/drop/spike drift-а
- * @param noiseStdDev стандартное отклонение шума
- * @param driftStartPercent позиция начала drift-а в процентах длины потока
- * @param spikeLengthPercent длительность spike-а в процентах длины потока
+ * @param scenario documented value
+ * @param speed documented value
+ * @param resetState documented value
+ * @param profile documented value
+ * @param samples documented value
+ * @param baselineValue stable value before drift
+ * @param driftValue value during step/drop/spike drift
+ * @param noiseStdDev noise standard deviation
+ * @param driftStartPercent drift start position as a percentage of stream length
+ * @param spikeLengthPercent spike duration as a percentage of stream length
  */
 public record KafkaReplayRequest(
         String scenario,
@@ -52,3 +52,5 @@ public record KafkaReplayRequest(
         );
     }
 }
+
+

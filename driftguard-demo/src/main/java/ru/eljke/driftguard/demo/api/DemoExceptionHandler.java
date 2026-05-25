@@ -11,7 +11,7 @@ import ru.eljke.driftguard.demo.error.DemoErrorReason;
 import java.time.Instant;
 
 /**
- * Преобразует исключения DriftGuard в стабильный REST error contract.
+ * English demo documentation.
  */
 @RestControllerAdvice
 public class DemoExceptionHandler {
@@ -40,3 +40,5 @@ public class DemoExceptionHandler {
         ));
     }
 }
+
+

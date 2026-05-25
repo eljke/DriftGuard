@@ -3,10 +3,10 @@ package ru.eljke.driftguard.core.config;
 import ru.eljke.driftguard.core.error.DriftGuardErrors;
 
 /**
- * Общая пара порогов warning/critical для алгоритмов со скалярным score.
+ * Shared warning/critical threshold pair for algorithms with a scalar score.
  *
- * @param warning score, начиная с которого drift event получает уровень warning
- * @param critical score, начиная с которого drift event получает уровень critical
+ * @param warning score, score from which a drift event receives warning severity
+ * @param critical score, score from which a drift event receives critical severity
  */
 public record ThresholdConfig(
         double warning,
@@ -17,3 +17,4 @@ public record ThresholdConfig(
         DriftGuardErrors.require(Double.isFinite(critical) && critical >= warning, "critical threshold must be finite and greater than or equal to warning");
     }
 }
+

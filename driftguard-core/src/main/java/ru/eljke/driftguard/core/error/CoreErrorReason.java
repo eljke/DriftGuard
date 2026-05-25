@@ -1,7 +1,7 @@
 package ru.eljke.driftguard.core.error;
 
 /**
- * Причины ошибок core-модуля.
+ * Core module error reasons.
  */
 public enum CoreErrorReason implements ErrorReason {
     REQUIRED_VALUE_MISSING("DG-CORE-001", "{} must not be null"),
@@ -30,3 +30,4 @@ public enum CoreErrorReason implements ErrorReason {
         return description;
     }
 }
+

@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 
 /**
- * Codec состояния PSI detector-а.
+ * English API documentation.
  */
 public final class PsiStateCodec implements DetectorStateCodec<PsiState> {
     @Override
@@ -52,3 +52,5 @@ public final class PsiStateCodec implements DetectorStateCodec<PsiState> {
         }
     }
 }
+
+

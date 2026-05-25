@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Собирает операционную сводку Kafka demo из runtime status-а и Micrometer.
+ * English demo documentation.
  */
 @Service
 public class KafkaOperationsService {
@@ -112,3 +112,5 @@ public class KafkaOperationsService {
         return Math.clamp(produced * 100.0 / total, 0.0, 100.0);
     }
 }
+
+

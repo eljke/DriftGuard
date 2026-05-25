@@ -36,7 +36,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/demo")
-@Tag(name = "Demo", description = "REST API демонстрационного сценария DriftGuard")
+@Tag(name = "Demo", description = "DriftGuard demo REST API")
 public class DemoController {
     private final DemoCapabilityService capabilityService;
     private final DemoScenarioService service;
@@ -65,62 +65,62 @@ public class DemoController {
     }
 
     @GetMapping
-    @Operation(summary = "Возвращает последний результат демонстрационного запуска")
+    @Operation(summary = "DriftGuard demo endpoint")
     public DemoRunResult overview() {
         return service.lastResult();
     }
 
     @GetMapping("/events")
-    @Operation(summary = "Возвращает события дрейфа из последнего запуска")
+    @Operation(summary = "DriftGuard demo endpoint")
     public List<DriftEvent> events() {
         return eventRepository.recentEvents(200);
     }
 
     @GetMapping("/events/stored")
-    @Operation(summary = "Возвращает последние сохранённые события drift-а с demo metadata")
+    @Operation(summary = "DriftGuard demo endpoint")
     public List<DemoStoredDriftEvent> storedEvents() {
         return eventRepository.recent(200);
     }
 
     @PostMapping("/events/clear")
-    @Operation(summary = "Очищает demo-хранилище сохранённых drift events")
+    @Operation(summary = "DriftGuard demo endpoint")
     public Map<String, Object> clearStoredEvents() {
         eventRepository.clear();
         return Map.of("cleared", true);
     }
 
     @GetMapping("/quality")
-    @Operation(summary = "Возвращает оценку качества детекции из последнего запуска")
+    @Operation(summary = "DriftGuard demo endpoint")
     public Object quality() {
         return service.lastResult().quality();
     }
 
     @GetMapping("/benchmark")
-    @Operation(summary = "Запускает benchmark всех synthetic scenarios на текущем detector profile")
+    @Operation(summary = "DriftGuard demo endpoint")
     public DetectionBenchmarkReport benchmark() {
         return service.benchmark();
     }
 
     @GetMapping("/benchmark/profiles")
-    @Operation(summary = "Сравнивает synthetic benchmark для всех runtime detector profile")
+    @Operation(summary = "DriftGuard demo endpoint")
     public List<DetectionBenchmarkReport> benchmarkProfiles() {
         return service.benchmarkProfiles();
     }
 
     @GetMapping("/scenarios")
-    @Operation(summary = "Возвращает доступные демонстрационные сценарии")
+    @Operation(summary = "DriftGuard demo endpoint")
     public List<DemoScenarioDescriptor> scenarios() {
         return service.scenarios();
     }
 
     @PostMapping("/run")
-    @Operation(summary = "Перезапускает демонстрационный сценарий деградации latency")
+    @Operation(summary = "DriftGuard demo endpoint")
     public DemoRunResult rerun() {
         return service.runLatencyDegradation();
     }
 
     @PostMapping("/run/{scenario}")
-    @Operation(summary = "Запускает выбранный демонстрационный сценарий")
+    @Operation(summary = "DriftGuard demo endpoint")
     public DemoRunResult runScenario(
             @PathVariable("scenario") String scenario,
             @RequestBody(required = false) DemoScenarioRequest request
@@ -129,7 +129,7 @@ public class DemoController {
     }
 
     @PostMapping("/live/{scenario}")
-    @Operation(summary = "Запускает live playback выбранного сценария")
+    @Operation(summary = "DriftGuard demo endpoint")
     public DemoRunResult startLiveScenario(
             @PathVariable("scenario") String scenario,
             @RequestBody(required = false) DemoScenarioRequest request
@@ -138,26 +138,26 @@ public class DemoController {
     }
 
     @PostMapping("/live/stop")
-    @Operation(summary = "Останавливает live playback")
+    @Operation(summary = "DriftGuard demo endpoint")
     public DemoRunResult stopLiveScenario() {
         service.stopLive();
         return service.lastResult();
     }
 
     @GetMapping("/kafka")
-    @Operation(summary = "Возвращает состояние интеграционного Kafka demo")
+    @Operation(summary = "DriftGuard demo endpoint")
     public KafkaDemoStatus kafkaStatus() {
         return kafkaDemoService.status();
     }
 
     @GetMapping("/kafka/operations")
-    @Operation(summary = "Возвращает operational-сводку Kafka topology и demo playback")
+    @Operation(summary = "DriftGuard demo endpoint")
     public KafkaOperationsSnapshot kafkaOperations() {
         return kafkaOperationsService.snapshot();
     }
 
     @PostMapping("/kafka/start/{scenario}")
-    @Operation(summary = "Запускает Kafka producer, Kafka Streams topology и consumer событий")
+    @Operation(summary = "DriftGuard demo endpoint")
     public KafkaDemoStatus startKafkaScenario(
             @PathVariable("scenario") String scenario,
             @RequestBody(required = false) DemoScenarioRequest request
@@ -166,42 +166,42 @@ public class DemoController {
     }
 
     @PostMapping("/kafka/replay")
-    @Operation(summary = "Переигрывает Kafka demo scenario с выбранной скоростью и сбросом detector state")
+    @Operation(summary = "DriftGuard demo endpoint")
     public KafkaDemoStatus replayKafkaScenario(@RequestBody(required = false) KafkaReplayRequest request) {
         return kafkaDemoService.replay(request);
     }
 
     @PostMapping("/kafka/stop")
-    @Operation(summary = "Останавливает интеграционный Kafka demo")
+    @Operation(summary = "DriftGuard demo endpoint")
     public KafkaDemoStatus stopKafkaScenario() {
         return kafkaDemoService.stop();
     }
 
     @GetMapping("/capabilities")
-    @Operation(summary = "Возвращает карту возможностей demo UI и backend API")
+    @Operation(summary = "DriftGuard demo endpoint")
     public List<DemoCapabilityGroup> capabilities() {
         return capabilityService.capabilities();
     }
 
     @GetMapping("/tools")
-    @Operation(summary = "Возвращает ссылки на инструменты локального demo-стенда")
+    @Operation(summary = "DriftGuard demo endpoint")
     public List<ToolLink> tools() {
         return List.of(
-                new ToolLink("kafka-ui", "Kafka UI", toolProperties.getKafkaUiUrl(), "Topic-и, consumer groups и сообщения Kafka."),
-                new ToolLink("prometheus", "Prometheus", toolProperties.getPrometheusUrl(), "Scrape target-ы и raw metrics DriftGuard."),
-                new ToolLink("grafana", "Grafana", toolProperties.getGrafanaUrl(), "Dashboard для метрик DriftGuard."),
-                new ToolLink("swagger", "Swagger", toolProperties.getSwaggerUrl(), "REST API demo-приложения.")
+                new ToolLink("kafka-ui", "Kafka UI", toolProperties.getKafkaUiUrl(), "English demo text."),
+                new ToolLink("prometheus", "Prometheus", toolProperties.getPrometheusUrl(), "English demo text."),
+                new ToolLink("grafana", "Grafana", toolProperties.getGrafanaUrl(), "English demo text."),
+                new ToolLink("swagger", "Swagger", toolProperties.getSwaggerUrl(), "REST API demo-application.")
         );
     }
 
     @GetMapping("/configuration")
-    @Operation(summary = "Возвращает runtime-конфигурацию demo и DriftGuard detector-ов")
+    @Operation(summary = "DriftGuard demo endpoint")
     public DemoConfigurationView configuration() {
         return configurationService.current();
     }
 
     @PostMapping("/configuration/profile/{profile}")
-    @Operation(summary = "Меняет runtime-профиль чувствительности detector-ов")
+    @Operation(summary = "DriftGuard demo endpoint")
     public DemoConfigurationView updateProfile(@PathVariable("profile") String profile) {
         try {
             return configurationService.updateProfile(DemoDetectorProfile.parse(profile));
@@ -211,7 +211,7 @@ public class DemoController {
     }
 
     @GetMapping("/help")
-    @Operation(summary = "Возвращает краткий список доступных demo endpoint-ов")
+    @Operation(summary = "DriftGuard demo endpoint")
     public Map<String, String> help() {
         return Map.ofEntries(
                 Map.entry("overview", "GET /api/demo"),
@@ -238,3 +238,5 @@ public class DemoController {
         );
     }
 }
+
+

@@ -6,16 +6,16 @@ import ru.eljke.driftguard.core.error.DriftGuardErrors;
 import java.util.Optional;
 
 /**
- * Стабильная идентичность потока метрик, который обрабатывает DriftGuard.
+ * Stable identity of a metric stream processed by DriftGuard.
  *
- * <p>Ключ намеренно небольшой и не зависит от транспорта. Наиболее частые
- * измерения вынесены в отдельные поля, а менее универсальные измерения следует
- * передавать через {@link MetricPoint#tags()}.</p>
+ * <p>The key is intentionally small and transport-independent. The most common
+ * dimensions are separate fields; less universal dimensions should be
+ * passed through {@link MetricPoint#tags()}.</p>
  *
- * @param service сервис или подсистема, которая сгенерировала метрику
- * @param metric имя метрики, например {@code latency}, {@code error_rate} или {@code cpu_usage}
- * @param instance необязательный id экземпляра сервиса, pod-а, node-а или host-а
- * @param operation необязательное имя операции, endpoint-а, job-а или consumer group
+ * @param service service or subsystem that generated the metric
+ * @param metric metric name, for example {@code latency}, {@code error_rate} or {@code cpu_usage}
+ * @param instance optional id of a service instance, pod, node or host
+ * @param operation optional operation, endpoint, job or consumer group name
  */
 @Builder(toBuilder = true)
 public record MetricKey(
@@ -54,3 +54,5 @@ public record MetricKey(
         return value.trim();
     }
 }
+
+

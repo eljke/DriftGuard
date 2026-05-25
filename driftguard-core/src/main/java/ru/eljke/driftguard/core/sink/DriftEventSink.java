@@ -3,18 +3,19 @@ package ru.eljke.driftguard.core.sink;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 
 /**
- * Точка расширения для доставки опубликованных drift events во внешние системы.
+ * Extension point for delivering published drift events to external systems.
  *
- * <p>Core не знает о Kafka, JDBC, HTTP, logs или UI. Пользователь может
- * реализовать sink и подключить его через Spring bean или напрямую через
+ * <p>Core does not depend on Kafka, JDBC, HTTP, logs or UI. A user can
+ * implement a sink and connect it through a Spring bean or directly through
  * {@code DriftEventSinkListener}.</p>
  */
 @FunctionalInterface
 public interface DriftEventSink {
     /**
-     * Принимает одно опубликованное событие drift-а.
+     * Accepts one published drift event.
      *
-     * @param event событие, прошедшее emission policy
+     * @param event event that passed the emission policy
      */
     void accept(DriftEvent event);
 }
+

@@ -1,10 +1,11 @@
 package ru.eljke.driftguard.core.domain;
 
 /**
- * Укрупнённый уровень важности, который detector назначает по настроенным порогам.
+ * Coarse severity level assigned by a detector from configured thresholds.
  */
 public enum DriftSeverity {
     INFO,
     WARNING,
     CRITICAL
 }
+

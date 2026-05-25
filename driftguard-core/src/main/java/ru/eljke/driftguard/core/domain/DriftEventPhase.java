@@ -1,10 +1,11 @@
 package ru.eljke.driftguard.core.domain;
 
 /**
- * Фаза жизненного цикла drift episode.
+ * Lifecycle phase of a drift episode.
  */
 public enum DriftEventPhase {
     STARTED,
     ONGOING,
     RECOVERED
 }
+

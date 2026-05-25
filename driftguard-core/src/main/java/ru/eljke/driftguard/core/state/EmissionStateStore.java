@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.function.UnaryOperator;
 
 /**
- * Хранилище состояния emission-политик.
+ * Store for emission policy state.
  */
 public interface EmissionStateStore {
     Optional<EmissionState> get(DetectorInstanceKey key);
@@ -16,7 +16,7 @@ public interface EmissionStateStore {
     void put(DetectorInstanceKey key, EmissionState state);
 
     /**
-     * Атомарно читает, изменяет и сохраняет состояние emission-политики.
+     * Atomically reads, modifies and saves emission policy state.
      */
     default EmissionState update(DetectorInstanceKey key, UnaryOperator<EmissionState> transition) {
         DriftGuardErrors.requireNonNull(key, "key");
@@ -29,3 +29,4 @@ public interface EmissionStateStore {
         }
     }
 }
+

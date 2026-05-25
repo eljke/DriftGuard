@@ -3,7 +3,7 @@ package ru.eljke.driftguard.algorithms.pagehinkley;
 import ru.eljke.driftguard.core.detector.DetectorState;
 
 /**
- * Состояние detector-а Page-Hinkley для одного потока метрик.
+ * Page-Hinkley detector state for one metric stream.
  */
 public record PageHinkleyState(
         long count,
@@ -16,3 +16,5 @@ public record PageHinkleyState(
         return PageHinkleyConfig.ALGORITHM;
     }
 }
+
+

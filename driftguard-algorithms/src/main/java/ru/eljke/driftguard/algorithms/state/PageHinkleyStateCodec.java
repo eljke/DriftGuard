@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 
 /**
- * Codec состояния Page-Hinkley detector-а.
+ * Codec for Page-Hinkley detector state.
  */
 public final class PageHinkleyStateCodec implements DetectorStateCodec<PageHinkleyState> {
     @Override
@@ -56,3 +56,5 @@ public final class PageHinkleyStateCodec implements DetectorStateCodec<PageHinkl
         }
     }
 }
+
+

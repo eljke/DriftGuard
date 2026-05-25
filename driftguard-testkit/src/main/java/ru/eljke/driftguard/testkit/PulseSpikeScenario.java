@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * Кратковременный spike метрики, например всплеск error rate после deploy-а.
+ * English API documentation.
  */
 public final class PulseSpikeScenario implements MetricScenario {
     private final String name;
@@ -70,3 +70,5 @@ public final class PulseSpikeScenario implements MetricScenario {
         return List.of(new DriftInterval(start, end));
     }
 }
+
+

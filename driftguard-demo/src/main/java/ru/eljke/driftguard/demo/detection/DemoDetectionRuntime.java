@@ -17,8 +17,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Runtime-обёртка над {@link DriftDetectorEngine}, позволяющая demo UI менять
- * профиль чувствительности без перезапуска Spring Boot приложения.
+ * English demo documentation.
+ * English demo documentation.
  */
 @Service
 public class DemoDetectionRuntime {
@@ -185,3 +185,5 @@ public class DemoDetectionRuntime {
         }
     }
 }
+
+

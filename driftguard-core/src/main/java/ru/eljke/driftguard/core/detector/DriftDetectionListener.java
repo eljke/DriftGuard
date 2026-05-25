@@ -6,29 +6,29 @@ import ru.eljke.driftguard.core.domain.MetricPoint;
 import java.util.List;
 
 /**
- * Listener жизненного цикла detection-а.
+ * Detection lifecycle listener.
  *
- * <p>Core не зависит от Micrometer, logs или Spring. Внешние модули могут
- * подключать listener-ы для метрик, аудита или отладки, не меняя алгоритмы и
- * транспортно-независимую логику engine.</p>
+ * <p>Core does not depend on Micrometer, logs or Spring. External modules can
+ * connect listeners for metrics, audit or debugging without changing algorithms or
+ * transport-independent engine logic.</p>
  */
 public interface DriftDetectionListener {
     /**
-     * Вызывается после успешной обработки одной точки метрики.
+     * Called after one metric point is processed successfully.
      *
-     * @param point обработанная точка метрики
-     * @param events опубликованные drift events
-     * @param durationNanos длительность обработки в наносекундах
+     * @param point processed metric point
+     * @param events published drift events
+     * @param durationNanos processing duration in nanoseconds
      */
     default void onDetectionCompleted(MetricPoint point, List<DriftEvent> events, long durationNanos) {
     }
 
     /**
-     * Вызывается, если detection завершился ошибкой.
+     * Called when detection fails.
      *
-     * @param point точка метрики, на которой произошла ошибка
-     * @param exception исходная ошибка detection pipeline
-     * @param durationNanos длительность обработки до ошибки в наносекундах
+     * @param point metric point that caused the failure
+     * @param exception original detection pipeline error
+     * @param durationNanos processing duration before the failure, in nanoseconds
      */
     default void onDetectionFailed(MetricPoint point, RuntimeException exception, long durationNanos) {
     }

@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 
 /**
- * Общий helper для единообразного создания drift events из кода алгоритмов.
+ * Shared helper for consistently creating drift events from algorithm code.
  */
 public final class DriftEvents {
     private DriftEvents() {
@@ -75,3 +75,5 @@ public final class DriftEvents {
         return score >= criticalThreshold ? DriftSeverity.CRITICAL : DriftSeverity.WARNING;
     }
 }
+
+

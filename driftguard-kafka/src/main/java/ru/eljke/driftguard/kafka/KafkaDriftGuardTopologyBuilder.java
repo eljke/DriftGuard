@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * Builder Kafka Streams topology для потоковой обработки метрик DriftGuard.
+ * Kafka Streams topology builder for streaming DriftGuard metric processing.
  */
 public final class KafkaDriftGuardTopologyBuilder {
     private final ObjectMapper objectMapper;
@@ -96,3 +96,5 @@ public final class KafkaDriftGuardTopologyBuilder {
         return events == null ? List.of() : events;
     }
 }
+
+

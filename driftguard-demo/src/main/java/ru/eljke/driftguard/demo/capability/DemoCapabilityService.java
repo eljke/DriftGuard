@@ -19,12 +19,12 @@ public class DemoCapabilityService {
         return new DemoCapabilityGroup(
                 "detection-engine",
                 "Detection engine",
-                "Сценарии, live playback, detector lifecycle и сохранённые drift events.",
+                "English demo text.",
                 List.of(
                         ready(
                                 "synthetic-scenarios",
                                 "Synthetic scenarios",
-                                "Запуск предсказуемых потоков latency, error-rate, throughput и queue-size.",
+                                "English demo text.",
                                 "engine",
                                 List.of("GET /api/demo/scenarios", "POST /api/demo/run/{scenario}"),
                                 List.of("Synthetic", "Overview")
@@ -32,7 +32,7 @@ public class DemoCapabilityService {
                         ready(
                                 "live-playback",
                                 "Live playback",
-                                "Потоковая обработка точек без Kafka для быстрой проверки detector profile.",
+                                "English demo text.",
                                 "engine",
                                 List.of("POST /api/demo/live/{scenario}", "POST /api/demo/live/stop"),
                                 List.of("Synthetic")
@@ -40,7 +40,7 @@ public class DemoCapabilityService {
                         partial(
                                 "event-lifecycle",
                                 "Event lifecycle",
-                                "UI показывает STARTED/ONGOING/RECOVERED, но сценарии recovery ещё стоит расширить.",
+                                "English demo text.",
                                 "engine",
                                 List.of("GET /api/demo/events", "GET /api/demo/events/stored"),
                                 List.of("Kafka Demo", "Synthetic", "Overview")
@@ -48,7 +48,7 @@ public class DemoCapabilityService {
                         ready(
                                 "stored-events",
                                 "Stored drift events",
-                                "Общий recent-stream событий из synthetic, live и Kafka demo.",
+                                "English demo text.",
                                 "engine",
                                 List.of("GET /api/demo/events/stored", "POST /api/demo/events/clear"),
                                 List.of("Overview")
@@ -61,12 +61,12 @@ public class DemoCapabilityService {
         return new DemoCapabilityGroup(
                 "kafka-operations",
                 "Kafka operations",
-                "Kafka replay, stateful processing, runtime status и operational telemetry.",
+                "English demo text.",
                 List.of(
                         ready(
                                 "kafka-scenario-replay",
                                 "Kafka scenario replay",
-                                "Переигрывание synthetic scenario через Kafka с выбором скорости и detector profile.",
+                                "English demo text.",
                                 "kafka",
                                 List.of("POST /api/demo/kafka/start/{scenario}", "POST /api/demo/kafka/replay", "POST /api/demo/kafka/stop"),
                                 List.of("Kafka Demo")
@@ -74,7 +74,7 @@ public class DemoCapabilityService {
                         partial(
                                 "stateful-kafka-processing",
                                 "Stateful Kafka processing",
-                                "Runtime state store подключён, но отдельный restart/recovery экран ещё не выделен.",
+                                "English demo text.",
                                 "kafka",
                                 List.of("GET /api/demo/kafka", "GET /api/demo/kafka/operations"),
                                 List.of("Kafka Demo")
@@ -82,7 +82,7 @@ public class DemoCapabilityService {
                         ready(
                                 "kafka-operations-telemetry",
                                 "Operations telemetry",
-                                "Панель показывает processed/events/errors/latency и параметры topology.",
+                                "English demo text.",
                                 "kafka",
                                 List.of("GET /api/demo/kafka/operations"),
                                 List.of("Kafka Demo")
@@ -90,7 +90,7 @@ public class DemoCapabilityService {
                         planned(
                                 "kafka-error-records",
                                 "Kafka error records",
-                                "Счётчики ошибок есть, но просмотр payload-ов error topic ещё не выведен в UI.",
+                                "English demo text.",
                                 "kafka",
                                 List.of("GET /api/demo/kafka/operations"),
                                 List.of("Kafka Demo")
@@ -103,12 +103,12 @@ public class DemoCapabilityService {
         return new DemoCapabilityGroup(
                 "quality-and-profiles",
                 "Quality and profiles",
-                "Benchmark-и, runtime profiles и сравнение чувствительности detector-ов.",
+                "English demo text.",
                 List.of(
                         ready(
                                 "benchmark",
                                 "Benchmark report",
-                                "Precision, recall, false positives, missed intervals и latency-to-detect.",
+                                "English demo text.",
                                 "quality",
                                 List.of("GET /api/demo/benchmark"),
                                 List.of("Synthetic")
@@ -116,7 +116,7 @@ public class DemoCapabilityService {
                         ready(
                                 "profile-comparison",
                                 "Profile comparison",
-                                "Сравнение conservative/balanced/aggressive профилей на одинаковых сценариях.",
+                                "English demo text.",
                                 "quality",
                                 List.of("GET /api/demo/benchmark/profiles", "POST /api/demo/configuration/profile/{profile}"),
                                 List.of("Synthetic", "Configuration")
@@ -124,7 +124,7 @@ public class DemoCapabilityService {
                         partial(
                                 "quality-gates",
                                 "Quality gates",
-                                "Testkit поддерживает gates, но UI пока показывает только benchmark summary.",
+                                "English demo text.",
                                 "quality",
                                 List.of("GET /api/demo/benchmark", "GET /api/demo/benchmark/profiles"),
                                 List.of("Synthetic")
@@ -137,12 +137,12 @@ public class DemoCapabilityService {
         return new DemoCapabilityGroup(
                 "observability-and-tooling",
                 "Observability and tooling",
-                "Конфигурация, OpenAPI, Kafka UI, Actuator и вспомогательные инструменты demo-стенда.",
+                "English demo text.",
                 List.of(
                         ready(
                                 "configuration-view",
                                 "Configuration view",
-                                "Показывает detector definitions, Kafka properties и зарегистрированные алгоритмы.",
+                                "English demo text.",
                                 "configuration",
                                 List.of("GET /api/demo/configuration"),
                                 List.of("Configuration")
@@ -150,7 +150,7 @@ public class DemoCapabilityService {
                         ready(
                                 "tool-links",
                                 "Tool links",
-                                "Быстрый переход к Swagger, Actuator, Kafka UI и другим локальным инструментам.",
+                                "English demo text.",
                                 "tools",
                                 List.of("GET /api/demo/tools"),
                                 List.of("Tools")
@@ -158,7 +158,7 @@ public class DemoCapabilityService {
                         ready(
                                 "capability-map",
                                 "Capability map",
-                                "Показывает, какие возможности backend уже раскрыты в UI, а где остаются gaps.",
+                                "English demo text.",
                                 "tools",
                                 List.of("GET /api/demo/capabilities"),
                                 List.of("Overview")
@@ -221,3 +221,5 @@ public class DemoCapabilityService {
         );
     }
 }
+
+

@@ -19,12 +19,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Transport-agnostic оркестратор обнаружения drift-а в метриках.
+ * Transport-agnostic orchestrator for drift detection in metrics.
  *
- * <p>Engine не владеет потоками исполнения и не открывает сетевых соединений.
- * Он применяет настроенные detector definitions к входящим {@link MetricPoint},
- * находит алгоритмы через {@link DetectorRegistry}, читает и сохраняет
- * состояние через {@link DetectorStateStore}, а затем возвращает созданные
+ * <p>The engine does not own execution threads and does not open network connections.
+ * It applies configured detector definitions to incoming {@link MetricPoint},
+ * finds algorithms through {@link DetectorRegistry}, reads and saves
+ * state through {@link DetectorStateStore}, and then returns created
  * {@link DriftEvent}.</p>
  */
 public final class DriftDetectorEngine {
@@ -86,10 +86,10 @@ public final class DriftDetectorEngine {
     }
 
     /**
-     * Обрабатывает одну точку метрики через все подходящие detector definitions.
+     * Processes one metric point through all matching detector definitions.
      *
-     * @return immutable-список drift events; обычно пустой или из одного элемента,
-     * но может содержать несколько событий, если подошло несколько definitions
+     * @return immutable list of drift events; usually empty or containing one element,
+     * but it can contain multiple events when several definitions match
      */
     public List<DriftEvent> detect(MetricPoint point) {
         DriftGuardErrors.requireNonNull(point, "point");
@@ -280,7 +280,7 @@ public final class DriftDetectorEngine {
             try {
                 listener.onDetectionCompleted(point, events, durationNanos);
             } catch (RuntimeException ignored) {
-                // Listener-ошибка не должна ломать detection pipeline.
+                // Listener errors must not break the detection pipeline.
             }
         }
     }
@@ -290,7 +290,7 @@ public final class DriftDetectorEngine {
             try {
                 listener.onDetectionFailed(point, exception, durationNanos);
             } catch (RuntimeException ignored) {
-                // Listener-ошибка не должна маскировать исходную ошибку detection-а.
+                // Listener errors must not hide the original detection error.
             }
         }
     }
@@ -300,3 +300,4 @@ public final class DriftDetectorEngine {
         return (S) state;
     }
 }
+

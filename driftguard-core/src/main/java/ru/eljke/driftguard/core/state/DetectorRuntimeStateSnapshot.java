@@ -7,21 +7,21 @@ import java.time.Instant;
 import java.util.Arrays;
 
 /**
- * Переносимый snapshot runtime-состояния detector instance.
+ * Portable runtime-state snapshot for a detector instance.
  *
- * <p>Snapshot не привязан к конкретному формату хранения. Kafka, JDBC или Redis adapter
- * могут сериализовать этот объект в JSON, Avro, Protobuf или другой формат, но структура
- * snapshot-а остаётся общей для всех хранилищ.</p>
+ * <p>The snapshot is not bound to a concrete storage format. Kafka, JDBC or Redis adapters
+ * can serialize this object as JSON, Avro, Protobuf or another format, while the
+ * snapshot structure remains shared by all stores.</p>
  *
- * @param schemaVersion версия схемы persisted snapshot-а
- * @param algorithm имя алгоритма, которому принадлежит detector state
- * @param detectorStatePayload сериализованное состояние алгоритма
- * @param consecutiveSignals количество последовательных сигналов drift-а
- * @param lastEmittedAt момент последнего опубликованного события
- * @param activeEpisode открыт ли episode, для которого уже было событие
- * @param consecutiveNormal количество последовательных нормальных точек после drift-а
- * @param lastEmittedEvent последнее опубликованное событие текущего episode
- * @param version монотонная runtime-версия состояния внутри хранилища
+ * @param schemaVersion schema version of the persisted snapshot
+ * @param algorithm algorithm name that owns the detector state
+ * @param detectorStatePayload serialized algorithm state
+ * @param consecutiveSignals number of consecutive drift signals
+ * @param lastEmittedAt time of the last published event
+ * @param activeEpisode whether an already published episode is active
+ * @param consecutiveNormal number of consecutive normal points after drift
+ * @param lastEmittedEvent last published event of the current episode
+ * @param version monotonic runtime state version inside the store
  */
 public record DetectorRuntimeStateSnapshot(
         int schemaVersion,
@@ -57,3 +57,4 @@ public record DetectorRuntimeStateSnapshot(
         return Arrays.copyOf(detectorStatePayload, detectorStatePayload.length);
     }
 }
+

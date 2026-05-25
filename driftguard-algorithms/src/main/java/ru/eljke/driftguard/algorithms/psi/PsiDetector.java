@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 /**
- * Detector на основе Population Stability Index для drift-а binned-распределений.
+ * Population Stability Index detector for binned distribution drift.
  */
 public final class PsiDetector implements DetectorAlgorithm<PsiConfig, PsiState> {
     @Override
@@ -93,3 +93,5 @@ public final class PsiDetector implements DetectorAlgorithm<PsiConfig, PsiState>
         return Math.max(epsilon, count / (double) values.length);
     }
 }
+
+

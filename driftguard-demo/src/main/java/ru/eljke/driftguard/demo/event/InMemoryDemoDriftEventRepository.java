@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Простое in-memory хранилище для demo UI.
+ * English demo documentation.
  *
- * <p>Для MVP этого достаточно: события не теряются при переключении вкладок
- * и могут отображаться как общий recent stream. При необходимости этот
- * интерфейс можно заменить JDBC/PostgreSQL adapter-ом без изменений core.</p>
+ * English demo documentation.
+ * English demo documentation.
+ * English demo documentation.
  */
 @Repository
 public class InMemoryDemoDriftEventRepository implements DemoDriftEventRepository {
@@ -64,3 +64,4 @@ public class InMemoryDemoDriftEventRepository implements DemoDriftEventRepositor
         }
     }
 }
+

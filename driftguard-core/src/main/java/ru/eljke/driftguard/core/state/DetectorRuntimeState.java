@@ -5,15 +5,15 @@ import ru.eljke.driftguard.core.detector.EmissionState;
 import ru.eljke.driftguard.core.error.DriftGuardErrors;
 
 /**
- * Единый runtime snapshot detector instance.
+ * Unified runtime snapshot of a detector instance.
  *
- * <p>Detector state и emission state должны сохраняться вместе, иначе при
- * рестарте, replay или переносе partition-а можно получить опубликованные
- * события без соответствующего состояния алгоритма или наоборот.</p>
+ * <p>Detector state and emission state must be persisted together; otherwise during
+ * restart, replay or partition migration, the system can get published
+ * events without matching algorithm state or the opposite.</p>
  *
- * @param detectorState состояние алгоритма
- * @param emissionState состояние emission-политики
- * @param version монотонная runtime-версия snapshot-а внутри конкретного хранилища
+ * @param detectorState algorithm state
+ * @param emissionState emission policy state
+ * @param version monotonic runtime snapshot version inside a concrete store
  */
 public record DetectorRuntimeState(
         DetectorState detectorState,
@@ -66,3 +66,4 @@ public record DetectorRuntimeState(
         return new DetectorRuntimeState(nextDetectorState, nextEmissionState, version + 1);
     }
 }
+

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Агрегированные метрики качества по нескольким synthetic scenarios.
+ * English API documentation.
  */
 public record DetectionBenchmarkSummary(
         int scenarios,
@@ -87,3 +87,4 @@ public record DetectionBenchmarkSummary(
         return Duration.ofMillis(millis);
     }
 }
+

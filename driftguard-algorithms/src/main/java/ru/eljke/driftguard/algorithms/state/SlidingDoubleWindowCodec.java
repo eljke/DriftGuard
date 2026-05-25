@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 
 /**
- * Внутренний binary codec для неизменяемых sliding window-ов алгоритмов.
+ * English API documentation.
  */
 final class SlidingDoubleWindowCodec {
     private SlidingDoubleWindowCodec() {
@@ -56,3 +56,5 @@ final class SlidingDoubleWindowCodec {
         return SlidingDoubleWindow.of(capacity, values);
     }
 }
+
+

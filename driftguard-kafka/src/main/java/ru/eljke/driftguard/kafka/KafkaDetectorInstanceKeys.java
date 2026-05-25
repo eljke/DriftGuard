@@ -5,10 +5,10 @@ import ru.eljke.driftguard.core.domain.MetricKey;
 import ru.eljke.driftguard.core.error.DriftGuardErrors;
 
 /**
- * Формирует стабильный ключ Kafka state store для состояния конкретного detector instance.
+ * Builds a stable Kafka state-store key for a concrete detector instance state.
  *
- * <p>Ключ включает metric key и имя detector definition, потому что одна метрика может
- * обрабатываться несколькими detector-ами с независимыми состояниями.</p>
+ * <p>The key includes the metric key and detector definition name because one metric can
+ * be processed by several detectors with independent states.</p>
  */
 public final class KafkaDetectorInstanceKeys {
     private static final String SEPARATOR = "|";
@@ -37,3 +37,5 @@ public final class KafkaDetectorInstanceKeys {
         return value.replace("%", "%25").replace(SEPARATOR, "%7C");
     }
 }
+
+

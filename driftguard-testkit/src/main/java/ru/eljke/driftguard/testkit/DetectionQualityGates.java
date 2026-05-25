@@ -3,17 +3,17 @@ package ru.eljke.driftguard.testkit;
 import java.time.Duration;
 
 /**
- * Готовые профили quality-gates для тестов и CI.
+ * English API documentation.
  *
- * <p>Профили намеренно консервативные: они задают стартовые политики, которые
- * можно переопределить точечным gate-ом под конкретный алгоритм или сценарий.</p>
+ * English API documentation.
+ * English API documentation.
  */
 public final class DetectionQualityGates {
     private DetectionQualityGates() {
     }
 
     /**
-     * Мягкий gate для smoke-тестов и ранней разработки detector-а.
+     * English API documentation.
      */
     public static DetectionQualityGate smoke() {
         return DetectionQualityGate.builder()
@@ -23,7 +23,7 @@ public final class DetectionQualityGates {
     }
 
     /**
-     * Баланс между чувствительностью и шумом для обычного CI-прогона.
+     * English API documentation.
      */
     public static DetectionQualityGate balanced() {
         return DetectionQualityGate.builder()
@@ -36,7 +36,7 @@ public final class DetectionQualityGates {
     }
 
     /**
-     * Строгий gate для стабильных detector-ов и regression-suite.
+     * English API documentation.
      */
     public static DetectionQualityGate strict() {
         return DetectionQualityGate.builder()
@@ -48,3 +48,5 @@ public final class DetectionQualityGates {
                 .build();
     }
 }
+
+

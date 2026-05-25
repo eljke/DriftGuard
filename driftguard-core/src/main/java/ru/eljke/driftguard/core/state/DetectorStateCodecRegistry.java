@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 /**
- * Реестр кодеков состояния detector-ов, доступных инфраструктурному адаптеру.
+ * Registry of detector state codecs available to an infrastructure adapter.
  */
 public interface DetectorStateCodecRegistry {
     Optional<DetectorStateCodec<?>> findByAlgorithm(String algorithm);
@@ -15,3 +15,4 @@ public interface DetectorStateCodecRegistry {
 
     Collection<String> algorithms();
 }
+

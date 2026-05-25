@@ -3,10 +3,10 @@ package ru.eljke.driftguard.testkit;
 import java.util.Objects;
 
 /**
- * Один сценарий внутри benchmark-suite.
+ * English API documentation.
  *
- * @param id стабильный идентификатор сценария для отчётов и CI-логов
- * @param scenario synthetic scenario, который генерирует поток метрик и ожидаемые drift-интервалы
+ * @param id documented value
+ * @param scenario documented value
  */
 public record DetectionBenchmarkCase(
         String id,
@@ -23,3 +23,5 @@ public record DetectionBenchmarkCase(
         return new DetectionBenchmarkCase(id, scenario);
     }
 }
+
+

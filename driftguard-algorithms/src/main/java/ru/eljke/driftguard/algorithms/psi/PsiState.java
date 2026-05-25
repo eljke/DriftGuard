@@ -4,7 +4,7 @@ import ru.eljke.driftguard.algorithms.support.SlidingDoubleWindow;
 import ru.eljke.driftguard.core.detector.DetectorState;
 
 /**
- * Baseline- и current-окна, используемые PSI detector-ом.
+ * Baseline and current windows used by the PSI detector.
  */
 public record PsiState(
         SlidingDoubleWindow baseline,
@@ -15,3 +15,5 @@ public record PsiState(
         return PsiConfig.ALGORITHM;
     }
 }
+
+

@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Запускает synthetic scenarios через переданную функцию детекции и считает
- * качество detector-а на воспроизводимых потоках метрик.
+ * English API documentation.
+ * detector quality on reproducible metric streams.
  */
 public final class DetectionBenchmarkRunner {
     private DetectionBenchmarkRunner() {
@@ -41,3 +41,5 @@ public final class DetectionBenchmarkRunner {
         return gate.evaluate(report);
     }
 }
+
+

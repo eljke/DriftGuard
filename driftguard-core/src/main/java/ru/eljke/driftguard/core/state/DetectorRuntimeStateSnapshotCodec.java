@@ -5,11 +5,11 @@ import ru.eljke.driftguard.core.detector.EmissionState;
 import ru.eljke.driftguard.core.error.DriftGuardErrors;
 
 /**
- * Codec между runtime-состоянием и переносимым snapshot-ом.
+ * Codec between runtime state and a portable snapshot.
  *
- * <p>Этот класс не выбирает физический формат хранения. Он только раскладывает
- * {@link DetectorRuntimeState} на стабильную структуру и восстанавливает его обратно,
- * используя registry codec-ов конкретных detector state.</p>
+ * <p>This class does not choose a physical storage format. It only decomposes
+ * {@link DetectorRuntimeState} into a stable structure and restores it back,
+ * using the codec registry for concrete detector states.</p>
  */
 public final class DetectorRuntimeStateSnapshotCodec {
     private final DetectorStateCodecRegistry detectorStateCodecs;
@@ -62,3 +62,4 @@ public final class DetectorRuntimeStateSnapshotCodec {
         );
     }
 }
+

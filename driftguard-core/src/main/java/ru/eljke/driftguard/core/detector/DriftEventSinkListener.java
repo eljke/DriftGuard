@@ -7,10 +7,10 @@ import ru.eljke.driftguard.core.sink.DriftEventSink;
 import java.util.List;
 
 /**
- * Listener, который доставляет опубликованные {@link DriftEvent} в набор sink-ов.
+ * Listener that delivers published {@link DriftEvent} to a set of sinks.
  *
- * <p>Ошибки отдельных sink-ов не прерывают detection pipeline: событие уже
- * считается опубликованным engine-ом, а sink является внешним adapter-слоем.</p>
+ * <p>Individual sink errors do not interrupt the detection pipeline: the event is already
+ * considered published by the engine, and a sink is an external adapter layer.</p>
  */
 public final class DriftEventSinkListener implements DriftDetectionListener {
     private final List<DriftEventSink> sinks;
@@ -34,8 +34,9 @@ public final class DriftEventSinkListener implements DriftDetectionListener {
             try {
                 sink.accept(event);
             } catch (RuntimeException ignored) {
-                // Sink-ошибка не должна ломать основной detection pipeline.
+                // Sink errors must not break the main detection pipeline.
             }
         }
     }
 }
+

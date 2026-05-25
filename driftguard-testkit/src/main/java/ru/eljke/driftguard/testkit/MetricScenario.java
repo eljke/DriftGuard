@@ -5,21 +5,23 @@ import ru.eljke.driftguard.core.domain.MetricPoint;
 import java.util.List;
 
 /**
- * Воспроизводимый сценарий генерации технических метрик.
+ * English API documentation.
  */
 public interface MetricScenario {
     /**
-     * Человекочитаемое имя сценария.
+     * English API documentation.
      */
     String name();
 
     /**
-     * Генерирует поток точек метрик.
+     * English API documentation.
      */
     List<MetricPoint> generate();
 
     /**
-     * Возвращает интервалы, в которых сценарий ожидает drift.
+     * English API documentation.
      */
     List<DriftInterval> expectedDrifts();
 }
+
+

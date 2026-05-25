@@ -8,11 +8,11 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 /**
- * Хранилище полного runtime state для одного detector instance.
+ * Store for full runtime state of one detector instance.
  *
- * <p>Это основной state-контракт для processing pipeline. Адаптеры Kafka,
- * JDBC или Redis должны сохранять {@link DetectorRuntimeState} атомарно, чтобы
- * detector state и emission state не расходились между собой.</p>
+ * <p>This is the main state contract for the processing pipeline. Kafka,
+ * JDBC or Redis adapters must persist {@link DetectorRuntimeState} atomically so
+ * detector state and emission state cannot diverge.</p>
  */
 public interface DetectorRuntimeStateStore {
     Optional<DetectorRuntimeState> get(DetectorInstanceKey key);
@@ -20,7 +20,7 @@ public interface DetectorRuntimeStateStore {
     void put(DetectorInstanceKey key, DetectorRuntimeState state);
 
     /**
-     * Атомарно читает, изменяет и сохраняет полный runtime snapshot.
+     * Atomically reads, modifies and saves the full runtime snapshot.
      */
     default DetectorRuntimeState update(
             DetectorInstanceKey key,
@@ -38,3 +38,5 @@ public interface DetectorRuntimeStateStore {
         }
     }
 }
+
+

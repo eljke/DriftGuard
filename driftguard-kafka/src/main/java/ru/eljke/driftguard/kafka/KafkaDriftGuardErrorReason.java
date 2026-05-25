@@ -3,7 +3,7 @@ package ru.eljke.driftguard.kafka;
 import ru.eljke.driftguard.core.error.ErrorReason;
 
 /**
- * Причины ошибок Kafka adapter-а.
+ * Kafka adapter error reasons.
  */
 public enum KafkaDriftGuardErrorReason implements ErrorReason {
     EMPTY_INPUT_TOPICS("DG-KAFKA-001", "inputTopics must not be empty"),
@@ -29,3 +29,5 @@ public enum KafkaDriftGuardErrorReason implements ErrorReason {
         return description;
     }
 }
+
+

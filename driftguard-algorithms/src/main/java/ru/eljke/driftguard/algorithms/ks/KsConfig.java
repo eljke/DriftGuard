@@ -4,12 +4,12 @@ import lombok.Builder;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 
 /**
- * Конфигурация двухвыборочного detector-а Колмогорова-Смирнова.
+ * Configuration for the two-sample Kolmogorov-Smirnov detector.
  *
- * @param baselineWindowSize число наблюдений в reference-выборке
- * @param currentWindowSize число последних наблюдений в current-выборке
- * @param warningPValue максимальный p-value, при котором создаётся warning event
- * @param criticalPValue максимальный p-value, при котором создаётся critical event
+ * @param baselineWindowSize number of observations in the reference sample
+ * @param currentWindowSize number of latest observations in the current sample
+ * @param warningPValue maximum p-value that produces a warning event
+ * @param criticalPValue maximum p-value that produces a critical event
  */
 @Builder(toBuilder = true)
 public record KsConfig(
@@ -34,3 +34,5 @@ public record KsConfig(
         return ALGORITHM;
     }
 }
+
+

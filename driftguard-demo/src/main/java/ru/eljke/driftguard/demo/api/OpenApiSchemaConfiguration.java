@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Map;
 
 /**
- * Обогащает OpenAPI схемы моделей, которые приходят из core/testkit модулей.
+ * English demo documentation.
  */
 @SuppressWarnings("rawtypes")
 @Configuration
@@ -17,146 +17,146 @@ public class OpenApiSchemaConfiguration {
     public OpenApiCustomizer driftGuardSchemaDescriptions() {
         return openApi -> {
             Map<String, Schema> schemas = openApi.getComponents().getSchemas();
-            describe(schemas, "DemoRunResult", "Результат запуска demo-сценария с точками метрик, событиями и качеством детекции.", Map.of(
-                    "scenario", "Технический id сценария.",
-                    "title", "Человекочитаемое имя сценария.",
-                    "metricPoints", "Количество сгенерированных точек метрик.",
-                    "samplePoints", "Точки метрик, использованные для построения графика.",
-                    "expectedDrifts", "Ожидаемые интервалы drift-а в synthetic сценарии.",
-                    "events", "События drift-а, опубликованные detector-ами.",
-                    "quality", "Оценка качества детекции на сценарии."
+            describe(schemas, "DemoRunResult", "English demo text.", Map.of(
+                    "scenario", "English demo text.",
+                    "title", "English demo text.",
+                    "metricPoints", "English demo text.",
+                    "samplePoints", "English demo text.",
+                    "expectedDrifts", "English demo text.",
+                    "events", "English demo text.",
+                    "quality", "English demo text."
             ));
-            describe(schemas, "DetectionMetrics", "Метрики качества detector-а на synthetic сценарии.", Map.of(
-                    "events", "Всего опубликованных событий.",
-                    "truePositiveEvents", "События внутри ожидаемых drift-интервалов.",
-                    "falsePositiveEvents", "События вне ожидаемых drift-интервалов.",
-                    "expectedDriftIntervals", "Количество ожидаемых drift-интервалов.",
-                    "detectedDriftIntervals", "Количество интервалов, где был сигнал.",
-                    "missedDriftIntervals", "Количество пропущенных ожидаемых интервалов.",
-                    "detected", "Был ли найден хотя бы один ожидаемый drift.",
-                    "firstDetectionDelay", "Задержка первого сигнала относительно начала drift-а.",
-                    "precision", "Доля событий, попавших в ожидаемые интервалы.",
-                    "recall", "Доля ожидаемых интервалов, где был сигнал."
+            describe(schemas, "DetectionMetrics", "English demo text.", Map.of(
+                    "events", "English demo text.",
+                    "truePositiveEvents", "English demo text.",
+                    "falsePositiveEvents", "English demo text.",
+                    "expectedDriftIntervals", "English demo text.",
+                    "detectedDriftIntervals", "English demo text.",
+                    "missedDriftIntervals", "English demo text.",
+                    "detected", "English demo text.",
+                    "firstDetectionDelay", "English demo text.",
+                    "precision", "English demo text.",
+                    "recall", "English demo text."
             ));
-            describe(schemas, "DriftEvent", "Публичное событие о найденном drift-е потока метрик.", Map.ofEntries(
-                    Map.entry("id", "Уникальный id события."),
-                    Map.entry("key", "Ключ потока метрик."),
-                    Map.entry("detectedAt", "Время обнаружения события."),
-                    Map.entry("direction", "Направление изменения."),
-                    Map.entry("severity", "Уровень важности события."),
-                    Map.entry("score", "Алгоритм-специфичная оценка drift-а."),
-                    Map.entry("currentValue", "Репрезентативное текущее значение."),
-                    Map.entry("baselineValue", "Репрезентативное baseline-значение."),
-                    Map.entry("detector", "Имя detector definition."),
-                    Map.entry("algorithm", "Имя алгоритма."),
-                    Map.entry("reason", "Короткое объяснение причины события.")
+            describe(schemas, "DriftEvent", "English demo text.", Map.ofEntries(
+                    Map.entry("id", "Schema field."),
+                    Map.entry("key", "Schema field."),
+                    Map.entry("detectedAt", "Schema field."),
+                    Map.entry("direction", "Schema field."),
+                    Map.entry("severity", "Schema field."),
+                    Map.entry("score", "Schema field."),
+                    Map.entry("currentValue", "Schema field."),
+                    Map.entry("baselineValue", "Schema field."),
+                    Map.entry("detector", "Schema field."),
+                    Map.entry("algorithm", "Schema field."),
+                    Map.entry("reason", "Schema field.")
             ));
-            describe(schemas, "MetricPoint", "Одно наблюдаемое значение технической метрики.", Map.of(
-                    "key", "Стабильная идентичность потока метрик.",
-                    "timestamp", "Event timestamp точки.",
-                    "value", "Числовое значение метрики.",
-                    "kind", "Семантический тип метрики.",
-                    "tags", "Индексируемые строковые измерения.",
-                    "attributes", "Дополнительная диагностическая нагрузка."
+            describe(schemas, "MetricPoint", "English demo text.", Map.of(
+                    "key", "English demo text.",
+                    "timestamp", "English demo text.",
+                    "value", "English demo text.",
+                    "kind", "English demo text.",
+                    "tags", "English demo text.",
+                    "attributes", "English demo text."
             ));
-            describe(schemas, "MetricKey", "Идентичность потока метрик.", Map.of(
-                    "service", "Сервис или подсистема.",
-                    "metric", "Имя метрики.",
-                    "instance", "Экземпляр сервиса, pod, node или host.",
-                    "operation", "Endpoint, job, consumer group или операция."
+            describe(schemas, "MetricKey", "English demo text.", Map.of(
+                    "service", "English demo text.",
+                    "metric", "English demo text.",
+                    "instance", "English demo text.",
+                    "operation", "English demo text."
             ));
-            describe(schemas, "DriftInterval", "Ожидаемый интервал drift-а в synthetic сценарии.", Map.of(
-                    "start", "Начало ожидаемой деградации.",
-                    "end", "Окончание ожидаемой деградации."
+            describe(schemas, "DriftInterval", "English demo text.", Map.of(
+                    "start", "English demo text.",
+                    "end", "English demo text."
             ));
-            describe(schemas, "DemoScenarioDescriptor", "Сценарий, доступный в demo UI и REST API.", Map.of(
-                    "id", "Id сценария для endpoint-а запуска.",
-                    "title", "Название сценария.",
-                    "metric", "Основная метрика сценария.",
-                    "description", "Краткое описание сценария."
+            describe(schemas, "DemoScenarioDescriptor", "English demo text.", Map.of(
+                    "id", "English demo text.",
+                    "title", "English demo text.",
+                    "metric", "English demo text.",
+                    "description", "English demo text."
             ));
-            describe(schemas, "KafkaDemoStatus", "Состояние реального Kafka demo-контура producer -> DriftGuard Kafka Streams -> events topic.", Map.ofEntries(
-                    Map.entry("enabled", "Включён ли Kafka demo режим."),
-                    Map.entry("running", "Идёт ли сейчас публикация тестового потока."),
-                    Map.entry("scenario", "Id запущенного сценария."),
-                    Map.entry("inputTopic", "Topic входных MetricPoint."),
-                    Map.entry("outputTopic", "Topic выходных DriftEvent."),
+            describe(schemas, "KafkaDemoStatus", "English demo text.", Map.ofEntries(
+                    Map.entry("enabled", "Schema field."),
+                    Map.entry("running", "Schema field."),
+                    Map.entry("scenario", "Schema field."),
+                    Map.entry("inputTopic", "Schema field."),
+                    Map.entry("outputTopic", "Schema field."),
                     Map.entry("bootstrapServers", "Kafka bootstrap servers."),
-                    Map.entry("producedPoints", "Количество опубликованных producer-ом точек."),
-                    Map.entry("totalPoints", "Общее количество точек в сценарии."),
-                    Map.entry("producers", "Состояние отдельных тестовых producer-ов."),
-                    Map.entry("consumedEvents", "DriftEvent, прочитанные demo consumer-ом из output topic-а."),
-                    Map.entry("samplePoints", "MetricPoint, опубликованные producer-ом и отображаемые на графике."),
-                    Map.entry("error", "Последняя ошибка Kafka demo, если запуск не удался.")
+                    Map.entry("producedPoints", "Schema field."),
+                    Map.entry("totalPoints", "Schema field."),
+                    Map.entry("producers", "Schema field."),
+                    Map.entry("consumedEvents", "Schema field."),
+                    Map.entry("samplePoints", "Schema field."),
+                    Map.entry("error", "Schema field.")
             ));
-            describe(schemas, "KafkaProducerStatus", "Состояние отдельного тестового producer-а в Kafka demo.", Map.of(
-                    "id", "Стабильный id producer-а.",
-                    "service", "Сервис, который producer имитирует.",
-                    "metric", "Публикуемая метрика.",
-                    "operation", "Операция или endpoint.",
-                    "producedPoints", "Количество опубликованных точек.",
-                    "totalPoints", "Общее количество точек producer-а.",
-                    "running", "Публикует ли producer поток сейчас."
+            describe(schemas, "KafkaProducerStatus", "English demo text.", Map.of(
+                    "id", "English demo text.",
+                    "service", "English demo text.",
+                    "metric", "English demo text.",
+                    "operation", "English demo text.",
+                    "producedPoints", "English demo text.",
+                    "totalPoints", "English demo text.",
+                    "running", "English demo text."
             ));
-            describe(schemas, "ToolLink", "Ссылка на инструмент локального demo-стенда.", Map.of(
-                    "id", "Стабильный id инструмента.",
-                    "title", "Название инструмента.",
-                    "url", "URL инструмента.",
-                    "description", "Назначение инструмента."
+            describe(schemas, "ToolLink", "English demo text.", Map.of(
+                    "id", "English demo text.",
+                    "title", "English demo text.",
+                    "url", "English demo text.",
+                    "description", "English demo text."
             ));
-            describe(schemas, "DemoConfigurationView", "Runtime-конфигурация demo и DriftGuard detector-ов для UI.", Map.of(
-                    "aggressiveness", "Агрегированная оценка чувствительности detector-ов.",
-                    "kafka", "Kafka-настройки demo и Kafka Streams adapter-а.",
-                    "detectors", "Активные detector definitions из текущего Spring context-а."
+            describe(schemas, "DemoConfigurationView", "English demo text.", Map.of(
+                    "aggressiveness", "English demo text.",
+                    "kafka", "English demo text.",
+                    "detectors", "English demo text."
             ));
-            describe(schemas, "AggressivenessView", "Пояснение текущей чувствительности detector-ов.", Map.of(
-                    "level", "Уровень чувствительности: Aggressive, Balanced или Conservative.",
-                    "description", "Как этот уровень влияет на раннее обнаружение и риск ложных тревог."
+            describe(schemas, "AggressivenessView", "English demo text.", Map.of(
+                    "level", "English demo text.",
+                    "description", "English demo text."
             ));
-            describe(schemas, "KafkaConfigurationView", "Kafka-настройки, отображаемые в разделе Configuration.", Map.of(
-                    "demoEnabled", "Включены ли Kafka demo endpoints.",
+            describe(schemas, "KafkaConfigurationView", "English demo text.", Map.of(
+                    "demoEnabled", "English demo text.",
                     "bootstrapServers", "Kafka bootstrap servers.",
-                    "inputTopic", "Topic входных MetricPoint.",
-                    "outputTopic", "Topic выходных DriftEvent.",
+                    "inputTopic", "English demo text.",
+                    "outputTopic", "English demo text.",
                     "applicationId", "Kafka Streams application id.",
-                    "playbackInterval", "Интервал публикации synthetic points producer-ами."
+                    "playbackInterval", "English demo text."
             ));
-            describe(schemas, "DemoScenarioRequest", "Параметры генерации synthetic scenario.", Map.of(
-                    "samples", "Число MetricPoint samples на stream.",
-                    "baselineValue", "Стабильное значение до drift-а. Null или 0 в demo UI оставляет дефолт scenario.",
-                    "driftValue", "Значение во время step/drop/spike drift-а. Для queue-growth это slope, для seasonal-latency это amplitude.",
-                    "noiseStdDev", "Стандартное отклонение synthetic noise.",
-                    "driftStartPercent", "Позиция начала drift-а в процентах длины потока.",
-                    "spikeLengthPercent", "Длительность spike-а в процентах длины потока."
+            describe(schemas, "DemoScenarioRequest", "English demo text.", Map.of(
+                    "samples", "English demo text.",
+                    "baselineValue", "English demo text.",
+                    "driftValue", "English demo text.",
+                    "noiseStdDev", "English demo text.",
+                    "driftStartPercent", "English demo text.",
+                    "spikeLengthPercent", "English demo text."
             ));
-            describe(schemas, "KafkaReplayRequest", "Запрос на воспроизводимый replay synthetic scenario через Kafka.", Map.of(
+            describe(schemas, "KafkaReplayRequest", "English demo text.", Map.of(
                     "scenario", "Id synthetic scenario.",
-                    "speed", "Множитель скорости публикации MetricPoint.",
-                    "resetState", "Нужно ли сбросить runtime detector state перед replay.",
-                    "profile", "Detector profile, который нужно применить перед replay.",
-                    "samples", "Число MetricPoint samples на producer stream.",
-                    "baselineValue", "Стабильное значение до drift-а.",
-                    "driftValue", "Значение во время step/drop/spike drift-а.",
-                    "noiseStdDev", "Стандартное отклонение synthetic noise.",
-                    "driftStartPercent", "Позиция начала drift-а в процентах длины потока.",
-                    "spikeLengthPercent", "Длительность spike-а в процентах длины потока."
+                    "speed", "English demo text.",
+                    "resetState", "English demo text.",
+                    "profile", "English demo text.",
+                    "samples", "English demo text.",
+                    "baselineValue", "English demo text.",
+                    "driftValue", "English demo text.",
+                    "noiseStdDev", "English demo text.",
+                    "driftStartPercent", "English demo text.",
+                    "spikeLengthPercent", "English demo text."
             ));
-            describe(schemas, "DetectorConfigurationView", "UI-представление одного detector definition.", Map.ofEntries(
-                    Map.entry("name", "Имя detector-а."),
-                    Map.entry("algorithm", "Алгоритм detector-а."),
-                    Map.entry("services", "Фильтр по сервисам."),
-                    Map.entry("metrics", "Фильтр по метрикам."),
-                    Map.entry("warningThreshold", "Warning-порог score."),
-                    Map.entry("criticalThreshold", "Critical-порог score."),
-                    Map.entry("warningPValue", "Warning-порог p-value."),
-                    Map.entry("criticalPValue", "Critical-порог p-value."),
-                    Map.entry("warmupSamples", "Число samples для прогрева."),
-                    Map.entry("emissionPolicy", "Политика публикации событий."),
-                    Map.entry("sensitivity", "Оценка чувствительности detector-а.")
+            describe(schemas, "DetectorConfigurationView", "English demo text.", Map.ofEntries(
+                    Map.entry("name", "Schema field."),
+                    Map.entry("algorithm", "Schema field."),
+                    Map.entry("services", "Schema field."),
+                    Map.entry("metrics", "Schema field."),
+                    Map.entry("warningThreshold", "Schema field."),
+                    Map.entry("criticalThreshold", "Schema field."),
+                    Map.entry("warningPValue", "Schema field."),
+                    Map.entry("criticalPValue", "Schema field."),
+                    Map.entry("warmupSamples", "Schema field."),
+                    Map.entry("emissionPolicy", "Schema field."),
+                    Map.entry("sensitivity", "Schema field.")
             ));
-            describe(schemas, "EmissionPolicyView", "Политика сглаживания и подавления повторяющихся событий.", Map.of(
-                    "minConsecutiveSignals", "Сколько подряд сигналов нужно перед публикацией события.",
-                    "cooldown", "Минимальная пауза между событиями одного detector-а по одному stream-у."
+            describe(schemas, "EmissionPolicyView", "English demo text.", Map.of(
+                    "minConsecutiveSignals", "English demo text.",
+                    "cooldown", "English demo text."
             ));
         };
     }
@@ -179,3 +179,5 @@ public class OpenApiSchemaConfiguration {
         });
     }
 }
+
+

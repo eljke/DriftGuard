@@ -6,13 +6,13 @@ import java.time.Instant;
 import java.util.Optional;
 
 /**
- * Состояние emission-политики для одного detector instance.
+ * Emission policy state for one detector instance.
  *
- * @param consecutiveSignals сколько сигналов подряд пришло от алгоритма
- * @param lastEmittedAt момент последнего публичного события
- * @param activeEpisode открыт ли уже drift episode, для которого событие было опубликовано
- * @param consecutiveNormal сколько нормальных точек подряд пришло после последнего сигнала
- * @param lastEmittedEvent последнее опубликованное событие текущего episode
+ * @param consecutiveSignals number of consecutive signals from the algorithm
+ * @param lastEmittedAt time of the last public event
+ * @param activeEpisode whether a drift episode with a published event is active
+ * @param consecutiveNormal number of consecutive normal points after the last signal
+ * @param lastEmittedEvent last published event of the current episode
  */
 public record EmissionState(
         int consecutiveSignals,
@@ -39,3 +39,4 @@ public record EmissionState(
         return Optional.ofNullable(lastEmittedEvent);
     }
 }
+

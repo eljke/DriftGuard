@@ -8,14 +8,14 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * Общие настройки синтетического сценария метрик.
+ * English API documentation.
  *
- * @param key ключ генерируемой метрики
- * @param kind тип метрики
- * @param start начало сценария
- * @param step шаг между точками
- * @param samples число генерируемых точек
- * @param seed seed генератора шума
+ * @param key documented value
+ * @param kind documented value
+ * @param start documented value
+ * @param step documented value
+ * @param samples documented value
+ * @param seed documented value
  */
 public record ScenarioConfig(
         MetricKey key,
@@ -65,3 +65,5 @@ public record ScenarioConfig(
         );
     }
 }
+
+

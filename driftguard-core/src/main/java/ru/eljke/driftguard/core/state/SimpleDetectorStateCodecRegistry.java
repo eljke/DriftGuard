@@ -12,10 +12,10 @@ import java.util.Optional;
 
 /**
  * Immutable in-memory implementation of {@link DetectorStateCodecRegistry}.
- * Неизменяемая in-memory реализация {@link DetectorStateCodecRegistry}.
+ * Immutable in-memory implementation {@link DetectorStateCodecRegistry}.
  *
- * <p>Порядок регистрации codec-ов сохраняется, чтобы диагностические списки и тесты
- * были детерминированными.</p>
+ * <p>Codec registration order is preserved so diagnostic lists and tests
+ * remain deterministic.</p>
  */
 public final class SimpleDetectorStateCodecRegistry implements DetectorStateCodecRegistry {
     private final Map<String, DetectorStateCodec<?>> byAlgorithm;
@@ -66,3 +66,4 @@ public final class SimpleDetectorStateCodecRegistry implements DetectorStateCode
         return byAlgorithm.keySet();
     }
 }
+

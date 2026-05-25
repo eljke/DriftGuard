@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * Сценарий резкой деградации: после заданного индекса baseline переходит на
- * новый устойчивый уровень.
+ * English API documentation.
+ * English API documentation.
  */
 public final class StepDriftScenario implements MetricScenario {
     private final String name;
@@ -71,3 +71,5 @@ public final class StepDriftScenario implements MetricScenario {
         return List.of(new DriftInterval(start, end));
     }
 }
+
+

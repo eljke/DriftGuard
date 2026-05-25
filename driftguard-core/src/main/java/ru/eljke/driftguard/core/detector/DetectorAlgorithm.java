@@ -4,34 +4,36 @@ import ru.eljke.driftguard.core.config.DetectorConfig;
 import ru.eljke.driftguard.core.domain.MetricPoint;
 
 /**
- * Точка расширения для всех алгоритмов обнаружения drift-а.
+ * English API documentation.
  *
- * <p>Реализации должны быть детерминированными и не выполнять скрытых
- * side-effect-ов над состоянием detector-а: они получают предыдущее состояние
- * и возвращают новое состояние в {@link DetectionResult}. Инфраструктурные
- * модули решают, где это состояние физически хранится.</p>
+ * English API documentation.
+ * English API documentation.
+ * English API documentation.
+ * English API documentation.
  *
- * @param <C> типизированная конфигурация, принимаемая алгоритмом
- * @param <S> типизированное состояние, поддерживаемое алгоритмом
+ * English API documentation.
+ * English API documentation.
  */
 public interface DetectorAlgorithm<C extends DetectorConfig, S extends DetectorState> {
     /**
-     * Стабильное имя алгоритма, используемое в конфигурации и drift events.
+     * English API documentation.
      */
     String name();
 
     /**
-     * Класс конфигурации, который engine использует для runtime-проверки типов.
+     * English API documentation.
      */
     Class<C> configType();
 
     /**
-     * Создаёт начальное состояние для экземпляра detector-а.
+     * English API documentation.
      */
     S initialState(C config);
 
     /**
-     * Обрабатывает одну точку метрики и возвращает обновлённое состояние и необязательное событие.
+     * Processes one metric point and returns updated state plus an optional event.
      */
     DetectionResult<S> detect(MetricPoint point, S state, C config, DetectionContext context);
 }
+
+

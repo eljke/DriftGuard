@@ -4,7 +4,7 @@ import ru.eljke.driftguard.algorithms.support.SlidingDoubleWindow;
 import ru.eljke.driftguard.core.detector.DetectorState;
 
 /**
- * Baseline- и current-выборки, используемые detector-ом Колмогорова-Смирнова.
+ * Baseline and current samples used by the Kolmogorov-Smirnov detector.
  */
 public record KsState(
         SlidingDoubleWindow baseline,
@@ -15,3 +15,5 @@ public record KsState(
         return KsConfig.ALGORITHM;
     }
 }
+
+

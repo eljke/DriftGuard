@@ -1,16 +1,16 @@
 package ru.eljke.driftguard.demo.kafka.ops;
 
 /**
- * Агрегированные технические метрики Kafka detection pipeline для demo UI.
+ * English demo documentation.
  *
- * @param processedPoints сколько metric point обработала Kafka topology
- * @param emittedEvents сколько drift events создала Kafka topology
- * @param failedPoints сколько metric point завершились ошибкой detector-а
- * @param routedErrors сколько ошибок отправлено в diagnostic topic
- * @param durationMeasurements сколько измерений latency записано в Micrometer timer
- * @param totalDurationMillis суммарная длительность обработки metric point
- * @param maxDurationMillis максимальная длительность обработки одной metric point
- * @param meanDurationMillis средняя длительность обработки metric point
+ * @param processedPoints documented value
+ * @param emittedEvents documented value
+ * @param failedPoints documented value
+ * @param routedErrors documented value
+ * @param durationMeasurements documented value
+ * @param totalDurationMillis documented value
+ * @param maxDurationMillis documented value
+ * @param meanDurationMillis documented value
  */
 public record KafkaOperationsMetrics(
         double processedPoints,
@@ -26,3 +26,5 @@ public record KafkaOperationsMetrics(
         return new KafkaOperationsMetrics(0.0, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0);
     }
 }
+
+

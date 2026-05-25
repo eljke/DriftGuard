@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * Ссылки на вспомогательные инструменты локального demo-стенда.
+ * English demo documentation.
  */
 @Getter
 @Setter
@@ -14,22 +14,24 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "demo.tools")
 public class DemoToolProperties {
     /**
-     * URL Kafka UI из docker compose.
+     * English demo documentation.
      */
     private String kafkaUiUrl = "http://localhost:8090";
 
     /**
-     * URL Prometheus из docker compose.
+     * English demo documentation.
      */
     private String prometheusUrl = "http://localhost:9090";
 
     /**
-     * URL Grafana из docker compose.
+     * English demo documentation.
      */
     private String grafanaUrl = "http://localhost:3000";
 
     /**
-     * URL Swagger UI demo-приложения.
+     * URL Swagger UI demo-application.
      */
     private String swaggerUrl = "/swagger-ui.html";
 }
+
+

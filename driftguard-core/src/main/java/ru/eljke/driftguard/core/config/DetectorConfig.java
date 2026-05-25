@@ -1,15 +1,16 @@
 package ru.eljke.driftguard.core.config;
 
 /**
- * Маркерный контракт для типизированной конфигурации detector-а.
+ * Marker contract for typed detector configuration.
  *
- * <p>Каждый алгоритм должен предоставлять собственную immutable-реализацию,
- * чтобы некорректные пороги, окна или baseline-настройки можно было проверить
- * при создании объекта.</p>
+ * <p>Each algorithm should provide its own immutable implementation
+ * so invalid thresholds, windows or baseline settings can be checked
+ * when the object is created.</p>
  */
 public interface DetectorConfig {
     /**
-     * Имя алгоритма, по которому реализация ищется в detector registry.
+     * Algorithm name used to look up the implementation in a detector registry.
      */
     String algorithm();
 }
+

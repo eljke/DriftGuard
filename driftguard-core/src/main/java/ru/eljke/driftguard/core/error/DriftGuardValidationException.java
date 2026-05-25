@@ -1,7 +1,7 @@
 package ru.eljke.driftguard.core.error;
 
 /**
- * Ошибка валидации входных данных, конфигурации или состояния DriftGuard.
+ * Validation error in DriftGuard input, configuration or state.
  */
 public final class DriftGuardValidationException extends DriftGuardException {
     public DriftGuardValidationException(ErrorReason reason, Object... args) {
@@ -12,3 +12,4 @@ public final class DriftGuardValidationException extends DriftGuardException {
         super(reason, cause, args);
     }
 }
+

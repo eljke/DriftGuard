@@ -10,16 +10,16 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Транспортно-независимый selector потоков метрик для detector definition.
+ * Transport-independent selector of metric streams for a detector definition.
  *
- * <p>Пустой набор значений означает {@code any}. Например, если заполнено
- * только поле {@code metrics}, detector применяется ко всем сервисам, но только
- * к указанным метрикам.</p>
+ * <p>An empty value set means {@code any}. For example, when only
+ * is set {@code metrics}, the detector applies to all services, but only
+ * to the listed metrics.</p>
  *
- * @param services допустимые значения {@code MetricKey.service}
- * @param metrics допустимые значения {@code MetricKey.metric}
- * @param operations допустимые значения {@code MetricKey.operation}
- * @param instances допустимые значения {@code MetricKey.instance}
+ * @param services allowed values of {@code MetricKey.service}
+ * @param metrics allowed values of {@code MetricKey.metric}
+ * @param operations allowed values of {@code MetricKey.operation}
+ * @param instances allowed values of {@code MetricKey.instance}
  */
 @Builder(toBuilder = true)
 public record MetricSelector(
@@ -84,3 +84,4 @@ public record MetricSelector(
                 .collect(Collectors.toUnmodifiableSet());
     }
 }
+

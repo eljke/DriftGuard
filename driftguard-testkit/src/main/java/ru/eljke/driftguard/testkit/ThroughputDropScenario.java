@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * Резкое падение throughput, характерное для throttling-а или деградации downstream dependency.
+ * English API documentation.
  */
 public final class ThroughputDropScenario implements MetricScenario {
     private final String name;
@@ -59,3 +59,5 @@ public final class ThroughputDropScenario implements MetricScenario {
         return List.of(new DriftInterval(start, end));
     }
 }
+
+

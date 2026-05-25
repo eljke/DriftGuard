@@ -1,7 +1,7 @@
 package ru.eljke.driftguard.demo.scenario;
 
 /**
- * Краткое описание demo-сценария для UI и REST API.
+ * Short demo scenario description for UI and REST API.
  */
 public record DemoScenarioDescriptor(
         String id,
@@ -10,3 +10,5 @@ public record DemoScenarioDescriptor(
         String description
 ) {
 }
+
+

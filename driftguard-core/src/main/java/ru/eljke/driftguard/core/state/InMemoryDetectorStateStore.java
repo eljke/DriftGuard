@@ -11,8 +11,8 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 /**
- * Потокобезопасное in-memory хранилище состояний для тестов, локального demo
- * и запусков без долговременного хранения.
+ * Thread-safe in-memory state store for tests, local demo runs
+ * and executions without durable persistence.
  */
 public final class InMemoryDetectorStateStore implements DetectorStateStore {
     private final Map<DetectorInstanceKey, DetectorState> states = new ConcurrentHashMap<>();
@@ -42,3 +42,4 @@ public final class InMemoryDetectorStateStore implements DetectorStateStore {
         });
     }
 }
+

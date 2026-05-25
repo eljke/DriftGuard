@@ -5,7 +5,7 @@ import org.apache.kafka.common.serialization.Deserializer;
 import ru.eljke.driftguard.core.error.DriftGuardException;
 
 /**
- * Kafka JSON deserializer для конкретного DriftGuard-типа.
+ * English API documentation.
  */
 public final class JsonDeserializer<T> implements Deserializer<T> {
     private final ObjectMapper objectMapper;
@@ -28,3 +28,5 @@ public final class JsonDeserializer<T> implements Deserializer<T> {
         }
     }
 }
+
+

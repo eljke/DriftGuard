@@ -13,11 +13,11 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 /**
- * Adapter между core-хранилищем runtime state и Kafka Streams state store.
+ * English API documentation.
  *
- * <p>В Kafka state store сохраняется переносимый snapshot, а не Java-объект
- * состояния алгоритма. Это позволяет позже менять физический формат хранения
- * и добавлять миграции схемы без изменения core engine.</p>
+ * <p>Kafka state store persists a portable snapshot, not a Java object
+ * English API documentation.
+ * and adding schema migrations without changing the core engine.</p>
  */
 public final class KafkaDetectorRuntimeStateStore implements DetectorRuntimeStateStore {
     private final KeyValueStore<String, DetectorRuntimeStateSnapshot> store;
@@ -65,3 +65,5 @@ public final class KafkaDetectorRuntimeStateStore implements DetectorRuntimeStat
         return updated;
     }
 }
+
+

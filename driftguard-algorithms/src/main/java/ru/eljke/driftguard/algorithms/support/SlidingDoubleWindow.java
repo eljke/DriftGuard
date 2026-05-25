@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
 
 /**
- * Неизменяемое окно фиксированного размера для реализаций detector-ов.
+ * Immutable fixed-size window for detector implementations.
  *
- * <p>Добавление значения возвращает новый экземпляр окна. Это упрощает анализ
- * snapshot-ов состояния алгоритма и исключает скрытую мутацию внутри detector-ов.</p>
+ * English API documentation.
+ * algorithm state snapshots and prevents hidden mutation inside detectors.</p>
  */
 public final class SlidingDoubleWindow {
     private final int capacity;
@@ -87,3 +87,5 @@ public final class SlidingDoubleWindow {
         return Arrays.stream(toArray()).summaryStatistics();
     }
 }
+
+

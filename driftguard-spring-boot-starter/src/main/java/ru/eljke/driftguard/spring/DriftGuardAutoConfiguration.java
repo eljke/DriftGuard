@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Spring Boot auto-configuration для core-компонентов DriftGuard.
+ * Spring Boot auto-configuration for DriftGuard core components.
  */
 @AutoConfiguration
 @EnableConfigurationProperties(DriftGuardProperties.class)
@@ -141,3 +141,5 @@ public class DriftGuardAutoConfiguration {
         ));
     }
 }
+
+

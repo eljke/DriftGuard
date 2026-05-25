@@ -4,10 +4,10 @@ import ru.eljke.driftguard.core.domain.MetricKey;
 import ru.eljke.driftguard.core.error.DriftGuardErrors;
 
 /**
- * Ключ для изоляции состояния detector-а по потоку метрик и detector definition.
+ * Key that isolates detector state by metric stream and detector definition.
  *
- * <p>Одна и та же метрика может проверяться несколькими detector definitions,
- * каждая из которых имеет независимое состояние и пороги.</p>
+ * English API documentation.
+ * English API documentation.
  */
 public record DetectorInstanceKey(
         MetricKey metricKey,
@@ -18,3 +18,5 @@ public record DetectorInstanceKey(
         detectorName = DriftGuardErrors.requireNonBlank(detectorName, "detectorName");
     }
 }
+
+

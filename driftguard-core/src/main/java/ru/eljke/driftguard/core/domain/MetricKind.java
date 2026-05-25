@@ -1,10 +1,10 @@
 package ru.eljke.driftguard.core.domain;
 
 /**
- * Семантический тип значения метрики.
+ * Semantic type of a metric value.
  *
- * <p>Тип помогает будущим adapter-ам и detector-ам корректно интерпретировать
- * значения без hardcode-а имён метрик.</p>
+ * <p>The type helps future adapters and detectors interpret
+ * values without hardcoding metric names.</p>
  */
 public enum MetricKind {
     GAUGE,
@@ -15,3 +15,5 @@ public enum MetricKind {
     COUNT,
     PERCENTAGE
 }
+
+

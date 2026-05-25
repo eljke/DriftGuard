@@ -13,7 +13,7 @@ import ru.eljke.driftguard.core.domain.MetricPoint;
 import java.util.Map;
 
 /**
- * Двухвыборочный detector Колмогорова-Смирнова для drift-а непрерывных распределений.
+ * Two-sample Kolmogorov-Smirnov detector for continuous distribution drift.
  */
 public final class KsDetector implements DetectorAlgorithm<KsConfig, KsState> {
     private static final KolmogorovSmirnovTest TEST = new KolmogorovSmirnovTest();
@@ -74,3 +74,5 @@ public final class KsDetector implements DetectorAlgorithm<KsConfig, KsState> {
         ));
     }
 }
+
+

@@ -6,7 +6,7 @@ import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 
 /**
- * Kafka SerDe, основанный на Jackson JSON.
+ * English API documentation.
  */
 public final class JsonSerde<T> implements Serde<T> {
     private final JsonSerializer<T> serializer;
@@ -27,3 +27,5 @@ public final class JsonSerde<T> implements Serde<T> {
         return deserializer;
     }
 }
+
+
