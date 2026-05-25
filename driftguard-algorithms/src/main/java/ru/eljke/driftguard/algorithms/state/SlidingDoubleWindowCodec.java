@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 
 /**
- * English API documentation.
+ * Codec for serializing bounded sliding double windows.
  */
 final class SlidingDoubleWindowCodec {
     private SlidingDoubleWindowCodec() {

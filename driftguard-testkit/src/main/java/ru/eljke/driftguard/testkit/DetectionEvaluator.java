@@ -7,7 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * English API documentation.
+ * Evaluates emitted events against expected drift intervals.
  */
 public final class DetectionEvaluator {
     private DetectionEvaluator() {

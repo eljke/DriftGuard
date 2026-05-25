@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  * Manages the DriftGuard Kafka Streams topology lifecycle inside a Spring
  * application.
  *
- * English API documentation.
+ * Lifecycle wrapper for a managed Kafka Streams instance.
  * the Spring context can load even in tests where auto-start is disabled. On
  * context shutdown, streams are closed through the standard {@code close()}.</p>
  */

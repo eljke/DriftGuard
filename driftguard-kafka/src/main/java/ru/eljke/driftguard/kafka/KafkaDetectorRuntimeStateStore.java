@@ -13,10 +13,10 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 /**
- * English API documentation.
+ * Detector runtime state store backed by Kafka Streams key-value state stores.
  *
  * <p>Kafka state store persists a portable snapshot, not a Java object
- * English API documentation.
+ * Detector runtime state store backed by Kafka Streams key-value state stores.
  * and adding schema migrations without changing the core engine.</p>
  */
 public final class KafkaDetectorRuntimeStateStore implements DetectorRuntimeStateStore {

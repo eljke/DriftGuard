@@ -6,8 +6,8 @@ import ru.eljke.driftguard.core.error.DriftGuardErrors;
 /**
  * Key that isolates detector state by metric stream and detector definition.
  *
- * English API documentation.
- * English API documentation.
+ * Key that isolates detector runtime state by metric stream and detector definition.
+ * Key that isolates detector runtime state by metric stream and detector definition.
  */
 public record DetectorInstanceKey(
         MetricKey metricKey,

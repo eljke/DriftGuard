@@ -7,7 +7,7 @@ import ru.eljke.driftguard.core.domain.MetricPoint;
 import ru.eljke.driftguard.core.state.DetectorRuntimeStateSnapshot;
 
 /**
- * English API documentation.
+ * Factory methods for JSON SerDes used by DriftGuard Kafka integrations.
  */
 public final class DriftGuardSerdes {
     private DriftGuardSerdes() {

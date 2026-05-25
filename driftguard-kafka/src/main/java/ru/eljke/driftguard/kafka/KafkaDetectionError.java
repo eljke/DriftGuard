@@ -5,16 +5,16 @@ import ru.eljke.driftguard.core.domain.MetricPoint;
 import java.time.Instant;
 
 /**
- * English API documentation.
+ * Serializable error record produced when Kafka detection fails.
  *
- * English API documentation.
- * English API documentation.
- * English API documentation.
+ * Serializable error record produced when Kafka detection fails.
+ * Serializable error record produced when Kafka detection fails.
+ * Serializable error record produced when Kafka detection fails.
  *
- * @param point documented value
- * @param exceptionClass documented value
- * @param message documented value
- * @param occurredAt documented value
+ * @param point metric point being processed
+ * @param exceptionClass fully qualified exception class name
+ * @param message error message
+ * @param occurredAt time when the error occurred
  */
 public record KafkaDetectionError(
         MetricPoint point,

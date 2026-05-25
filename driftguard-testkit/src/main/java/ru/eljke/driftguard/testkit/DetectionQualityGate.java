@@ -9,7 +9,7 @@ import java.util.Objects;
  * Set of minimum detection quality requirements.
  *
  * <p>Quality gates are used in tests and CI so algorithm changes
- * English API documentation.
+ * Thresholds that define acceptable benchmark quality.
  * All thresholds are optional: when a value is absent, the corresponding check
  * is skipped.</p>
  */

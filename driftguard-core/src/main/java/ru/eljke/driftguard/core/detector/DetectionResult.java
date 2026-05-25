@@ -6,11 +6,11 @@ import ru.eljke.driftguard.core.error.DriftGuardErrors;
 import java.util.Optional;
 
 /**
- * English API documentation.
+ * Detector output containing the updated algorithm state and an optional drift event.
  *
- * @param state documented value
- * @param event documented value
- * English API documentation.
+ * @param state updated detector state
+ * @param event optional emitted drift event
+ * Detector output containing the updated algorithm state and an optional drift event.
  */
 public record DetectionResult<S extends DetectorState>(
         S state,

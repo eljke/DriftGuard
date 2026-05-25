@@ -8,10 +8,10 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * English API documentation.
+ * Reusable benchmark suite with configurable quality gates.
  *
- * English API documentation.
- * English API documentation.
+ * Reusable benchmark suite with configurable quality gates.
+ * Reusable benchmark suite with configurable quality gates.
  */
 public record DetectionBenchmarkSuite(
         String label,

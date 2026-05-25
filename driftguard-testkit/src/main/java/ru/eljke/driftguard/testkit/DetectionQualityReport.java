@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * English API documentation.
+ * Quality-gate evaluation result for a benchmark report.
  *
- * @param benchmarkReport documented value
- * @param gate documented value
- * @param violations documented value
+ * @param benchmarkReport benchmark report being checked
+ * @param gate quality gate thresholds
+ * @param violations quality-gate violations
  */
 public record DetectionQualityReport(
         DetectionBenchmarkReport benchmarkReport,

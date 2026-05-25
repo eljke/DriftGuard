@@ -8,14 +8,14 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * English API documentation.
+ * Common configuration shared by synthetic metric scenarios.
  *
- * @param key documented value
- * @param kind documented value
- * @param start documented value
- * @param step documented value
- * @param samples documented value
- * @param seed documented value
+ * @param key metric stream key
+ * @param kind metric kind
+ * @param start start timestamp
+ * @param step time step between generated samples
+ * @param samples number of generated samples
+ * @param seed random seed for reproducible noise
  */
 public record ScenarioConfig(
         MetricKey key,

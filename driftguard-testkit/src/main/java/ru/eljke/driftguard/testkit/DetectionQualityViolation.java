@@ -1,12 +1,12 @@
 package ru.eljke.driftguard.testkit;
 
 /**
- * English API documentation.
+ * Single failed quality-gate assertion.
  *
- * @param metric documented value
- * @param expected documented value
- * @param actual documented value
- * @param direction documented value
+ * @param metric quality metric name
+ * @param expected required threshold value
+ * @param actual observed metric value
+ * @param direction comparison direction for the threshold
  */
 public record DetectionQualityViolation(
         String metric,

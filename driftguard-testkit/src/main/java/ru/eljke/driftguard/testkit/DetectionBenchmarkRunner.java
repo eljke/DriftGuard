@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * English API documentation.
+ * Runs detector callbacks against synthetic scenarios and evaluates quality.
  * detector quality on reproducible metric streams.
  */
 public final class DetectionBenchmarkRunner {

@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 
 /**
- * English API documentation.
+ * State codec for Population Stability Index detector samples.
  */
 public final class PsiStateCodec implements DetectorStateCodec<PsiState> {
     @Override

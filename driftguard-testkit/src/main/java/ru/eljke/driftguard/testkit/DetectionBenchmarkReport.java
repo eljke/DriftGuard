@@ -3,11 +3,11 @@ package ru.eljke.driftguard.testkit;
 import java.util.List;
 
 /**
- * English API documentation.
+ * Benchmark report containing per-scenario results and aggregate summary.
  *
- * @param label documented value
- * @param results documented value
- * @param summary documented value
+ * @param label benchmark report label
+ * @param results per-scenario benchmark results
+ * @param summary aggregate benchmark summary
  */
 public record DetectionBenchmarkReport(
         String label,

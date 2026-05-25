@@ -12,7 +12,7 @@ import java.util.Random;
  * Stable seasonal stream without expected drift.
  *
  * <p>This scenario verifies that a detector does not treat a regular
- * English API documentation.
+ * Scenario with periodic variation that should not be treated as drift.
  */
 public final class SeasonalNoiseScenario implements MetricScenario {
     private final String name;

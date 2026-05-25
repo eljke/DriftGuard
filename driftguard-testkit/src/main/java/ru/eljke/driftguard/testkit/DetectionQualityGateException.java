@@ -1,7 +1,7 @@
 package ru.eljke.driftguard.testkit;
 
 /**
- * English API documentation.
+ * Exception thrown when a benchmark report violates a quality gate.
  */
 public final class DetectionQualityGateException extends AssertionError {
     private final DetectionQualityReport report;

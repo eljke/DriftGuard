@@ -4,10 +4,10 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * English API documentation.
+ * Expected drift time interval in a synthetic scenario.
  *
- * @param start documented value
- * @param end documented value
+ * @param start start timestamp
+ * @param end end timestamp
  */
 public record DriftInterval(
         Instant start,

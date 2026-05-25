@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * English API documentation.
+ * Scenario with a short temporary spike in metric values.
  */
 public final class PulseSpikeScenario implements MetricScenario {
     private final String name;

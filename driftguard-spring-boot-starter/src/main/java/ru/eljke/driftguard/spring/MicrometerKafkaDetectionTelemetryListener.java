@@ -13,11 +13,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * English API documentation.
+ * Kafka detection telemetry listener that records Micrometer metrics.
  *
- * English API documentation.
- * English API documentation.
- * English API documentation.
+ * Kafka detection telemetry listener that records Micrometer metrics.
+ * Kafka detection telemetry listener that records Micrometer metrics.
+ * Kafka detection telemetry listener that records Micrometer metrics.
  */
 public final class MicrometerKafkaDetectionTelemetryListener implements KafkaDetectionTelemetryListener {
     private final MeterRegistry registry;

@@ -8,7 +8,7 @@ import ru.eljke.driftguard.core.config.DetectorConfig;
  *
  * @param baselineWindowSize number of observations in the reference distribution
  * @param currentWindowSize number of latest observations compared with the baseline
- * @param buckets documented value
+ * @param buckets ordered PSI bucket boundaries
  * @param warningThreshold PSI value for warning events
  * @param criticalThreshold PSI value for critical events
  * @param epsilon minimum bucket share used to avoid division by zero

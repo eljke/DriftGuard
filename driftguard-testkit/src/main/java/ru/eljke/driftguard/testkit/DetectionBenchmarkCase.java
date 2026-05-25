@@ -3,10 +3,10 @@ package ru.eljke.driftguard.testkit;
 import java.util.Objects;
 
 /**
- * English API documentation.
+ * Named benchmark case that pairs an id with a metric scenario.
  *
- * @param id documented value
- * @param scenario documented value
+ * @param id stable benchmark or scenario identifier
+ * @param scenario metric scenario under evaluation
  */
 public record DetectionBenchmarkCase(
         String id,

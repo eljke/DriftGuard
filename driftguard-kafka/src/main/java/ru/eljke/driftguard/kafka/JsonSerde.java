@@ -6,7 +6,7 @@ import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 
 /**
- * English API documentation.
+ * Kafka Serde backed by the DriftGuard JSON serializer and deserializer.
  */
 public final class JsonSerde<T> implements Serde<T> {
     private final JsonSerializer<T> serializer;

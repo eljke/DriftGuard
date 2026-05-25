@@ -4,29 +4,29 @@ import ru.eljke.driftguard.core.config.DetectorConfig;
 import ru.eljke.driftguard.core.domain.MetricPoint;
 
 /**
- * English API documentation.
+ * Contract implemented by streaming drift-detection algorithms.
  *
- * English API documentation.
- * English API documentation.
- * English API documentation.
- * English API documentation.
+ * Contract implemented by streaming drift-detection algorithms.
+ * Contract implemented by streaming drift-detection algorithms.
+ * Contract implemented by streaming drift-detection algorithms.
+ * Contract implemented by streaming drift-detection algorithms.
  *
- * English API documentation.
- * English API documentation.
+ * Contract implemented by streaming drift-detection algorithms.
+ * Contract implemented by streaming drift-detection algorithms.
  */
 public interface DetectorAlgorithm<C extends DetectorConfig, S extends DetectorState> {
     /**
-     * English API documentation.
+     * Contract implemented by streaming drift-detection algorithms.
      */
     String name();
 
     /**
-     * English API documentation.
+     * Contract implemented by streaming drift-detection algorithms.
      */
     Class<C> configType();
 
     /**
-     * English API documentation.
+     * Contract implemented by streaming drift-detection algorithms.
      */
     S initialState(C config);
 

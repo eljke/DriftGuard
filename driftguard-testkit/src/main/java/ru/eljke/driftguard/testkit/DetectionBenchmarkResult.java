@@ -1,10 +1,10 @@
 package ru.eljke.driftguard.testkit;
 
 /**
- * English API documentation.
+ * Quality result for one benchmark scenario.
  *
- * @param scenario documented value
- * @param metrics documented value
+ * @param scenario metric scenario under evaluation
+ * @param metrics calculated detection metrics
  */
 public record DetectionBenchmarkResult(
         String scenario,

@@ -3,17 +3,17 @@ package ru.eljke.driftguard.testkit;
 import java.time.Duration;
 
 /**
- * English API documentation.
+ * Factory and assertion helpers for detection quality gates.
  *
- * English API documentation.
- * English API documentation.
+ * Factory and assertion helpers for detection quality gates.
+ * Factory and assertion helpers for detection quality gates.
  */
 public final class DetectionQualityGates {
     private DetectionQualityGates() {
     }
 
     /**
-     * English API documentation.
+     * Factory and assertion helpers for detection quality gates.
      */
     public static DetectionQualityGate smoke() {
         return DetectionQualityGate.builder()
@@ -23,7 +23,7 @@ public final class DetectionQualityGates {
     }
 
     /**
-     * English API documentation.
+     * Factory and assertion helpers for detection quality gates.
      */
     public static DetectionQualityGate balanced() {
         return DetectionQualityGate.builder()
@@ -36,7 +36,7 @@ public final class DetectionQualityGates {
     }
 
     /**
-     * English API documentation.
+     * Factory and assertion helpers for detection quality gates.
      */
     public static DetectionQualityGate strict() {
         return DetectionQualityGate.builder()

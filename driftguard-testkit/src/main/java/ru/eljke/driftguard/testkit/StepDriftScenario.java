@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * English API documentation.
- * English API documentation.
+ * Scenario with an abrupt persistent value change.
+ * Scenario with an abrupt persistent value change.
  */
 public final class StepDriftScenario implements MetricScenario {
     private final String name;

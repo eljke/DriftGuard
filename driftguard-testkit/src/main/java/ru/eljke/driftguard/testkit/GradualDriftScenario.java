@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * English API documentation.
+ * Scenario where the metric value changes gradually after the drift point.
  */
 public final class GradualDriftScenario implements MetricScenario {
     private final String name;

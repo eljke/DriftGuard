@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * English API documentation.
+ * Aggregate quality summary across benchmark scenarios.
  */
 public record DetectionBenchmarkSummary(
         int scenarios,

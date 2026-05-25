@@ -5,21 +5,21 @@ import ru.eljke.driftguard.core.domain.MetricPoint;
 import java.util.List;
 
 /**
- * English API documentation.
+ * Synthetic metric scenario used for detector benchmarks and demos.
  */
 public interface MetricScenario {
     /**
-     * English API documentation.
+     * Synthetic metric scenario used for detector benchmarks and demos.
      */
     String name();
 
     /**
-     * English API documentation.
+     * Synthetic metric scenario used for detector benchmarks and demos.
      */
     List<MetricPoint> generate();
 
     /**
-     * English API documentation.
+     * Synthetic metric scenario used for detector benchmarks and demos.
      */
     List<DriftInterval> expectedDrifts();
 }

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * English API documentation.
+ * Scenario with stable noisy values and no expected drift.
  */
 public final class StableNoiseScenario implements MetricScenario {
     private final String name;

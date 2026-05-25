@@ -6,7 +6,7 @@ import ru.eljke.driftguard.core.state.SimpleDetectorStateCodecRegistry;
 import java.util.List;
 
 /**
- * English API documentation.
+ * Registry helper for state codecs used by built-in detector algorithms.
  */
 public final class BuiltInDetectorStateCodecs {
     private BuiltInDetectorStateCodecs() {

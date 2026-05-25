@@ -7,7 +7,7 @@ import java.util.DoubleSummaryStatistics;
 /**
  * Immutable fixed-size window for detector implementations.
  *
- * English API documentation.
+ * Bounded sliding window of double values used by statistical detectors.
  * algorithm state snapshots and prevents hidden mutation inside detectors.</p>
  */
 public final class SlidingDoubleWindow {

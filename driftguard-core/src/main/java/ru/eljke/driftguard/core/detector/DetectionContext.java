@@ -5,7 +5,7 @@ import ru.eljke.driftguard.core.error.DriftGuardErrors;
 /**
  * Metadata of one call that the engine passes to an algorithm.
  *
- * @param detectorName documented value
+ * @param detectorName detector definition name
  */
 public record DetectionContext(
         String detectorName

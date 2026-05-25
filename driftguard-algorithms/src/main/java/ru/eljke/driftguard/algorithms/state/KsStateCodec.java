@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 
 /**
- * English API documentation.
+ * State codec for Kolmogorov-Smirnov detector samples.
  */
 public final class KsStateCodec implements DetectorStateCodec<KsState> {
     @Override
