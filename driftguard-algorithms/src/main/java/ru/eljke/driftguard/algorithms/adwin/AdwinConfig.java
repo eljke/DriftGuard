@@ -4,16 +4,17 @@ import lombok.Builder;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 
 /**
- * Конфигурация ADWIN-style detector-а с адаптивным окном.
+ * Configuration for the ADWIN adaptive-window mean-shift detector.
  *
- * <p>Detector проверяет несколько возможных разрезов окна через Hoeffding
- * bound. После подтверждённого drift-а старый фрагмент окна отбрасывается,
- * а новое состояние продолжает работать с актуальной частью потока.</p>
+ * <p>The implementation keeps an exact bounded window and applies the ADWIN
+ * cut test with a variance-aware confidence bound. When a cut is accepted, the
+ * older sub-window is discarded and the detector continues with the recent
+ * observations.</p>
  *
- * @param windowSize общий размер sliding window
- * @param minSubWindowSize минимальный размер каждого сравниваемого sub-window
- * @param delta статистический confidence-параметр, используемый в bound
- * @param criticalMultiplier множитель score, после которого severity становится critical
+ * @param windowSize maximum retained adaptive window size
+ * @param minSubWindowSize minimum size of each candidate sub-window
+ * @param delta confidence parameter used by the ADWIN cut bound
+ * @param criticalMultiplier score multiplier that promotes an event to critical
  */
 @Builder(toBuilder = true)
 public record AdwinConfig(

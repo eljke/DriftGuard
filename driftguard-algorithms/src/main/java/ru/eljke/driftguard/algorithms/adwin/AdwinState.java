@@ -4,7 +4,7 @@ import ru.eljke.driftguard.algorithms.support.SlidingDoubleWindow;
 import ru.eljke.driftguard.core.detector.DetectorState;
 
 /**
- * Состояние ADWIN-style detector-а для одного потока метрик.
+ * Runtime state of the ADWIN detector for one metric stream.
  */
 public record AdwinState(
         SlidingDoubleWindow window

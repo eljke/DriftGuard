@@ -13,7 +13,12 @@ import java.util.Arrays;
 import java.util.Map;
 
 /**
- * Detector с адаптивным окном для обнаружения сдвига среднего через Hoeffding-style bound.
+ * ADWIN detector for online mean-shift detection.
+ *
+ * <p>This is the exact-window variant of ADWIN: it scans candidate cuts in the
+ * current adaptive window, applies the variance-aware ADWIN bound and drops
+ * the older side of the accepted cut. It does not use ADWIN2 bucket
+ * compression, so memory is bounded by {@link AdwinConfig#windowSize()}.</p>
  */
 public final class AdwinDetector implements DetectorAlgorithm<AdwinConfig, AdwinState> {
     @Override
@@ -41,7 +46,7 @@ public final class AdwinDetector implements DetectorAlgorithm<AdwinConfig, Adwin
         if (best == null) {
             return DetectionResult.noDrift(new AdwinState(window));
         }
-        double[] currentValues = Arrays.copyOfRange(window.toArray(), best.split(), window.size());
+        double[] currentValues = Arrays.copyOfRange(best.values(), best.split(), best.values().length);
         AdwinState next = new AdwinState(SlidingDoubleWindow.of(config.windowSize(), currentValues));
         DriftDirection direction = best.rightMean() > best.leftMean() ? DriftDirection.UP : DriftDirection.DOWN;
         DriftSeverity severity = best.score() >= config.criticalMultiplier() ? DriftSeverity.CRITICAL : DriftSeverity.WARNING;
@@ -54,7 +59,7 @@ public final class AdwinDetector implements DetectorAlgorithm<AdwinConfig, Adwin
                 best.score(),
                 best.rightMean(),
                 best.leftMean(),
-                "ADWIN-style adaptive window mean difference exceeded Hoeffding bound",
+                "ADWIN adaptive window cut exceeded the confidence bound",
                 DriftEvents.standardDetails(
                         best.leftMean(),
                         best.rightMean(),
@@ -63,7 +68,9 @@ public final class AdwinDetector implements DetectorAlgorithm<AdwinConfig, Adwin
                         Map.of(
                                 "epsilon", best.epsilon(),
                                 "split", best.split(),
-                                "windowSize", window.size(),
+                                "windowSize", best.values().length,
+                                "variance", best.variance(),
+                                "harmonicMean", best.harmonicMean(),
                                 "meanDifference", Math.abs(best.rightMean() - best.leftMean()),
                                 "scoreMultiplier", best.score()
                         )
@@ -88,18 +95,42 @@ public final class AdwinDetector implements DetectorAlgorithm<AdwinConfig, Adwin
         double leftMean = Arrays.stream(left).average().orElse(0.0);
         double rightMean = Arrays.stream(right).average().orElse(0.0);
         double diff = Math.abs(rightMean - leftMean);
-        double epsilon = Math.sqrt(0.5 * Math.log(4.0 / config.delta()) * (1.0 / left.length + 1.0 / right.length));
+        double variance = variance(values);
+        double harmonicMean = 1.0 / (1.0 / left.length + 1.0 / right.length);
+        double adjustedDelta = config.delta() / values.length;
+        double logTerm = Math.log(2.0 / adjustedDelta);
+        double epsilon = Math.sqrt(2.0 * variance * logTerm / harmonicMean) + (2.0 * logTerm / (3.0 * harmonicMean));
         if (diff <= epsilon) {
             return null;
         }
-        return new Cut(split, leftMean, rightMean, epsilon, diff / epsilon);
+        return new Cut(values, split, leftMean, rightMean, variance, harmonicMean, epsilon, diff / epsilon);
     }
 
-    private record Cut(int split, double leftMean, double rightMean, double epsilon, double score) {
+    private static double variance(double[] values) {
+        double mean = Arrays.stream(values).average().orElse(0.0);
+        double sumSquares = 0.0;
+        for (double value : values) {
+            double deviation = value - mean;
+            sumSquares += deviation * deviation;
+        }
+        return sumSquares / values.length;
+    }
+
+    private record Cut(
+            double[] values,
+            int split,
+            double leftMean,
+            double rightMean,
+            double variance,
+            double harmonicMean,
+            double epsilon,
+            double score
+    ) {
         private Cut {
             if (split <= 0) {
                 throw new IllegalArgumentException("split must be positive");
             }
+            values = Arrays.copyOf(values, values.length);
         }
     }
 }

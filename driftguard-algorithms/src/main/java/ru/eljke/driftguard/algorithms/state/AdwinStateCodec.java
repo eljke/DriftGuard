@@ -5,7 +5,7 @@ import ru.eljke.driftguard.algorithms.adwin.AdwinState;
 import ru.eljke.driftguard.core.state.DetectorStateCodec;
 
 /**
- * Codec состояния ADWIN-style detector-а.
+ * Codec for ADWIN detector state snapshots.
  */
 public final class AdwinStateCodec implements DetectorStateCodec<AdwinState> {
     @Override
