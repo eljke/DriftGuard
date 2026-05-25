@@ -27,7 +27,6 @@
         <module>driftguard-kafka</module>
         <module>driftguard-spring-boot-starter</module>
         <module>driftguard-testkit</module>
-        <module>driftguard-demo</module>
     </modules>
 
     <dependencyManagement>

@@ -1,17 +1,18 @@
 # DriftGuard
 
-DriftGuard is a modular Java library for detecting data drift in streaming technical metrics and publishing drift alerts. The project is structured as a reusable library plus integration modules; the demo module is intentionally kept separate so it can be moved into a standalone product that consumes the library.
+DriftGuard is a modular Java library for detecting data drift in streaming technical metrics and publishing drift alerts.
+The repository contains reusable library modules and integration modules only.
+The demo application lives in a separate sibling project: `DriftGuardDemo`.
 
 ## Modules
 
-| Module | Purpose |
-| --- | --- |
-| `driftguard-core` | Domain model, detector contracts, `DriftGuard` facade, `DriftDetectorEngine`, state-store abstractions and event sinks. |
-| `driftguard-algorithms` | Built-in drift detectors: Page-Hinkley, ADWIN, PSI, Kolmogorov-Smirnov and chi-square. |
-| `driftguard-kafka` | Kafka JSON SerDes and Kafka Streams topology builders. |
-| `driftguard-spring-boot-starter` | Spring Boot auto-configuration and `application.yml` binding. |
-| `driftguard-testkit` | Reproducible synthetic metric scenarios, expected drift intervals and quality gates. |
-| `driftguard-demo` | A demo observability product that uses DriftGuard to detect and alert on synthetic service degradation. |
+| Module                           | Purpose                                                                                                                 |
+|----------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| `driftguard-core`                | Domain model, detector contracts, `DriftGuard` facade, `DriftDetectorEngine`, state-store abstractions and event sinks. |
+| `driftguard-algorithms`          | Built-in drift detectors: Page-Hinkley, ADWIN, PSI, Kolmogorov-Smirnov and chi-square.                                  |
+| `driftguard-kafka`               | Kafka JSON SerDes and Kafka Streams topology builders.                                                                  |
+| `driftguard-spring-boot-starter` | Spring Boot auto-configuration and `application.yml` binding.                                                           |
+| `driftguard-testkit`             | Reproducible synthetic metric scenarios, expected drift intervals and quality gates.                                    |
 
 ## Runtime Flow
 
@@ -82,19 +83,17 @@ MetricPoint point = MetricPoint.builder()
 List<DriftEvent> events = driftGuard.detect(point);
 ```
 
-This mode is useful for unit tests, offline replay, embedded ingestion and custom alert pipelines.
-
 ## Built-In Algorithms
 
 The algorithms are meant to complement each other rather than compete for the same signal:
 
-| Algorithm | Best fit |
-| --- | --- |
+| Algorithm      | Best fit                                                                                                                                         |
+|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
 | `page-hinkley` | Fast online detection of sustained mean shifts. Good for latency, error rate, queue size, CPU and memory. Configure `DOWN` for throughput drops. |
-| `adwin` | Adaptive-window online mean-shift detection. It uses a variance-aware ADWIN cut bound and shrinks the window after a confirmed change. |
-| `psi` | Population Stability Index for broad distribution drift in binned values. Good for comparing current behavior with a baseline distribution. |
-| `ks` | Two-sample Kolmogorov-Smirnov test for continuous distributions when raw samples are meaningful. |
-| `chi-square` | Binned chi-square test for categorical or bucketed distributions with enough expected observations per bucket. |
+| `adwin`        | Adaptive-window online mean-shift detection. It uses a variance-aware ADWIN cut bound and shrinks the window after a confirmed change.           |
+| `psi`          | Population Stability Index for broad distribution drift in binned values. Good for comparing current behavior with a baseline distribution.      |
+| `ks`           | Two-sample Kolmogorov-Smirnov test for continuous distributions when raw samples are meaningful.                                                 |
+| `chi-square`   | Binned chi-square test for categorical or bucketed distributions with enough expected observations per bucket.                                   |
 
 Recommended combinations:
 
@@ -145,51 +144,31 @@ driftguard:
 
 Kafka message keys should identify the metric stream when possible, for example `checkout-service|latency|POST /checkout`. Stable keys improve partitioning and debugging.
 
-## Demo Product Direction
+## Standalone Demo
 
-`driftguard-demo` currently remains a Maven module, but it is treated as a standalone consumer product. It simulates a small service-observability environment:
+`DriftGuardDemo` is a standalone Spring Boot product that consumes this library. It simulates a small service-observability environment, runs synthetic and Kafka-backed drift scenarios, stores recent drift events, exposes REST/OpenAPI endpoints and renders a React UI.
 
-- checkout latency degradation;
-- error-rate spikes;
-- throughput drops;
-- queue backlog growth;
-- seasonal latency without expected drift;
-- multi-service Kafka replay.
+Build the library artifacts first:
 
-The demo uses DriftGuard as a dependency, exposes REST/OpenAPI endpoints, renders a React UI, stores recent drift events and shows quality metrics. This makes it easy to move the module into a separate `DriftGuardDemo` repository later without changing the library contracts.
+```bash
+mvn install
+```
 
-## Local Run
+Then run the demo from the sibling project:
 
-Run all tests:
+```bash
+cd ../DriftGuardDemo
+mvn spring-boot:run
+```
+
+The demo UI is available at `http://localhost:8080`.
+
+## Local Verification
+
+Run all library tests:
 
 ```bash
 mvn test
 ```
-
-Run the full demo stack:
-
-```bash
-docker compose up --build
-```
-
-Services:
-
-- Demo UI: `http://localhost:8080`
-- Kafka: `localhost:9092`
-- Kafka UI: `http://localhost:8090`
-- Prometheus: `http://localhost:9090`
-- Grafana: `http://localhost:3000` (`admin` / `admin`)
-
-Frontend development:
-
-```bash
-cd driftguard-demo/src/main/frontend
-npm ci
-npm run dev
-```
-
-Vite proxies `/api`, `/actuator`, `/v3` and Swagger requests to `localhost:8080`.
-
-## Quality Gates
 
 `driftguard-testkit` provides scenario generators and quality gates for precision, recall, false positives, missed drift intervals and first-detection delay. These tests protect algorithm behavior from regressions and make the project demonstrable for academic review.
