@@ -1,5 +1,7 @@
 package ru.eljke.driftguard.core.config;
 
+import lombok.Builder;
+import lombok.Singular;
 import ru.eljke.driftguard.core.domain.MetricKey;
 
 import java.util.List;
@@ -19,10 +21,15 @@ import java.util.stream.Collectors;
  * @param operations допустимые значения {@code MetricKey.operation}
  * @param instances допустимые значения {@code MetricKey.instance}
  */
+@Builder(toBuilder = true)
 public record MetricSelector(
+        @Singular("service")
         Set<String> services,
+        @Singular("metric")
         Set<String> metrics,
+        @Singular("operation")
         Set<String> operations,
+        @Singular("instance")
         Set<String> instances
 ) implements Predicate<MetricKey> {
     public static final MetricSelector ANY = new MetricSelector(Set.of(), Set.of(), Set.of(), Set.of());

@@ -1,9 +1,8 @@
 package ru.eljke.driftguard.algorithms.pagehinkley;
 
+import lombok.Builder;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 import ru.eljke.driftguard.core.domain.DriftDirection;
-
-import java.util.Objects;
 
 /**
  * Конфигурация онлайн detector-а Page-Hinkley для обнаружения сдвига среднего.
@@ -15,6 +14,7 @@ import java.util.Objects;
  * @param alpha коэффициент обновления среднего; меньшие значения делают baseline медленнее
  * @param direction направление сдвига среднего, которое должен искать detector
  */
+@Builder(toBuilder = true)
 public record PageHinkleyConfig(
         int warmupSamples,
         double delta,
@@ -36,7 +36,7 @@ public record PageHinkleyConfig(
     }
 
     public PageHinkleyConfig {
-        direction = Objects.requireNonNull(direction, "direction must not be null");
+        direction = direction == null ? DriftDirection.UP : direction;
         if (direction != DriftDirection.UP && direction != DriftDirection.DOWN) {
             throw new IllegalArgumentException("direction must be UP or DOWN");
         }

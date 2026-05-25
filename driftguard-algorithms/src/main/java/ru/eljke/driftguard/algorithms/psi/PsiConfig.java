@@ -1,5 +1,6 @@
 package ru.eljke.driftguard.algorithms.psi;
 
+import lombok.Builder;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 
 /**
@@ -12,6 +13,7 @@ import ru.eljke.driftguard.core.config.DetectorConfig;
  * @param criticalThreshold значение PSI для critical events
  * @param epsilon минимальная доля bucket-а, используемая для защиты от деления на ноль
  */
+@Builder(toBuilder = true)
 public record PsiConfig(
         int baselineWindowSize,
         int currentWindowSize,

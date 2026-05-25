@@ -1,5 +1,6 @@
 package ru.eljke.driftguard.algorithms.ks;
 
+import lombok.Builder;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 
 /**
@@ -10,6 +11,7 @@ import ru.eljke.driftguard.core.config.DetectorConfig;
  * @param warningPValue максимальный p-value, при котором создаётся warning event
  * @param criticalPValue максимальный p-value, при котором создаётся critical event
  */
+@Builder(toBuilder = true)
 public record KsConfig(
         int baselineWindowSize,
         int currentWindowSize,

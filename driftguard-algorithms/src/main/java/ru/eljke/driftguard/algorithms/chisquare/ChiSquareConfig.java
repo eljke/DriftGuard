@@ -1,5 +1,6 @@
 package ru.eljke.driftguard.algorithms.chisquare;
 
+import lombok.Builder;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 
 /**
@@ -12,6 +13,7 @@ import ru.eljke.driftguard.core.config.DetectorConfig;
  * @param criticalPValue максимальный p-value, при котором создаётся critical event
  * @param minExpectedCount bucket-ы с меньшим expected count игнорируются
  */
+@Builder(toBuilder = true)
 public record ChiSquareConfig(
         int baselineWindowSize,
         int currentWindowSize,

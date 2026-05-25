@@ -1,5 +1,6 @@
 package ru.eljke.driftguard.core.config;
 
+import lombok.Builder;
 import ru.eljke.driftguard.core.domain.MetricKey;
 import ru.eljke.driftguard.core.error.DriftGuardErrors;
 
@@ -16,6 +17,7 @@ import java.util.function.Predicate;
  * @param config типизированная конфигурация алгоритма
  * @param appliesTo predicate, определяющий, нужно ли обрабатывать поток метрик
  */
+@Builder(toBuilder = true)
 public record DetectorDefinition(
         String name,
         DetectorConfig config,

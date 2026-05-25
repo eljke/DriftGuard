@@ -1,5 +1,6 @@
 package ru.eljke.driftguard.algorithms.adwin;
 
+import lombok.Builder;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 
 /**
@@ -14,6 +15,7 @@ import ru.eljke.driftguard.core.config.DetectorConfig;
  * @param delta статистический confidence-параметр, используемый в bound
  * @param criticalMultiplier множитель score, после которого severity становится critical
  */
+@Builder(toBuilder = true)
 public record AdwinConfig(
         int windowSize,
         int minSubWindowSize,

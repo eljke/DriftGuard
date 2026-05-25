@@ -1,5 +1,6 @@
 package ru.eljke.driftguard.core.config;
 
+import lombok.Builder;
 import ru.eljke.driftguard.core.error.DriftGuardErrors;
 
 import java.time.Duration;
@@ -27,5 +28,18 @@ public record EmissionPolicyConfig(
         cooldown = DriftGuardErrors.requireNonNull(cooldown, "cooldown");
         DriftGuardErrors.require(!cooldown.isNegative(), "cooldown must not be negative");
         DriftGuardErrors.require(recoveryConsecutiveNormal > 0, "recoveryConsecutiveNormal must be positive");
+    }
+
+    @Builder(builderMethodName = "builder")
+    public static EmissionPolicyConfig of(
+            Integer minConsecutiveSignals,
+            Duration cooldown,
+            Integer recoveryConsecutiveNormal
+    ) {
+        return new EmissionPolicyConfig(
+                minConsecutiveSignals == null ? 1 : minConsecutiveSignals,
+                cooldown == null ? Duration.ZERO : cooldown,
+                recoveryConsecutiveNormal == null ? 1 : recoveryConsecutiveNormal
+        );
     }
 }

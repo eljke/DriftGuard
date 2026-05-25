@@ -1,5 +1,6 @@
 package ru.eljke.driftguard.core.domain;
 
+import lombok.Builder;
 import ru.eljke.driftguard.core.error.DriftGuardErrors;
 
 import java.util.Optional;
@@ -16,6 +17,7 @@ import java.util.Optional;
  * @param instance необязательный id экземпляра сервиса, pod-а, node-а или host-а
  * @param operation необязательное имя операции, endpoint-а, job-а или consumer group
  */
+@Builder(toBuilder = true)
 public record MetricKey(
         String service,
         String metric,

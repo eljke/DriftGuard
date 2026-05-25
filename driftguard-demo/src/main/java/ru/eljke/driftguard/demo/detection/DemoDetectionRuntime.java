@@ -3,13 +3,13 @@ package ru.eljke.driftguard.demo.detection;
 import org.springframework.stereotype.Service;
 import ru.eljke.driftguard.algorithms.DefaultAlgorithms;
 import ru.eljke.driftguard.algorithms.pagehinkley.PageHinkleyConfig;
-import ru.eljke.driftguard.core.domain.DriftDirection;
+import ru.eljke.driftguard.core.DriftGuard;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
 import ru.eljke.driftguard.core.config.EmissionPolicyConfig;
-import ru.eljke.driftguard.core.detector.DriftDetectorEngine;
+import ru.eljke.driftguard.core.config.MetricSelector;
+import ru.eljke.driftguard.core.domain.DriftDirection;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricPoint;
-import ru.eljke.driftguard.core.state.InMemoryDetectorRuntimeStateStore;
 
 import java.time.Duration;
 import java.util.List;
@@ -26,7 +26,7 @@ public class DemoDetectionRuntime {
     private final AtomicReference<RuntimeState> state = new AtomicReference<>(create(DemoDetectorProfile.BALANCED, 1));
 
     public List<DriftEvent> detect(MetricPoint point) {
-        return state.get().engine().detect(point);
+        return state.get().guard().detect(point);
     }
 
     public DemoDetectorProfile profile() {
@@ -56,52 +56,86 @@ public class DemoDetectionRuntime {
                 profile,
                 version,
                 definitions,
-                new DriftDetectorEngine(DefaultAlgorithms.registry(), new InMemoryDetectorRuntimeStateStore(), definitions)
+                DriftGuard.builder()
+                        .registry(DefaultAlgorithms.registry())
+                        .definitions(definitions)
+                        .build()
         );
     }
 
     private static List<DetectorDefinition> definitions(DemoDetectorProfile profile) {
         ProfileSettings settings = ProfileSettings.of(profile);
         return List.of(
-                new DetectorDefinition(
+                pageHinkley(
                         "latency-page-hinkley",
-                        new PageHinkleyConfig(20, 0.1, settings.latencyWarning(), settings.latencyCritical(), 0.05),
-                        key -> key.metric().equals("latency"),
-                        settings.emissionPolicy()
+                        "latency",
+                        settings.latencyWarning(),
+                        settings.latencyCritical(),
+                        0.1,
+                        DriftDirection.UP,
+                        settings
                 ),
-                new DetectorDefinition(
+                pageHinkley(
                         "error-rate-page-hinkley",
-                        new PageHinkleyConfig(20, 0.001, settings.errorRateWarning(), settings.errorRateCritical(), 0.05),
-                        key -> key.metric().equals("error-rate"),
-                        settings.emissionPolicy()
+                        "error-rate",
+                        settings.errorRateWarning(),
+                        settings.errorRateCritical(),
+                        0.001,
+                        DriftDirection.UP,
+                        settings
                 ),
-                new DetectorDefinition(
+                pageHinkley(
                         "queue-size-page-hinkley",
-                        new PageHinkleyConfig(20, 0.1, settings.queueWarning(), settings.queueCritical(), 0.05),
-                        key -> key.metric().equals("queue-size"),
-                        settings.emissionPolicy()
+                        "queue-size",
+                        settings.queueWarning(),
+                        settings.queueCritical(),
+                        0.1,
+                        DriftDirection.UP,
+                        settings
                 ),
-                new DetectorDefinition(
+                pageHinkley(
                         "throughput-page-hinkley",
-                        new PageHinkleyConfig(
-                                20,
-                                1.0,
-                                settings.throughputWarning(),
-                                settings.throughputCritical(),
-                                0.05,
-                                DriftDirection.DOWN
-                        ),
-                        key -> key.metric().equals("throughput"),
-                        settings.emissionPolicy()
+                        "throughput",
+                        settings.throughputWarning(),
+                        settings.throughputCritical(),
+                        1.0,
+                        DriftDirection.DOWN,
+                        settings
                 )
         );
+    }
+
+    private static DetectorDefinition pageHinkley(
+            String name,
+            String metric,
+            double warningThreshold,
+            double criticalThreshold,
+            double delta,
+            DriftDirection direction,
+            ProfileSettings settings
+    ) {
+        return DetectorDefinition.builder()
+                .name(name)
+                .config(PageHinkleyConfig.builder()
+                        .warmupSamples(20)
+                        .delta(delta)
+                        .warningThreshold(warningThreshold)
+                        .criticalThreshold(criticalThreshold)
+                        .alpha(0.05)
+                        .direction(direction)
+                        .build())
+                .appliesTo(MetricSelector.builder()
+                        .metric(metric)
+                        .build())
+                .emissionPolicy(settings.emissionPolicy())
+                .build();
     }
 
     private record RuntimeState(
             DemoDetectorProfile profile,
             long version,
             List<DetectorDefinition> definitions,
-            DriftDetectorEngine engine
+            DriftGuard guard
     ) {
     }
 
@@ -123,23 +157,31 @@ public class DemoDetectionRuntime {
                         0.025, 0.09,
                         25.0, 70.0,
                         90.0, 180.0,
-                        new EmissionPolicyConfig(2, Duration.ofSeconds(20))
+                        emissionPolicy(2, Duration.ofSeconds(20))
                 );
                 case BALANCED -> new ProfileSettings(
                         35.0, 115.0,
                         0.045, 0.14,
                         35.0, 110.0,
                         120.0, 250.0,
-                        new EmissionPolicyConfig(2, Duration.ofSeconds(45))
+                        emissionPolicy(2, Duration.ofSeconds(45))
                 );
                 case CONSERVATIVE -> new ProfileSettings(
                         70.0, 190.0,
                         0.07, 0.20,
                         75.0, 180.0,
                         180.0, 350.0,
-                        new EmissionPolicyConfig(4, Duration.ofSeconds(75))
+                        emissionPolicy(4, Duration.ofSeconds(75))
                 );
             };
+        }
+
+        private static EmissionPolicyConfig emissionPolicy(int minConsecutiveSignals, Duration cooldown) {
+            return EmissionPolicyConfig.builder()
+                    .minConsecutiveSignals(minConsecutiveSignals)
+                    .cooldown(cooldown)
+                    .recoveryConsecutiveNormal(1)
+                    .build();
         }
     }
 }

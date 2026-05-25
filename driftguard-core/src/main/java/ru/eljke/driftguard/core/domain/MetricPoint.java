@@ -1,5 +1,6 @@
 package ru.eljke.driftguard.core.domain;
 
+import lombok.Builder;
 import ru.eljke.driftguard.core.error.CoreErrorReason;
 import ru.eljke.driftguard.core.error.DriftGuardErrors;
 
@@ -21,6 +22,7 @@ import java.util.Map;
  * @param tags индексируемые строковые измерения для фильтрации и вывода событий
  * @param attributes дополнительная неиндексируемая нагрузка для adapter-ов и диагностики
  */
+@Builder(toBuilder = true)
 public record MetricPoint(
         MetricKey key,
         Instant timestamp,
