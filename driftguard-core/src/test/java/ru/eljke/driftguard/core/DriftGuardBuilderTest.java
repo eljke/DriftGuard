@@ -29,6 +29,7 @@ class DriftGuardBuilderTest {
     @Test
     void buildsEmbeddableRuntimeWithMetricSelectorAndSink() {
         List<DriftEvent> published = new ArrayList<>();
+        List<String> alertTitles = new ArrayList<>();
         DriftGuard guard = DriftGuard.builder()
                 .registry(registry())
                 .definition(DetectorDefinition.builder()
@@ -43,6 +44,7 @@ class DriftGuardBuilderTest {
                                 .build())
                         .build())
                 .sink(published::add)
+                .alertSink(alert -> alertTitles.add(alert.title()))
                 .build();
 
         MetricPoint point = MetricPoint.builder()
@@ -60,6 +62,7 @@ class DriftGuardBuilderTest {
 
         assertEquals(1, events.size());
         assertEquals(events, published);
+        assertEquals(1, alertTitles.size());
         assertEquals("latency-threshold", events.getFirst().detector());
     }
 

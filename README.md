@@ -19,11 +19,11 @@ The demo application lives in a separate sibling project: `DriftGuardDemo`.
 ```text
 Metric source
   -> MetricPoint
-  -> DriftGuard / DriftDetectorEngine
+  -> MetricPointPublisher / DriftGuard / DriftDetectorEngine
   -> DetectorAlgorithm
   -> DetectorRuntimeStateStore
   -> DriftEvent
-  -> DriftEventSink
+  -> DriftEventSink / DriftAlertSink
 ```
 
 `MetricPoint` is the stable input contract. `MetricKey` identifies the metric stream by `service`, `metric`, optional `instance` and optional `operation`.
@@ -37,6 +37,8 @@ STARTED    first public event for a drift episode
 ONGOING    repeated update after emission cooldown
 RECOVERED  recovery event after enough normal points near baseline
 ```
+
+`DriftAlertSink` is the user-facing alert port. The core event stays structured for machines, while an alert adds a title, message and labels suitable for Telegram bots, Slack, email, logs or incident-management integrations.
 
 ## Embedded Usage
 
@@ -83,6 +85,13 @@ MetricPoint point = MetricPoint.builder()
 List<DriftEvent> events = driftGuard.detect(point);
 ```
 
+The facade also implements `MetricPointPublisher`, so application code can depend on the narrow publishing port:
+
+```java
+MetricPointPublisher publisher = driftGuard;
+publisher.publish(point);
+```
+
 ## Built-In Algorithms
 
 The algorithms are meant to complement each other rather than compete for the same signal:
@@ -126,6 +135,88 @@ driftguard:
 ```
 
 The starter creates a detector registry, runtime state store, detector definitions, `DriftDetectorEngine`, Micrometer listeners when a `MeterRegistry` is present, and a `DriftEventSinkListener` when custom `DriftEventSink` beans exist.
+
+The starter also creates a `MetricPointPublisher` bean. A Spring application can publish observations without knowing the engine wiring:
+
+```java
+@Service
+class CheckoutMetricsAdapter {
+    private final MetricPointPublisher driftGuard;
+
+    CheckoutMetricsAdapter(MetricPointPublisher driftGuard) {
+        this.driftGuard = driftGuard;
+    }
+
+    void recordLatency(String operation, double millis) {
+        driftGuard.publish(MetricPoint.builder()
+                .key(MetricKey.builder()
+                        .service("checkout-service")
+                        .metric("latency")
+                        .operation(operation)
+                        .build())
+                .timestamp(Instant.now())
+                .value(millis)
+                .kind(MetricKind.DURATION)
+                .build());
+    }
+}
+```
+
+## Alerts
+
+By default, the Spring Boot starter creates an SLF4J alert sink. Production applications normally replace it with a custom `DriftAlertSink` bean:
+
+```java
+@Component
+class TelegramDriftAlertSink implements DriftAlertSink {
+    private final TelegramClient telegram;
+
+    TelegramDriftAlertSink(TelegramClient telegram) {
+        this.telegram = telegram;
+    }
+
+    @Override
+    public void accept(DriftAlert alert) {
+        telegram.sendMessage(alert.message());
+    }
+}
+```
+
+Disable alert mapping or the default log sink when needed:
+
+```yaml
+driftguard:
+  alerts:
+    enabled: true
+    logging-enabled: false
+```
+
+## Custom Detectors
+
+Custom algorithms are first-class extension points. Implement `DetectorAlgorithm<C, S>`, where `C` is a `DetectorConfig` and `S` is a `DetectorState`, then register a detector definition that uses the custom config.
+
+With Spring Boot, expose the algorithm and definitions as beans:
+
+```java
+@Bean
+DetectorAlgorithm<MyConfig, MyState> myDetectorAlgorithm() {
+    return new MyDetectorAlgorithm();
+}
+
+@Bean
+DetectorDefinitionProvider myDetectorDefinitions() {
+    return () -> List.of(DetectorDefinition.builder()
+            .name("business-score-detector")
+            .config(new MyConfig())
+            .appliesTo(MetricSelector.builder()
+                    .service("scoring-service")
+                    .metric("business-score")
+                    .build())
+            .build());
+}
+```
+
+The starter adds custom algorithms to the registry alongside built-in algorithms.
 
 ## Kafka Streams Usage
 

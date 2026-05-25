@@ -48,6 +48,11 @@ public class DriftGuardProperties {
     private MetricsProperties metrics = new MetricsProperties();
 
     /**
+     * Alert delivery settings.
+     */
+    private AlertProperties alerts = new AlertProperties();
+
+    /**
      * Kafka Streams adapter settings.
      *
      * <p>The Kafka part is disabled by default because not every Spring
@@ -68,6 +73,10 @@ public class DriftGuardProperties {
 
     public void setMetrics(MetricsProperties metrics) {
         this.metrics = metrics == null ? new MetricsProperties() : metrics;
+    }
+
+    public void setAlerts(AlertProperties alerts) {
+        this.alerts = alerts == null ? new AlertProperties() : alerts;
     }
 
     @Getter
@@ -263,6 +272,20 @@ public class DriftGuardProperties {
          * Streams tasks.</p>
          */
         private boolean kafkaEnabled = true;
+    }
+
+    @Getter
+    @Setter
+    public static class AlertProperties {
+        /**
+         * Enables the alert listener that maps emitted drift events to alerts.
+         */
+        private boolean enabled = true;
+
+        /**
+         * Creates the default SLF4J alert sink when no custom alert sink bean exists.
+         */
+        private boolean loggingEnabled = true;
     }
 
     @Getter

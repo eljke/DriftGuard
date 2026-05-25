@@ -3,192 +3,192 @@
     {
       "name": "driftguard.enabled",
       "type": "java.lang.Boolean",
-      "description": "Включает создание DriftGuard bean-ов через auto-configuration.",
+      "description": "Enables DriftGuard auto-configuration.",
       "defaultValue": true
     },
     {
       "name": "driftguard.detectors",
       "type": "java.util.List",
-      "description": "Список detector-ов, которые будут зарегистрированы в DriftDetectorEngine."
+      "description": "Detector definitions registered in the detection engine."
     },
     {
       "name": "driftguard.detectors-enabled",
       "type": "java.lang.Boolean",
-      "description": "Включает detector definitions, описанные через application.yml.",
+      "description": "Enables detector definitions declared through application.yml.",
       "defaultValue": true
     },
     {
       "name": "driftguard.detectors[].enabled",
       "type": "java.lang.Boolean",
-      "description": "Включает или выключает отдельный detector definition без удаления конфигурации.",
+      "description": "Enables or disables one detector definition without removing it from configuration.",
       "defaultValue": true
     },
     {
       "name": "driftguard.detectors[].name",
       "type": "java.lang.String",
-      "description": "Уникальное имя detector-а. Используется в DriftEvent.detector и ключе состояния."
+      "description": "Unique detector name used in DriftEvent.detector and runtime state keys."
     },
     {
       "name": "driftguard.detectors[].algorithm",
       "type": "java.lang.String",
-      "description": "Алгоритм detector-а: page-hinkley, adwin, psi, ks или chi-square."
+      "description": "Detector algorithm: page-hinkley, adwin, psi, ks or chi-square."
     },
     {
       "name": "driftguard.detectors[].services",
       "type": "java.util.List<java.lang.String>",
-      "description": "Фильтр по MetricKey.service. Пустой список означает любые сервисы."
+      "description": "Filter by MetricKey.service. An empty list matches any service."
     },
     {
       "name": "driftguard.detectors[].metrics",
       "type": "java.util.List<java.lang.String>",
-      "description": "Фильтр по MetricKey.metric. Пустой список означает любые метрики."
+      "description": "Filter by MetricKey.metric. An empty list matches any metric."
     },
     {
       "name": "driftguard.detectors[].operations",
       "type": "java.util.List<java.lang.String>",
-      "description": "Фильтр по MetricKey.operation. Пустой список означает любые операции."
+      "description": "Filter by MetricKey.operation. An empty list matches any operation."
     },
     {
       "name": "driftguard.detectors[].instances",
       "type": "java.util.List<java.lang.String>",
-      "description": "Фильтр по MetricKey.instance. Пустой список означает любые instance id."
+      "description": "Filter by MetricKey.instance. An empty list matches any instance id."
     },
     {
       "name": "driftguard.metrics.enabled",
       "type": "java.lang.Boolean",
-      "description": "Включает Micrometer listener для runtime-метрик detection pipeline при наличии MeterRegistry.",
+      "description": "Enables the Micrometer listener for detection pipeline runtime metrics when a MeterRegistry is present.",
       "defaultValue": true
     },
     {
       "name": "driftguard.metrics.kafka-enabled",
       "type": "java.lang.Boolean",
-      "description": "Включает Kafka-специфичные Micrometer-метрики detection topology при наличии MeterRegistry.",
+      "description": "Enables Kafka-specific Micrometer metrics for the detection topology when a MeterRegistry is present.",
       "defaultValue": true
     },
     {
       "name": "driftguard.detectors[].baseline-window-size",
       "type": "java.lang.Integer",
-      "description": "Размер baseline-окна для PSI, KS и chi-square.",
+      "description": "Baseline window size for PSI, KS and chi-square.",
       "defaultValue": 40
     },
     {
       "name": "driftguard.detectors[].current-window-size",
       "type": "java.lang.Integer",
-      "description": "Размер current-окна для PSI, KS и chi-square.",
+      "description": "Current window size for PSI, KS and chi-square.",
       "defaultValue": 40
     },
     {
       "name": "driftguard.detectors[].window-size",
       "type": "java.lang.Integer",
-      "description": "Размер адаптивного окна для ADWIN.",
+      "description": "Adaptive window size for ADWIN.",
       "defaultValue": 40
     },
     {
       "name": "driftguard.detectors[].min-sub-window-size",
       "type": "java.lang.Integer",
-      "description": "Минимальный размер каждой части окна при поиске разреза в ADWIN.",
+      "description": "Minimum size of each window side when ADWIN searches for a cut.",
       "defaultValue": 10
     },
     {
       "name": "driftguard.detectors[].warmup-samples",
       "type": "java.lang.Integer",
-      "description": "Число первых samples, используемых Page-Hinkley для прогрева baseline.",
+      "description": "Number of initial samples used by Page-Hinkley to warm up the baseline.",
       "defaultValue": 20
     },
     {
       "name": "driftguard.detectors[].buckets",
       "type": "java.lang.Integer",
-      "description": "Количество bucket-ов для PSI и chi-square.",
+      "description": "Bucket count for PSI and chi-square.",
       "defaultValue": 5
     },
     {
       "name": "driftguard.detectors[].warning-threshold",
       "type": "java.lang.Double",
-      "description": "Warning-порог для PSI или Page-Hinkley, в зависимости от выбранного алгоритма.",
+      "description": "Warning threshold for PSI or Page-Hinkley depending on the selected algorithm.",
       "defaultValue": 0.1
     },
     {
       "name": "driftguard.detectors[].critical-threshold",
       "type": "java.lang.Double",
-      "description": "Critical-порог для PSI или Page-Hinkley, в зависимости от выбранного алгоритма.",
+      "description": "Critical threshold for PSI or Page-Hinkley depending on the selected algorithm.",
       "defaultValue": 0.25
     },
     {
       "name": "driftguard.detectors[].warning-p-value",
       "type": "java.lang.Double",
-      "description": "P-value граница warning-события для KS и chi-square.",
+      "description": "P-value boundary for warning events in KS and chi-square.",
       "defaultValue": 0.05
     },
     {
       "name": "driftguard.detectors[].critical-p-value",
       "type": "java.lang.Double",
-      "description": "P-value граница critical-события для KS и chi-square.",
+      "description": "P-value boundary for critical events in KS and chi-square.",
       "defaultValue": 0.01
     },
     {
       "name": "driftguard.detectors[].delta",
       "type": "java.lang.Double",
-      "description": "Sensitivity/confidence параметр для ADWIN и Page-Hinkley.",
+      "description": "Sensitivity/confidence parameter for ADWIN and Page-Hinkley.",
       "defaultValue": 0.1
     },
     {
       "name": "driftguard.detectors[].alpha",
       "type": "java.lang.Double",
-      "description": "Скорость адаптации среднего в Page-Hinkley.",
+      "description": "Mean adaptation speed in Page-Hinkley.",
       "defaultValue": 0.05
     },
     {
       "name": "driftguard.detectors[].direction",
       "type": "ru.eljke.driftguard.core.domain.DriftDirection",
-      "description": "Направление сдвига среднего для Page-Hinkley: UP для роста, DOWN для падения.",
+      "description": "Mean-shift direction for Page-Hinkley: UP for growth, DOWN for drops.",
       "defaultValue": "UP"
     },
     {
       "name": "driftguard.detectors[].epsilon",
       "type": "java.lang.Double",
-      "description": "Малое значение сглаживания для PSI, чтобы избежать деления на ноль.",
+      "description": "Small PSI smoothing value that prevents division by zero.",
       "defaultValue": 0.0001
     },
     {
       "name": "driftguard.detectors[].critical-multiplier",
       "type": "java.lang.Double",
-      "description": "Множитель score, после которого ADWIN помечает событие как critical.",
+      "description": "Score multiplier after which ADWIN marks an event as critical.",
       "defaultValue": 2.0
     },
     {
       "name": "driftguard.detectors[].min-expected-count",
       "type": "java.lang.Double",
-      "description": "Минимальная ожидаемая частота bucket-а для chi-square.",
+      "description": "Minimum expected bucket frequency for chi-square.",
       "defaultValue": 1.0
     },
     {
       "name": "driftguard.detectors[].emission-policy.min-consecutive-signals",
       "type": "java.lang.Integer",
-      "description": "Сколько последовательных сигналов алгоритма нужно получить перед публикацией DriftEvent.",
+      "description": "Number of consecutive algorithm signals required before publishing a DriftEvent.",
       "defaultValue": 1
     },
     {
       "name": "driftguard.detectors[].emission-policy.cooldown",
       "type": "java.time.Duration",
-      "description": "Минимальная пауза между опубликованными DriftEvent для одного detector-а и потока метрик.",
+      "description": "Minimum pause between DriftEvent publications for one detector and metric stream.",
       "defaultValue": "0s"
     },
     {
       "name": "driftguard.detectors[].emission-policy.recovery-consecutive-normal",
       "type": "java.lang.Integer",
-      "description": "Сколько нормальных точек подряд закрывает drift episode и разрешает новое событие.",
+      "description": "Number of consecutive normal observations that close a drift episode and allow a new event.",
       "defaultValue": 1
     },
     {
       "name": "driftguard.kafka.enabled",
       "type": "java.lang.Boolean",
-      "description": "Включает Kafka Streams topology DriftGuard.",
+      "description": "Enables the DriftGuard Kafka Streams topology.",
       "defaultValue": false
     },
     {
       "name": "driftguard.kafka.bootstrap-servers",
       "type": "java.lang.String",
-      "description": "Kafka bootstrap servers для topology DriftGuard.",
+      "description": "Kafka bootstrap servers for the DriftGuard topology.",
       "defaultValue": "localhost:9092"
     },
     {
@@ -200,24 +200,37 @@
     {
       "name": "driftguard.kafka.input-topics",
       "type": "java.util.List<java.lang.String>",
-      "description": "Topic-и с JSON MetricPoint."
+      "description": "Topics containing JSON MetricPoint messages."
     },
     {
       "name": "driftguard.kafka.output-topic",
       "type": "java.lang.String",
-      "description": "Topic, куда topology пишет JSON DriftEvent.",
+      "description": "Topic where the topology writes JSON DriftEvent messages.",
       "defaultValue": "driftguard.drift-events"
     },
     {
       "name": "driftguard.kafka.state-dir",
       "type": "java.lang.String",
-      "description": "Локальная директория state store-ов Kafka Streams."
+      "description": "Local directory for Kafka Streams state stores."
     },
     {
       "name": "driftguard.kafka.auto-startup",
       "type": "java.lang.Boolean",
-      "description": "Запускать ли Kafka Streams topology автоматически при старте Spring context-а.",
+      "description": "Whether Kafka Streams topology starts automatically with the Spring context.",
       "defaultValue": true
     }
-  ]
+  ,
+  {
+    "name": "driftguard.alerts.enabled",
+    "type": "java.lang.Boolean",
+    "description": "Whether DriftGuard maps emitted drift events to user-facing alerts.",
+    "defaultValue": true
+  },
+  {
+    "name": "driftguard.alerts.logging-enabled",
+    "type": "java.lang.Boolean",
+    "description": "Whether the starter creates a default SLF4J alert sink when no custom DriftAlertSink bean exists.",
+    "defaultValue": true
+  }
+]
 }

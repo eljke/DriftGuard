@@ -6,6 +6,8 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.eljke.driftguard.core.adapter.MetricPointPublisher;
+import ru.eljke.driftguard.core.alert.DriftAlertSink;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
 import ru.eljke.driftguard.core.config.DetectorDefinitionProvider;
@@ -29,7 +31,12 @@ class DriftGuardAutoConfigurationTest {
 
     @Test
     void createsCoreEngineByDefault() {
-        contextRunner.run(context -> assertThat(context).hasSingleBean(DriftDetectorEngine.class));
+        contextRunner.run(context -> {
+            assertThat(context).hasSingleBean(DriftDetectorEngine.class);
+            assertThat(context).hasSingleBean(MetricPointPublisher.class);
+            assertThat(context).hasSingleBean(DriftAlertSink.class);
+            assertThat(context.getBean(DriftAlertSink.class)).isInstanceOf(Slf4jDriftAlertSink.class);
+        });
     }
 
     @Test
@@ -65,6 +72,16 @@ class DriftGuardAutoConfigurationTest {
 
                     assertThat(registry.algorithmNames()).contains("page-hinkley", CustomConfig.ALGORITHM);
                     assertThat(registry.find(CustomConfig.ALGORITHM)).isPresent();
+                });
+    }
+
+    @Test
+    void backsOffWhenCustomAlertSinkExists() {
+        contextRunner
+                .withUserConfiguration(CustomAlertConfiguration.class)
+                .run(context -> {
+                    assertThat(context).hasSingleBean(DriftAlertSink.class);
+                    assertThat(context.getBean(DriftAlertSink.class)).isSameAs(CustomAlertConfiguration.SINK);
                 });
     }
 
@@ -131,6 +148,17 @@ class DriftGuardAutoConfigurationTest {
                     new CustomConfig(),
                     key -> key.metric().equals("latency")
             ));
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class CustomAlertConfiguration {
+        static final DriftAlertSink SINK = alert -> {
+        };
+
+        @Bean
+        DriftAlertSink customAlertSink() {
+            return SINK;
         }
     }
 

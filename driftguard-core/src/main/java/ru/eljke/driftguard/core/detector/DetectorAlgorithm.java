@@ -6,27 +6,24 @@ import ru.eljke.driftguard.core.domain.MetricPoint;
 /**
  * Contract implemented by streaming drift-detection algorithms.
  *
- * Contract implemented by streaming drift-detection algorithms.
- * Contract implemented by streaming drift-detection algorithms.
- * Contract implemented by streaming drift-detection algorithms.
- * Contract implemented by streaming drift-detection algorithms.
- *
- * Contract implemented by streaming drift-detection algorithms.
- * Contract implemented by streaming drift-detection algorithms.
+ * <p>Applications can provide their own algorithm by implementing this
+ * interface and registering it in {@link DetectorRegistry}. Spring Boot users
+ * can expose the implementation as a bean; the starter adds it to the registry
+ * together with built-in algorithms.</p>
  */
 public interface DetectorAlgorithm<C extends DetectorConfig, S extends DetectorState> {
     /**
-     * Contract implemented by streaming drift-detection algorithms.
+     * Stable algorithm id used by {@link DetectorConfig#algorithm()}.
      */
     String name();
 
     /**
-     * Contract implemented by streaming drift-detection algorithms.
+     * Runtime config type accepted by this algorithm.
      */
     Class<C> configType();
 
     /**
-     * Contract implemented by streaming drift-detection algorithms.
+     * Creates the initial state for a new metric stream and detector definition.
      */
     S initialState(C config);
 

@@ -10,6 +10,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
+import ru.eljke.driftguard.core.adapter.MetricPointPublisher;
+import ru.eljke.driftguard.core.alert.DefaultDriftAlertMapper;
+import ru.eljke.driftguard.core.alert.DriftAlertListener;
+import ru.eljke.driftguard.core.alert.DriftAlertMapper;
+import ru.eljke.driftguard.core.alert.DriftAlertSink;
 import ru.eljke.driftguard.algorithms.DefaultAlgorithms;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
 import ru.eljke.driftguard.core.config.DetectorDefinitionProvider;
@@ -87,6 +92,37 @@ public class DriftGuardAutoConfiguration {
                 detectorDefinitions,
                 listeners.orderedStream().toList()
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public MetricPointPublisher driftGuardMetricPointPublisher(DriftDetectorEngine engine) {
+        return new DriftGuardMetricPointPublisher(engine);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "driftguard.alerts", name = "enabled", havingValue = "true", matchIfMissing = true)
+    public DriftAlertMapper driftGuardAlertMapper() {
+        return new DefaultDriftAlertMapper();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(DriftAlertSink.class)
+    @ConditionalOnProperty(prefix = "driftguard.alerts", name = {"enabled", "logging-enabled"}, havingValue = "true", matchIfMissing = true)
+    public DriftAlertSink driftGuardSlf4jAlertSink() {
+        return new Slf4jDriftAlertSink();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "driftGuardDriftAlertListener")
+    @ConditionalOnBean(DriftAlertSink.class)
+    @ConditionalOnProperty(prefix = "driftguard.alerts", name = "enabled", havingValue = "true", matchIfMissing = true)
+    public DriftDetectionListener driftGuardDriftAlertListener(
+            DriftAlertMapper mapper,
+            ObjectProvider<DriftAlertSink> alertSinks
+    ) {
+        return new DriftAlertListener(mapper, alertSinks.orderedStream().toList());
     }
 
     @Bean
