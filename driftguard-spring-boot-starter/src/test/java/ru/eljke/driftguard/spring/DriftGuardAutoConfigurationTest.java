@@ -98,6 +98,23 @@ class DriftGuardAutoConfigurationTest {
     }
 
     @Test
+    void createsMicrometerInputPollerWhenEnabled() {
+        contextRunner
+                .withUserConfiguration(MeterRegistryConfiguration.class)
+                .withPropertyValues(
+                        "driftguard.micrometer-input.enabled=true",
+                        "driftguard.micrometer-input.auto-startup=false",
+                        "driftguard.micrometer-input.meters[0].name=checkout.latency",
+                        "driftguard.micrometer-input.meters[0].service=checkout-service",
+                        "driftguard.micrometer-input.meters[0].metric=latency"
+                )
+                .run(context -> {
+                    assertThat(context).hasSingleBean(MicrometerMetricInputPoller.class);
+                    assertThat(context.getBean(MicrometerMetricInputPoller.class).isAutoStartup()).isFalse();
+                });
+    }
+
+    @Test
     void appendsCustomDetectorDefinitionProviders() {
         contextRunner
                 .withUserConfiguration(CustomDefinitionConfiguration.class)

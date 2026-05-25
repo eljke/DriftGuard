@@ -144,6 +144,19 @@ public class DriftGuardAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnClass(MeterRegistry.class)
+    @ConditionalOnBean(MeterRegistry.class)
+    @ConditionalOnProperty(prefix = "driftguard.micrometer-input", name = "enabled", havingValue = "true")
+    public MicrometerMetricInputPoller driftGuardMicrometerMetricInputPoller(
+            MeterRegistry meterRegistry,
+            MetricPointPublisher publisher,
+            DriftGuardProperties properties
+    ) {
+        return new MicrometerMetricInputPoller(meterRegistry, publisher, properties.getMicrometerInput());
+    }
+
+    @Bean
     @ConditionalOnMissingBean(name = "driftGuardDriftEventSinkListener")
     @ConditionalOnBean(DriftEventSink.class)
     public DriftDetectionListener driftGuardDriftEventSinkListener(ObjectProvider<DriftEventSink> sinks) {

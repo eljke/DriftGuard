@@ -4,10 +4,13 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import ru.eljke.driftguard.core.domain.DriftDirection;
+import ru.eljke.driftguard.core.domain.MetricKind;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * DriftGuard settings read from {@code application.yml}.
@@ -53,6 +56,11 @@ public class DriftGuardProperties {
     private AlertProperties alerts = new AlertProperties();
 
     /**
+     * Micrometer input adapter settings.
+     */
+    private MicrometerInputProperties micrometerInput = new MicrometerInputProperties();
+
+    /**
      * Kafka Streams adapter settings.
      *
      * <p>The Kafka part is disabled by default because not every Spring
@@ -77,6 +85,10 @@ public class DriftGuardProperties {
 
     public void setAlerts(AlertProperties alerts) {
         this.alerts = alerts == null ? new AlertProperties() : alerts;
+    }
+
+    public void setMicrometerInput(MicrometerInputProperties micrometerInput) {
+        this.micrometerInput = micrometerInput == null ? new MicrometerInputProperties() : micrometerInput;
     }
 
     @Getter
@@ -286,6 +298,89 @@ public class DriftGuardProperties {
          * Creates the default SLF4J alert sink when no custom alert sink bean exists.
          */
         private boolean loggingEnabled = true;
+    }
+
+    @Getter
+    @Setter
+    public static class MicrometerInputProperties {
+        /**
+         * Enables polling selected Micrometer meters and publishing them to DriftGuard.
+         */
+        private boolean enabled = false;
+
+        /**
+         * Whether the poller starts with the Spring context.
+         */
+        private boolean autoStartup = true;
+
+        /**
+         * Pause between meter samples.
+         */
+        private Duration pollInterval = Duration.ofSeconds(10);
+
+        /**
+         * Meters sampled by the input adapter.
+         */
+        private List<MicrometerMeterProperties> meters = new ArrayList<>();
+
+        public void setMeters(List<MicrometerMeterProperties> meters) {
+            this.meters = meters == null ? new ArrayList<>() : meters;
+        }
+    }
+
+    @Getter
+    @Setter
+    public static class MicrometerMeterProperties {
+        /**
+         * Micrometer meter name.
+         */
+        private String name;
+
+        /**
+         * How to read the meter value.
+         */
+        private MicrometerMeterType type = MicrometerMeterType.GAUGE;
+
+        /**
+         * DriftGuard service dimension.
+         */
+        private String service;
+
+        /**
+         * DriftGuard metric dimension.
+         */
+        private String metric;
+
+        /**
+         * Optional DriftGuard operation dimension.
+         */
+        private String operation;
+
+        /**
+         * Optional DriftGuard instance dimension.
+         */
+        private String instance;
+
+        /**
+         * Optional metric kind override.
+         */
+        private MetricKind kind;
+
+        /**
+         * Micrometer tags used to find a concrete meter and copied to MetricPoint tags.
+         */
+        private Map<String, String> tags = new LinkedHashMap<>();
+
+        public void setTags(Map<String, String> tags) {
+            this.tags = tags == null ? new LinkedHashMap<>() : tags;
+        }
+    }
+
+    public enum MicrometerMeterType {
+        GAUGE,
+        COUNTER,
+        TIMER_MEAN,
+        TIMER_MAX
     }
 
     @Getter

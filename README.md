@@ -162,6 +162,26 @@ class CheckoutMetricsAdapter {
 }
 ```
 
+If an application already exposes useful Micrometer meters, the starter can poll selected meters and publish them automatically:
+
+```yaml
+driftguard:
+  micrometer-input:
+    enabled: true
+    poll-interval: 5s
+    meters:
+      - name: http.server.requests
+        type: timer-mean
+        service: checkout-service
+        metric: latency
+        operation: POST /checkout
+        tags:
+          uri: /checkout
+          method: POST
+```
+
+This adapter is intentionally explicit: DriftGuard still needs to know which meters are meaningful drift signals and how they map to `service`, `metric` and `operation`.
+
 ## Alerts
 
 By default, the Spring Boot starter creates an SLF4J alert sink. Production applications normally replace it with a custom `DriftAlertSink` bean:

@@ -226,11 +226,75 @@
     "description": "Whether DriftGuard maps emitted drift events to user-facing alerts.",
     "defaultValue": true
   },
+    {
+      "name": "driftguard.alerts.logging-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether the starter creates a default SLF4J alert sink when no custom DriftAlertSink bean exists.",
+      "defaultValue": true
+  },
   {
-    "name": "driftguard.alerts.logging-enabled",
+    "name": "driftguard.micrometer-input.enabled",
     "type": "java.lang.Boolean",
-    "description": "Whether the starter creates a default SLF4J alert sink when no custom DriftAlertSink bean exists.",
+    "description": "Whether the Micrometer input adapter polls selected meters and publishes them as MetricPoint observations.",
+    "defaultValue": false
+  },
+  {
+    "name": "driftguard.micrometer-input.auto-startup",
+    "type": "java.lang.Boolean",
+    "description": "Whether the Micrometer input poller starts with the Spring context.",
     "defaultValue": true
-  }
+  },
+  {
+    "name": "driftguard.micrometer-input.poll-interval",
+    "type": "java.time.Duration",
+    "description": "Pause between Micrometer input samples.",
+    "defaultValue": "10s"
+  },
+  {
+    "name": "driftguard.micrometer-input.meters",
+    "type": "java.util.List",
+    "description": "Micrometer meters sampled by the input adapter."
+  },
+  {
+    "name": "driftguard.micrometer-input.meters[].name",
+    "type": "java.lang.String",
+    "description": "Micrometer meter name."
+  },
+  {
+    "name": "driftguard.micrometer-input.meters[].type",
+    "type": "ru.eljke.driftguard.spring.DriftGuardProperties$MicrometerMeterType",
+    "description": "How the adapter reads the meter: gauge, counter, timer-mean or timer-max.",
+    "defaultValue": "GAUGE"
+  },
+  {
+    "name": "driftguard.micrometer-input.meters[].service",
+    "type": "java.lang.String",
+    "description": "MetricKey.service value for the published MetricPoint."
+  },
+  {
+    "name": "driftguard.micrometer-input.meters[].metric",
+    "type": "java.lang.String",
+    "description": "MetricKey.metric value for the published MetricPoint."
+  },
+  {
+    "name": "driftguard.micrometer-input.meters[].operation",
+    "type": "java.lang.String",
+    "description": "Optional MetricKey.operation value for the published MetricPoint."
+  },
+  {
+    "name": "driftguard.micrometer-input.meters[].instance",
+    "type": "java.lang.String",
+    "description": "Optional MetricKey.instance value for the published MetricPoint."
+  },
+  {
+    "name": "driftguard.micrometer-input.meters[].kind",
+    "type": "ru.eljke.driftguard.core.domain.MetricKind",
+    "description": "Optional MetricPoint kind override."
+  },
+  {
+    "name": "driftguard.micrometer-input.meters[].tags",
+    "type": "java.util.Map<java.lang.String,java.lang.String>",
+    "description": "Micrometer tags used to find a concrete meter and copied to MetricPoint tags."
+    }
 ]
 }
