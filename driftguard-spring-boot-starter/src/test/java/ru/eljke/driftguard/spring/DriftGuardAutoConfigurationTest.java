@@ -76,12 +76,14 @@ class DriftGuardAutoConfigurationTest {
     }
 
     @Test
-    void backsOffWhenCustomAlertSinkExists() {
+    void keepsDefaultLogAlertSinkWhenCustomAlertSinkExists() {
         contextRunner
                 .withUserConfiguration(CustomAlertConfiguration.class)
                 .run(context -> {
-                    assertThat(context).hasSingleBean(DriftAlertSink.class);
-                    assertThat(context.getBean(DriftAlertSink.class)).isSameAs(CustomAlertConfiguration.SINK);
+                    assertThat(context).hasBean("driftGuardSlf4jAlertSink");
+                    assertThat(context.getBeansOfType(DriftAlertSink.class).values())
+                            .contains(CustomAlertConfiguration.SINK)
+                            .anySatisfy(sink -> assertThat(sink).isInstanceOf(Slf4jDriftAlertSink.class));
                 });
     }
 

@@ -108,7 +108,7 @@ public class DriftGuardAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(DriftAlertSink.class)
+    @ConditionalOnMissingBean(name = "driftGuardSlf4jAlertSink")
     @ConditionalOnProperty(prefix = "driftguard.alerts", name = {"enabled", "logging-enabled"}, havingValue = "true", matchIfMissing = true)
     public DriftAlertSink driftGuardSlf4jAlertSink() {
         return new Slf4jDriftAlertSink();
