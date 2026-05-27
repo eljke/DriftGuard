@@ -182,6 +182,40 @@ driftguard:
 
 This adapter is intentionally explicit: DriftGuard still needs to know which meters are meaningful drift signals and how they map to `service`, `metric` and `operation`.
 
+## Integration Quickstarts
+
+### Spring Boot Embedded Service
+
+Use this when the application owns the metric values directly:
+
+```text
+business operation -> MetricPointPublisher -> DriftGuard -> DriftAlertSink
+```
+
+Define detectors in `application.yml`, inject `MetricPointPublisher`, and publish one `MetricPoint` per observation. This keeps business code independent from the engine and registry classes.
+
+### Micrometer Input Adapter
+
+Use this when the application already exports useful Micrometer meters. Configure `driftguard.micrometer-input.meters` and let the starter poll selected meters. Prefer this for HTTP timers, queue gauges, JVM/runtime gauges and other already-instrumented signals.
+
+### Kafka Streams Adapter
+
+Use this when metric producers and drift detection are separate runtime components. Publish JSON `MetricPoint` messages to Kafka and let the DriftGuard topology write JSON `DriftEvent` messages to the output topic.
+
+### Custom Alert Sink
+
+Use this when alerts must leave the process through a product-specific channel. Define a `DriftAlertSink` bean. The default SLF4J sink remains available unless `driftguard.alerts.logging-enabled=false`.
+
+```java
+@Component
+class WebhookDriftAlertSink implements DriftAlertSink {
+    @Override
+    public void accept(DriftAlert alert) {
+        // Send alert.title(), alert.message() and alert.labels() to the target system.
+    }
+}
+```
+
 ## Alerts
 
 By default, the Spring Boot starter creates an SLF4J alert sink. Production applications normally replace it with a custom `DriftAlertSink` bean:
@@ -210,6 +244,38 @@ driftguard:
     enabled: true
     logging-enabled: false
 ```
+
+## Explainability
+
+Every `DriftEvent` contains shared fields and algorithm-specific `details`.
+User interfaces and alert sinks should display:
+
+- lifecycle phase: `STARTED`, `ONGOING` or `RECOVERED`;
+- metric identity: service, metric, operation and instance;
+- current value, baseline value and score;
+- threshold or p-value when available;
+- algorithm details such as observation count, ADWIN cut, ADWIN bound, mean difference or Page-Hinkley cumulative score.
+
+This makes alerts auditable: a reviewer can see both the business impact and the statistical evidence that triggered the event.
+
+## Quality Gates
+
+Use `driftguard-testkit` to validate changes against reproducible drift scenarios. The testkit reports precision, recall, false positives, missed drift intervals and first-detection delay. A practical release gate is:
+
+- no missed drift on core scenarios that the selected profile claims to cover;
+- false positives stay within the configured tolerance for stable and seasonal scenarios;
+- first detection delay is documented for aggressive, balanced and conservative profiles;
+- custom detectors include at least one stable scenario and one drift scenario.
+
+These gates are especially important when detector thresholds, emission policies or alert recovery rules change.
+
+## Project Roadmap
+
+- Integrations: production-ready examples for Spring Boot embedded, Micrometer polling, Kafka Streams and webhook/chat alert delivery.
+- Explainability: richer alert templates and UI evidence panels for each algorithm.
+- Demo product: keep `Checkout Service` and `Kafka Service` as the default screens; keep synthetic screens as lab mode.
+- Quality: benchmark reports per profile and per algorithm, generated from `driftguard-testkit`.
+- Documentation: small quickstarts for each integration path and extension point.
 
 ## Custom Detectors
 
