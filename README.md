@@ -373,3 +373,7 @@ String markdown = DetectionBenchmarkMarkdownReport.render(report);
 ```
 
 The benchmark APIs live under `ru.eljke.driftguard.testkit.benchmark`; synthetic metric streams live under `ru.eljke.driftguard.testkit.scenario`; reusable quality gates live under `ru.eljke.driftguard.testkit.quality`. The Markdown renderer is intentionally presentation-only: run scenarios with `DetectionBenchmarkSuite` or `DetectionBenchmarkRunner`, then render the resulting immutable report.
+
+## License
+
+DriftGuard is released under the [MIT License](LICENSE).
