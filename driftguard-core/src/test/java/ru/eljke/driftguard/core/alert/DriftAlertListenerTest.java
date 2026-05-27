@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DriftAlertListenerTest {
     @Test
@@ -28,6 +29,9 @@ class DriftAlertListenerTest {
         assertEquals(DriftSeverity.WARNING, alerts.getFirst().severity());
         assertEquals("checkout-service", alerts.getFirst().labels().get("service"));
         assertEquals("latency", alerts.getFirst().labels().get("metric"));
+        assertTrue(alerts.getFirst().message().contains("Evidence:"));
+        assertTrue(alerts.getFirst().message().contains("relativeChangePercent="));
+        assertTrue(alerts.getFirst().message().contains("warningThreshold="));
     }
 
     @Test
@@ -65,7 +69,11 @@ class DriftAlertListenerTest {
                 "page-hinkley",
                 "mean shift detected",
                 Map.of(),
-                Map.of()
+                Map.of(
+                        "relativeChangePercent", 100.0,
+                        "warningThreshold", 25.0,
+                        "debugOnly", "not-in-alert"
+                )
         );
     }
 }

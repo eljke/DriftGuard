@@ -226,11 +226,33 @@
     "description": "Whether DriftGuard maps emitted drift events to user-facing alerts.",
     "defaultValue": true
   },
-    {
-      "name": "driftguard.alerts.logging-enabled",
-      "type": "java.lang.Boolean",
-      "description": "Whether the starter creates a default SLF4J alert sink when no custom DriftAlertSink bean exists.",
-      "defaultValue": true
+  {
+    "name": "driftguard.alerts.logging-enabled",
+    "type": "java.lang.Boolean",
+    "description": "Whether the starter creates the default SLF4J alert sink. It can run alongside custom sinks.",
+    "defaultValue": true
+  },
+  {
+    "name": "driftguard.alerts.webhook.enabled",
+    "type": "java.lang.Boolean",
+    "description": "Whether the starter creates a generic HTTP webhook alert sink.",
+    "defaultValue": false
+  },
+  {
+    "name": "driftguard.alerts.webhook.url",
+    "type": "java.lang.String",
+    "description": "HTTP endpoint that receives DriftAlert JSON payloads."
+  },
+  {
+    "name": "driftguard.alerts.webhook.timeout",
+    "type": "java.time.Duration",
+    "description": "HTTP webhook request timeout.",
+    "defaultValue": "3s"
+  },
+  {
+    "name": "driftguard.alerts.webhook.headers",
+    "type": "java.util.Map<java.lang.String,java.lang.String>",
+    "description": "Additional HTTP headers sent with webhook alert requests."
   },
   {
     "name": "driftguard.micrometer-input.enabled",

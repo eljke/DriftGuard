@@ -295,9 +295,46 @@ public class DriftGuardProperties {
         private boolean enabled = true;
 
         /**
-         * Creates the default SLF4J alert sink when no custom alert sink bean exists.
+         * Creates the default SLF4J alert sink. It can run alongside custom sinks.
          */
         private boolean loggingEnabled = true;
+
+        /**
+         * Generic webhook alert delivery settings.
+         */
+        private WebhookAlertProperties webhook = new WebhookAlertProperties();
+
+        public void setWebhook(WebhookAlertProperties webhook) {
+            this.webhook = webhook == null ? new WebhookAlertProperties() : webhook;
+        }
+    }
+
+    @Getter
+    @Setter
+    public static class WebhookAlertProperties {
+        /**
+         * Enables the generic webhook alert sink.
+         */
+        private boolean enabled = false;
+
+        /**
+         * Webhook endpoint URL.
+         */
+        private String url;
+
+        /**
+         * HTTP request timeout.
+         */
+        private Duration timeout = Duration.ofSeconds(3);
+
+        /**
+         * Additional HTTP headers, for example Authorization.
+         */
+        private Map<String, String> headers = new LinkedHashMap<>();
+
+        public void setHeaders(Map<String, String> headers) {
+            this.headers = headers == null ? new LinkedHashMap<>() : headers;
+        }
     }
 
     @Getter

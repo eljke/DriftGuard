@@ -115,6 +115,13 @@ public class DriftGuardAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(name = "driftGuardWebhookAlertSink")
+    @ConditionalOnProperty(prefix = "driftguard.alerts.webhook", name = "enabled", havingValue = "true")
+    public DriftAlertSink driftGuardWebhookAlertSink(DriftGuardProperties properties) {
+        return new WebhookDriftAlertSink(properties.getAlerts().getWebhook());
+    }
+
+    @Bean
     @ConditionalOnMissingBean(name = "driftGuardDriftAlertListener")
     @ConditionalOnBean(DriftAlertSink.class)
     @ConditionalOnProperty(prefix = "driftguard.alerts", name = "enabled", havingValue = "true", matchIfMissing = true)

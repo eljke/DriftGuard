@@ -117,6 +117,19 @@ class DriftGuardAutoConfigurationTest {
     }
 
     @Test
+    void createsWebhookAlertSinkWhenEnabled() {
+        contextRunner
+                .withPropertyValues(
+                        "driftguard.alerts.webhook.enabled=true",
+                        "driftguard.alerts.webhook.url=http://localhost:65535/alerts"
+                )
+                .run(context -> {
+                    assertThat(context).hasBean("driftGuardWebhookAlertSink");
+                    assertThat(context.getBean("driftGuardWebhookAlertSink")).isInstanceOf(WebhookDriftAlertSink.class);
+                });
+    }
+
+    @Test
     void appendsCustomDetectorDefinitionProviders() {
         contextRunner
                 .withUserConfiguration(CustomDefinitionConfiguration.class)
