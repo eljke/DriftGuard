@@ -284,7 +284,7 @@
   },
   {
     "name": "driftguard.micrometer-input.meters[].type",
-    "type": "ru.eljke.driftguard.spring.DriftGuardProperties$MicrometerMeterType",
+    "type": "ru.eljke.driftguard.spring.autoconfigure.DriftGuardProperties$MicrometerMeterType",
     "description": "How the adapter reads the meter: gauge, counter, timer-mean or timer-max.",
     "defaultValue": "GAUGE"
   },

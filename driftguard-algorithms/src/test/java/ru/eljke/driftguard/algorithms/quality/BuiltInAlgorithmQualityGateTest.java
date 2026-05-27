@@ -12,11 +12,11 @@ import ru.eljke.driftguard.core.detector.DetectorAlgorithm;
 import ru.eljke.driftguard.core.detector.DetectorState;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricPoint;
-import ru.eljke.driftguard.testkit.DetectionBenchmarkCase;
-import ru.eljke.driftguard.testkit.DetectionBenchmarkSuite;
-import ru.eljke.driftguard.testkit.DetectionQualityGate;
-import ru.eljke.driftguard.testkit.ScenarioConfig;
-import ru.eljke.driftguard.testkit.StepDriftScenario;
+import ru.eljke.driftguard.testkit.benchmark.DetectionBenchmarkCase;
+import ru.eljke.driftguard.testkit.benchmark.DetectionBenchmarkSuite;
+import ru.eljke.driftguard.testkit.quality.DetectionQualityGate;
+import ru.eljke.driftguard.testkit.scenario.ScenarioConfig;
+import ru.eljke.driftguard.testkit.scenario.StepDriftScenario;
 
 import java.time.Duration;
 import java.util.List;

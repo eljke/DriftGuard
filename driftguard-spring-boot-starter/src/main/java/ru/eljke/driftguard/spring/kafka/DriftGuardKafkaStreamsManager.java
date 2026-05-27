@@ -1,0 +1,100 @@
+package ru.eljke.driftguard.spring.kafka;
+
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StreamsConfig;
+import org.springframework.context.SmartLifecycle;
+import ru.eljke.driftguard.core.error.DriftGuardErrors;
+import ru.eljke.driftguard.spring.autoconfigure.DriftGuardProperties;
+import ru.eljke.driftguard.spring.error.SpringDriftGuardErrorReason;
+
+import java.time.Duration;
+import java.util.Properties;
+import java.util.function.Supplier;
+
+/**
+ * Manages the DriftGuard Kafka Streams topology lifecycle inside a Spring
+ * application.
+ *
+ * <p>The manager creates the {@link KafkaStreams} instance lazily so the Spring
+ * context can load in tests where auto-start is disabled. On context shutdown,
+ * streams are closed through the standard {@code close()} method.</p>
+ */
+public class DriftGuardKafkaStreamsManager implements SmartLifecycle {
+    private final DriftGuardProperties.KafkaProperties properties;
+    private final Supplier<KafkaStreams> streamsFactory;
+    private volatile KafkaStreams streams;
+    private volatile boolean running;
+
+    public DriftGuardKafkaStreamsManager(
+            DriftGuardProperties.KafkaProperties properties,
+            Supplier<KafkaStreams> streamsFactory
+    ) {
+        this.properties = properties;
+        this.streamsFactory = streamsFactory;
+    }
+
+    @Override
+    public synchronized void start() {
+        if (running) {
+            return;
+        }
+        streams = streamsFactory.get();
+        streams.start();
+        running = true;
+    }
+
+    @Override
+    public synchronized void stop() {
+        KafkaStreams current = streams;
+        streams = null;
+        running = false;
+        if (current != null) {
+            current.close(Duration.ofSeconds(10));
+        }
+    }
+
+    @Override
+    public boolean isRunning() {
+        return running;
+    }
+
+    @Override
+    public boolean isAutoStartup() {
+        return properties.isAutoStartup();
+    }
+
+    Properties streamsProperties() {
+        return streamsProperties(properties);
+    }
+
+    public static Properties streamsProperties(DriftGuardProperties.KafkaProperties properties) {
+        Properties props = new Properties();
+        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getBootstrapServers());
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, properties.getApplicationId());
+        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class.getName());
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.StringSerde.class.getName());
+        String stateDir = properties.getStateDir();
+        if (stateDir != null && !stateDir.isBlank()) {
+            props.put(StreamsConfig.STATE_DIR_CONFIG, stateDir.trim());
+        }
+        return props;
+    }
+
+    public static void validate(DriftGuardProperties.KafkaProperties properties) {
+        if (properties.getInputTopics().isEmpty()) {
+            throw DriftGuardErrors.validation(SpringDriftGuardErrorReason.EMPTY_KAFKA_INPUT_TOPICS);
+        }
+        if (properties.getOutputTopic() == null || properties.getOutputTopic().isBlank()) {
+            throw DriftGuardErrors.validation(SpringDriftGuardErrorReason.BLANK_KAFKA_OUTPUT_TOPIC);
+        }
+        if (properties.getBootstrapServers() == null || properties.getBootstrapServers().isBlank()) {
+            throw DriftGuardErrors.validation(SpringDriftGuardErrorReason.BLANK_KAFKA_BOOTSTRAP_SERVERS);
+        }
+        if (properties.getApplicationId() == null || properties.getApplicationId().isBlank()) {
+            throw DriftGuardErrors.validation(SpringDriftGuardErrorReason.BLANK_KAFKA_APPLICATION_ID);
+        }
+    }
+}
+
+

@@ -208,7 +208,7 @@ Use this when alerts must leave the process through a product-specific channel. 
 
 ```java
 @Component
-class WebhookDriftAlertSink implements DriftAlertSink {
+class TelegramDriftAlertSink implements DriftAlertSink {
     @Override
     public void accept(DriftAlert alert) {
         // Send alert.title(), alert.message() and alert.labels() to the target system.
@@ -218,7 +218,7 @@ class WebhookDriftAlertSink implements DriftAlertSink {
 
 ## Alerts
 
-By default, the Spring Boot starter creates an SLF4J alert sink. Production applications can add custom `DriftAlertSink` beans while keeping the log channel enabled:
+By default, the Spring Boot starter creates an SLF4J alert sink from `ru.eljke.driftguard.spring.alert`. Production applications can add custom `DriftAlertSink` beans while keeping the log channel enabled:
 
 ```java
 @Component
@@ -257,6 +257,8 @@ driftguard:
       headers:
         Authorization: Bearer ${ALERT_WEBHOOK_TOKEN}
 ```
+
+`WebhookDriftAlertSink` is a final ready-to-use adapter, not a base class for inheritance. To customize delivery, either configure `driftguard.alerts.webhook.*` for the built-in JSON POST adapter or provide your own `DriftAlertSink` bean. Multiple sinks are supported: for example SLF4J + webhook + a UI incident repository.
 
 ## Explainability
 
@@ -369,3 +371,5 @@ Render benchmark results for reports or review notes:
 DetectionBenchmarkReport report = suite.run(detector);
 String markdown = DetectionBenchmarkMarkdownReport.render(report);
 ```
+
+The benchmark APIs live under `ru.eljke.driftguard.testkit.benchmark`; synthetic metric streams live under `ru.eljke.driftguard.testkit.scenario`; reusable quality gates live under `ru.eljke.driftguard.testkit.quality`. The Markdown renderer is intentionally presentation-only: run scenarios with `DetectionBenchmarkSuite` or `DetectionBenchmarkRunner`, then render the resulting immutable report.
