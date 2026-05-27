@@ -8,10 +8,11 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * Reusable benchmark suite with configurable quality gates.
+ * Named group of reproducible detection scenarios.
  *
- * Reusable benchmark suite with configurable quality gates.
- * Reusable benchmark suite with configurable quality gates.
+ * <p>A suite runs one detector function against every configured scenario and
+ * returns aggregate precision, recall, false-positive and delay metrics. It is
+ * intended for regression tests, release gates and thesis evaluation reports.</p>
  */
 public record DetectionBenchmarkSuite(
         String label,
