@@ -218,7 +218,7 @@ class WebhookDriftAlertSink implements DriftAlertSink {
 
 ## Alerts
 
-By default, the Spring Boot starter creates an SLF4J alert sink. Production applications normally replace it with a custom `DriftAlertSink` bean:
+By default, the Spring Boot starter creates an SLF4J alert sink. Production applications can add custom `DriftAlertSink` beans while keeping the log channel enabled:
 
 ```java
 @Component
@@ -243,6 +243,19 @@ driftguard:
   alerts:
     enabled: true
     logging-enabled: false
+```
+
+For simple integrations with chat bots, incident routers or workflow systems, enable the generic webhook sink:
+
+```yaml
+driftguard:
+  alerts:
+    webhook:
+      enabled: true
+      url: https://alerts.example.internal/driftguard
+      timeout: 3s
+      headers:
+        Authorization: Bearer ${ALERT_WEBHOOK_TOKEN}
 ```
 
 ## Explainability
@@ -349,3 +362,10 @@ mvn test
 ```
 
 `driftguard-testkit` provides scenario generators and quality gates for precision, recall, false positives, missed drift intervals and first-detection delay. These tests protect algorithm behavior from regressions and make the project demonstrable for academic review.
+
+Render benchmark results for reports or review notes:
+
+```java
+DetectionBenchmarkReport report = suite.run(detector);
+String markdown = DetectionBenchmarkMarkdownReport.render(report);
+```
