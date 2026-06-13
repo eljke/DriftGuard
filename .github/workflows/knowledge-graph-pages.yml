@@ -1,0 +1,100 @@
+name: Publish knowledge graph
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/knowledge-graph-pages.yml"
+      - ".understand-anything/knowledge-graph.json"
+      - ".understand-anything/config.json"
+      - ".understand-anything/meta.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout DriftGuard
+        uses: actions/checkout@v4
+
+      - name: Checkout Understand Anything
+        uses: actions/checkout@v4
+        with:
+          repository: Egonex-AI/Understand-Anything
+          ref: 09ede1917ffd043e6d5bbc8a80b45760814c2d7f
+          path: .understand-dashboard
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: .understand-dashboard/pnpm-lock.yaml
+
+      - name: Install dashboard dependencies
+        working-directory: .understand-dashboard
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build dashboard
+        working-directory: .understand-dashboard
+        env:
+          BASE_PATH: /DriftGuard/
+          VITE_GRAPH_URL: /DriftGuard/knowledge-graph.json
+          VITE_META_URL: /DriftGuard/meta.json
+          VITE_CONFIG_URL: /DriftGuard/config.json
+        run: |
+          pnpm --filter @understand-anything/core build
+          pnpm --filter @understand-anything/dashboard exec tsc -b
+          pnpm --filter @understand-anything/dashboard exec vite build \
+            --config vite.config.demo.ts \
+            --base "$BASE_PATH"
+          sed -i "s|/demo/|$BASE_PATH|g" packages/dashboard/dist/index.html
+          if grep -R '"/demo/' packages/dashboard/dist/index.html packages/dashboard/dist/assets; then
+            echo "Static build still contains /demo/ URLs"
+            exit 1
+          fi
+
+      - name: Assemble static site
+        run: |
+          mkdir -p _site
+          cp -R .understand-dashboard/packages/dashboard/dist/. _site/
+          cp .understand-anything/knowledge-graph.json _site/
+          cp .understand-anything/config.json _site/
+          cp .understand-anything/meta.json _site/
+          touch _site/.nojekyll
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

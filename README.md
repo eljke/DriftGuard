@@ -374,6 +374,14 @@ String markdown = DetectionBenchmarkMarkdownReport.render(report);
 
 The benchmark APIs live under `ru.eljke.driftguard.testkit.benchmark`; synthetic metric streams live under `ru.eljke.driftguard.testkit.scenario`; reusable quality gates live under `ru.eljke.driftguard.testkit.quality`. The Markdown renderer is intentionally presentation-only: run scenarios with `DetectionBenchmarkSuite` or `DetectionBenchmarkRunner`, then render the resulting immutable report.
 
+## Architecture Dashboard
+
+The repository publishes its Understand Anything knowledge graph to:
+
+https://eljke.github.io/DriftGuard/
+
+The GitHub Pages build provides graph navigation, search, architectural layers and the guided tour in Russian. Source-file preview remains available only in the local dashboard because the static deployment does not expose repository files through the local authenticated endpoint.
+
 ## License
 
 DriftGuard is released under the [MIT License](LICENSE).

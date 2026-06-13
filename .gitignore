@@ -65,3 +65,9 @@ Desktop.ini
 ### Gradle / Kotlin leftovers ###
 .gradle/
 .kotlin/
+
+### Understand Anything ###
+.understand-anything/*
+!.understand-anything/knowledge-graph.json
+!.understand-anything/config.json
+!.understand-anything/meta.json
