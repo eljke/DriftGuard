@@ -64,16 +64,25 @@ jobs:
           pnpm --filter @understand-anything/dashboard exec vite build \
             --config vite.config.demo.ts \
             --base "$BASE_PATH"
-          sed -i "s|/demo/|$BASE_PATH|g" packages/dashboard/dist/index.html
-          if grep -R '"/demo/' packages/dashboard/dist/index.html packages/dashboard/dist/assets; then
+
+          DIST_INDEX="$(find . -type f -path '*/packages/dashboard/dist/index.html' -print -quit)"
+          if [ -z "$DIST_INDEX" ]; then
+            echo "Dashboard dist/index.html was not found"
+            exit 1
+          fi
+
+          DASHBOARD_DIST="$(realpath "$(dirname "$DIST_INDEX")")"
+          sed -i "s|/demo/|$BASE_PATH|g" "$DASHBOARD_DIST/index.html"
+          if grep -R '"/demo/' "$DASHBOARD_DIST/index.html" "$DASHBOARD_DIST/assets"; then
             echo "Static build still contains /demo/ URLs"
             exit 1
           fi
+          echo "DASHBOARD_DIST=$DASHBOARD_DIST" >> "$GITHUB_ENV"
 
       - name: Assemble static site
         run: |
           mkdir -p _site
-          cp -R .understand-dashboard/packages/dashboard/dist/. _site/
+          cp -R "$DASHBOARD_DIST"/. _site/
           cp .understand-anything/knowledge-graph.json _site/
           cp .understand-anything/config.json _site/
           cp .understand-anything/meta.json _site/
