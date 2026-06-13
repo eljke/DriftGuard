@@ -51,6 +51,9 @@ jobs:
         working-directory: .understand-dashboard
         run: pnpm install --no-frozen-lockfile
 
+      - name: Enable GitHub source links
+        run: node .github/scripts/patch-dashboard-code-viewer.mjs .understand-dashboard
+
       - name: Build dashboard
         working-directory: .understand-dashboard
         env:
@@ -58,6 +61,7 @@ jobs:
           VITE_GRAPH_URL: /DriftGuard/knowledge-graph.json
           VITE_META_URL: /DriftGuard/meta.json
           VITE_CONFIG_URL: /DriftGuard/config.json
+          VITE_SOURCE_BASE_URL: https://github.com/eljke/DriftGuard/blob/${{ github.sha }}
         run: |
           pnpm --filter @understand-anything/core build
           pnpm --filter @understand-anything/dashboard exec tsc -b
