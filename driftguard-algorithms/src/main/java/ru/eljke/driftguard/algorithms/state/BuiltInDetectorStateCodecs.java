@@ -15,6 +15,7 @@ public final class BuiltInDetectorStateCodecs {
     public static List<DetectorStateCodec<?>> all() {
         return List.of(
                 new PageHinkleyStateCodec(),
+                new AdaptivePageHinkleyStateCodec(),
                 new AdwinStateCodec(),
                 new PsiStateCodec(),
                 new KsStateCodec(),

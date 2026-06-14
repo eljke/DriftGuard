@@ -9,6 +9,8 @@ import ru.eljke.driftguard.algorithms.ks.KsConfig;
 import ru.eljke.driftguard.algorithms.ks.KsState;
 import ru.eljke.driftguard.algorithms.pagehinkley.PageHinkleyConfig;
 import ru.eljke.driftguard.algorithms.pagehinkley.PageHinkleyState;
+import ru.eljke.driftguard.algorithms.adaptive.AdaptivePageHinkleyState;
+import ru.eljke.driftguard.algorithms.adaptive.DetectorSensitivityProfile;
 import ru.eljke.driftguard.algorithms.psi.PsiConfig;
 import ru.eljke.driftguard.algorithms.psi.PsiState;
 import ru.eljke.driftguard.algorithms.support.SlidingDoubleWindow;
@@ -35,7 +37,7 @@ class BuiltInDetectorStateCodecsTest {
         assertTrue(registry.findByAlgorithm(KsConfig.ALGORITHM).isPresent());
         assertTrue(registry.findByAlgorithm(ChiSquareConfig.ALGORITHM).isPresent());
         assertEquals(
-                List.of("page-hinkley", "adwin", "psi", "ks", "chi-square"),
+                List.of("page-hinkley", "adaptive-page-hinkley", "adwin", "psi", "ks", "chi-square"),
                 List.copyOf(registry.algorithms())
         );
     }
@@ -45,6 +47,19 @@ class BuiltInDetectorStateCodecsTest {
         PageHinkleyState state = new PageHinkleyState(42, 12.5, 3.25, -1.5);
 
         DetectorState restored = roundTrip(new PageHinkleyStateCodec(), state);
+
+        assertEquals(state, restored);
+    }
+
+    @Test
+    void roundTripsAdaptivePageHinkleyState() {
+        AdaptivePageHinkleyState state = new AdaptivePageHinkleyState(
+                List.of(),
+                DetectorSensitivityProfile.CONSERVATIVE,
+                new PageHinkleyState(42, 12.5, 3.25, -1.5)
+        );
+
+        DetectorState restored = roundTrip(new AdaptivePageHinkleyStateCodec(), state);
 
         assertEquals(state, restored);
     }

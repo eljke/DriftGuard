@@ -1,6 +1,7 @@
 package ru.eljke.driftguard.algorithms;
 
 import ru.eljke.driftguard.algorithms.adwin.AdwinDetector;
+import ru.eljke.driftguard.algorithms.adaptive.AdaptivePageHinkleyDetector;
 import ru.eljke.driftguard.algorithms.chisquare.ChiSquareDetector;
 import ru.eljke.driftguard.algorithms.ks.KsDetector;
 import ru.eljke.driftguard.algorithms.pagehinkley.PageHinkleyDetector;
@@ -23,6 +24,7 @@ public final class DefaultAlgorithms {
                 new PsiDetector(),
                 new AdwinDetector(),
                 new PageHinkleyDetector(),
+                new AdaptivePageHinkleyDetector(),
                 new KsDetector(),
                 new ChiSquareDetector()
         );

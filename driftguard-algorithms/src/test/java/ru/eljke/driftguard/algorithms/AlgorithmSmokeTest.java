@@ -2,6 +2,8 @@ package ru.eljke.driftguard.algorithms;
 
 import org.junit.jupiter.api.Test;
 import ru.eljke.driftguard.algorithms.adwin.AdwinConfig;
+import ru.eljke.driftguard.algorithms.adaptive.AdaptivePageHinkleyConfig;
+import ru.eljke.driftguard.algorithms.adaptive.DetectorSensitivityProfile;
 import ru.eljke.driftguard.algorithms.chisquare.ChiSquareConfig;
 import ru.eljke.driftguard.algorithms.ks.KsConfig;
 import ru.eljke.driftguard.algorithms.pagehinkley.PageHinkleyConfig;
@@ -30,6 +32,7 @@ class AlgorithmSmokeTest {
         assertTrue(DefaultAlgorithms.registry().find("psi").isPresent());
         assertTrue(DefaultAlgorithms.registry().find("adwin").isPresent());
         assertTrue(DefaultAlgorithms.registry().find("page-hinkley").isPresent());
+        assertTrue(DefaultAlgorithms.registry().find("adaptive-page-hinkley").isPresent());
         assertTrue(DefaultAlgorithms.registry().find("ks").isPresent());
         assertTrue(DefaultAlgorithms.registry().find("chi-square").isPresent());
     }
@@ -74,6 +77,40 @@ class AlgorithmSmokeTest {
         assertEquals(1, events.stream().filter(event -> event.phase() == DriftEventPhase.STARTED).count());
         assertTrue(events.stream().anyMatch(event -> event.phase() == DriftEventPhase.ONGOING));
         assertFalse(events.stream().anyMatch(event -> event.phase() == DriftEventPhase.RECOVERED));
+    }
+
+    @Test
+    void adaptivePageHinkleySelectsProfilePerMetricStream() {
+        PageHinkleyConfig aggressive = new PageHinkleyConfig(8, 0.01, 0.05, 0.1, 0.05);
+        PageHinkleyConfig conservative = new PageHinkleyConfig(8, 0.01, 2.0, 4.0, 0.05);
+        AdaptivePageHinkleyConfig config = new AdaptivePageHinkleyConfig(
+                8,
+                characteristics -> Math.abs(characteristics.mean()) < 1.0
+                        ? DetectorSensitivityProfile.AGGRESSIVE
+                        : DetectorSensitivityProfile.CONSERVATIVE,
+                aggressive,
+                aggressive,
+                conservative
+        );
+        DriftDetectorEngine engine = new DriftDetectorEngine(
+                DefaultAlgorithms.registry(),
+                new InMemoryDetectorStateStore(),
+                List.of(new DetectorDefinition("adaptive", config, key -> true))
+        );
+        MetricKey key = MetricKey.of("payments", "error-rate");
+        List<DriftEvent> events = new ArrayList<>();
+        for (int index = 0; index < 30; index++) {
+            double value = index < 12 ? 0.01 : 0.2;
+            events.addAll(engine.detect(MetricPoint.gauge(
+                    key,
+                    Instant.parse("2026-05-01T10:00:00Z").plusSeconds(index),
+                    value
+            )));
+        }
+
+        assertFalse(events.isEmpty());
+        assertEquals("AGGRESSIVE", events.getFirst().details().get("selectedProfile"));
+        assertEquals("ADAPTIVE", events.getFirst().details().get("profileSelection"));
     }
 
     @Test
