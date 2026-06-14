@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ "${UNDERSTAND_SKIP_AUTO_UPDATE:-0}" = "1" ]; then
+  exit 0
+fi
+
+if [ -f .understand-anything/config.json ] \
+  && grep -q '"autoUpdate"[[:space:]]*:[[:space:]]*true' .understand-anything/config.json; then
+  node .github/scripts/update-knowledge-graph.mjs .
+fi
