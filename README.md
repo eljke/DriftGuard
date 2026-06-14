@@ -170,11 +170,16 @@ AdaptivePageHinkleyConfig config = new AdaptivePageHinkleyConfig(
         characteristics -> trainedSelector.select(characteristics.featureVector()),
         aggressiveConfig,
         balancedConfig,
-        conservativeConfig
+        conservativeConfig,
+        aggressiveEmissionPolicy,
+        balancedEmissionPolicy,
+        conservativeEmissionPolicy
 );
 ```
 
-`PageHinkleyProfileSelector` is the extension point for a trained model or explicit domain rules. Calibration must use representative historical streams; the built-in `ScaleAwareProfileSelector` is a production fallback, not a universal learned model.
+`PageHinkleyProfileSelector` is the extension point for a trained model or explicit domain rules. Optional profile-specific emission policies keep signal confirmation and cooldown behavior aligned with the selected threshold profile. Use the five-argument constructor when all profiles should inherit the `DetectorDefinition` emission policy.
+
+Calibration must use representative historical streams; the built-in `ScaleAwareProfileSelector` is a production fallback, not a universal learned model.
 
 The starter also creates a `MetricPointPublisher` bean. A Spring application can publish observations without knowing the engine wiring:
 

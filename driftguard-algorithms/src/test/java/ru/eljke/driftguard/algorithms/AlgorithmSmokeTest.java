@@ -114,6 +114,43 @@ class AlgorithmSmokeTest {
     }
 
     @Test
+    void adaptivePageHinkleyUsesSelectedProfileEmissionPolicy() {
+        PageHinkleyConfig sensitive = new PageHinkleyConfig(2, 0.0, 0.01, 0.02, 0.05);
+        AdaptivePageHinkleyConfig config = new AdaptivePageHinkleyConfig(
+                8,
+                characteristics -> DetectorSensitivityProfile.AGGRESSIVE,
+                sensitive,
+                sensitive,
+                sensitive,
+                new EmissionPolicyConfig(1, Duration.ZERO),
+                new EmissionPolicyConfig(2, Duration.ZERO),
+                new EmissionPolicyConfig(3, Duration.ZERO)
+        );
+        DriftDetectorEngine engine = new DriftDetectorEngine(
+                DefaultAlgorithms.registry(),
+                new InMemoryDetectorStateStore(),
+                List.of(new DetectorDefinition(
+                        "adaptive",
+                        config,
+                        key -> true,
+                        new EmissionPolicyConfig(3, Duration.ZERO)
+                ))
+        );
+        MetricKey key = MetricKey.of("payments", "error-rate");
+        List<DriftEvent> events = new ArrayList<>();
+        for (int index = 0; index < 10; index++) {
+            events.addAll(engine.detect(MetricPoint.gauge(
+                    key,
+                    Instant.parse("2026-05-01T11:00:00Z").plusSeconds(index),
+                    index < 9 ? 0.01 : 1.0
+            )));
+        }
+
+        assertEquals(1, events.size());
+        assertEquals("AGGRESSIVE", events.getFirst().details().get("selectedProfile"));
+    }
+
+    @Test
     void adwinDetectsMeanShift() {
         assertDetects(new AdwinConfig(40, 10, 0.2, 2.0), stableThenShifted());
     }

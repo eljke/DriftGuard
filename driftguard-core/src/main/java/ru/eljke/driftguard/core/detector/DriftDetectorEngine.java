@@ -2,6 +2,8 @@ package ru.eljke.driftguard.core.detector;
 
 import ru.eljke.driftguard.core.config.DetectorConfig;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
+import ru.eljke.driftguard.core.config.EmissionPolicyConfig;
+import ru.eljke.driftguard.core.config.StateAwareEmissionPolicy;
 import ru.eljke.driftguard.core.domain.DriftDirection;
 import ru.eljke.driftguard.core.domain.DriftEvent;
 import ru.eljke.driftguard.core.domain.MetricPoint;
@@ -142,9 +144,10 @@ public final class DriftDetectorEngine {
                             new DetectionContext(definition.name())
                     );
 
+                    EmissionPolicyConfig emissionPolicy = emissionPolicy(definition, result.state());
                     EmissionTransition emissionTransition = result.eventValue()
-                            .map(event -> onDriftSignal(currentRuntimeState.emissionState(), definition, event))
-                            .orElseGet(() -> onNormalSignal(point, currentRuntimeState.emissionState(), definition));
+                            .map(event -> onDriftSignal(currentRuntimeState.emissionState(), emissionPolicy, event))
+                            .orElseGet(() -> onNormalSignal(point, currentRuntimeState.emissionState(), emissionPolicy));
                     eventsReference.set(emissionTransition.events());
                     return currentRuntimeState.advance(result.state(), emissionTransition.state());
                 }
@@ -155,7 +158,7 @@ public final class DriftDetectorEngine {
     private EmissionTransition onNormalSignal(
             MetricPoint point,
             EmissionState previous,
-            DetectorDefinition definition
+            EmissionPolicyConfig emissionPolicy
     ) {
         if (previous.activeEpisode()) {
             DriftEvent lastEvent = previous.lastEmittedEventValue().orElse(null);
@@ -166,9 +169,9 @@ public final class DriftDetectorEngine {
                 );
             }
             int consecutiveNormal = previous.consecutiveNormal() + 1;
-            boolean recovered = consecutiveNormal >= definition.emissionPolicy().recoveryConsecutiveNormal();
+            boolean recovered = consecutiveNormal >= emissionPolicy.recoveryConsecutiveNormal();
             DriftEvent recoveryEvent = recovered
-                    ? lastEvent.recoveredAt(point.timestamp(), definition.emissionPolicy().recoveryConsecutiveNormal(), point.value())
+                    ? lastEvent.recoveredAt(point.timestamp(), emissionPolicy.recoveryConsecutiveNormal(), point.value())
                     : null;
             EmissionState next = new EmissionState(
                     recovered ? 0 : previous.consecutiveSignals(),
@@ -188,14 +191,18 @@ public final class DriftDetectorEngine {
         return new EmissionTransition(previous, List.of());
     }
 
-    private EmissionTransition onDriftSignal(EmissionState previous, DetectorDefinition definition, DriftEvent event) {
+    private EmissionTransition onDriftSignal(
+            EmissionState previous,
+            EmissionPolicyConfig emissionPolicy,
+            DriftEvent event
+    ) {
         if (previous.activeEpisode()) {
-            return onActiveEpisodeSignal(previous, definition, event);
+            return onActiveEpisodeSignal(previous, emissionPolicy, event);
         }
 
         int consecutiveSignals = previous.consecutiveSignals() + 1;
-        boolean enoughSignals = consecutiveSignals >= definition.emissionPolicy().minConsecutiveSignals();
-        boolean cooldownElapsed = cooldownElapsed(previous, definition, event);
+        boolean enoughSignals = consecutiveSignals >= emissionPolicy.minConsecutiveSignals();
+        boolean cooldownElapsed = cooldownElapsed(previous, emissionPolicy, event);
         boolean emit = enoughSignals && cooldownElapsed;
         EmissionState next = new EmissionState(
                 consecutiveSignals,
@@ -207,7 +214,11 @@ public final class DriftDetectorEngine {
         return new EmissionTransition(next, emit ? List.of(event) : List.of());
     }
 
-    private EmissionTransition onActiveEpisodeSignal(EmissionState previous, DetectorDefinition definition, DriftEvent event) {
+    private EmissionTransition onActiveEpisodeSignal(
+            EmissionState previous,
+            EmissionPolicyConfig emissionPolicy,
+            DriftEvent event
+    ) {
         int consecutiveSignals = previous.consecutiveSignals() + 1;
         DriftEvent lastEvent = previous.lastEmittedEventValue().orElse(null);
         if (isOppositeDirection(lastEvent, event)) {
@@ -217,14 +228,18 @@ public final class DriftDetectorEngine {
                         List.of()
                 );
             }
-            DriftEvent recovered = lastEvent.recoveredAt(event.detectedAt(), definition.emissionPolicy().recoveryConsecutiveNormal(), event.currentValue());
+            DriftEvent recovered = lastEvent.recoveredAt(
+                    event.detectedAt(),
+                    emissionPolicy.recoveryConsecutiveNormal(),
+                    event.currentValue()
+            );
             return new EmissionTransition(
                     new EmissionState(0, event.detectedAt(), false, 0, recovered),
                     List.of(recovered)
             );
         }
 
-        boolean emitOngoing = cooldownElapsed(previous, definition, event);
+        boolean emitOngoing = cooldownElapsed(previous, emissionPolicy, event);
         DriftEvent ongoing = emitOngoing ? event.ongoingAt(event.detectedAt(), consecutiveSignals, lastEvent.baselineValue()) : null;
         EmissionState next = new EmissionState(
                 consecutiveSignals,
@@ -266,10 +281,24 @@ public final class DriftDetectorEngine {
         };
     }
 
-    private static boolean cooldownElapsed(EmissionState previous, DetectorDefinition definition, DriftEvent event) {
+    private static boolean cooldownElapsed(
+            EmissionState previous,
+            EmissionPolicyConfig emissionPolicy,
+            DriftEvent event
+    ) {
         return previous.lastEmittedAtValue()
-                .map(last -> !event.detectedAt().isBefore(last.plus(definition.emissionPolicy().cooldown())))
+                .map(last -> !event.detectedAt().isBefore(last.plus(emissionPolicy.cooldown())))
                 .orElse(true);
+    }
+
+    private static EmissionPolicyConfig emissionPolicy(
+            DetectorDefinition definition,
+            DetectorState state
+    ) {
+        if (definition.config() instanceof StateAwareEmissionPolicy stateAware) {
+            return stateAware.emissionPolicy(state, definition.emissionPolicy());
+        }
+        return definition.emissionPolicy();
     }
 
     private record EmissionTransition(EmissionState state, List<DriftEvent> events) {
