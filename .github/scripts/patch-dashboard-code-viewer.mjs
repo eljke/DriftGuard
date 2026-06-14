@@ -123,3 +123,123 @@ for (const [current, replacement] of replacements) {
 
 fs.writeFileSync(codeViewerPath, source);
 console.log(`Patched ${codeViewerPath}`);
+
+const appPath = findFile(checkoutRoot, "/packages/dashboard/src/App.tsx");
+if (!appPath) {
+  throw new Error("App.tsx was not found in the dashboard checkout");
+}
+
+let appSource = fs.readFileSync(appPath, "utf8").replaceAll("\r\n", "\n");
+
+const appReplacements = [
+  [
+    `const ONBOARDING_DISMISSED_KEY = "ua-onboarding-dismissed-v1";
+type SidebarTab = "info" | "files";
+`,
+    `const ONBOARDING_DISMISSED_KEY = "ua-onboarding-dismissed-v1";
+const LANGUAGE_STORAGE_KEY = "ua-output-language";
+type SidebarTab = "info" | "files";
+`,
+  ],
+  [
+    `      "knowledge-graph.json": import.meta.env.VITE_GRAPH_URL,
+      "domain-graph.json": import.meta.env.VITE_DOMAIN_GRAPH_URL,
+`,
+    `      "knowledge-graph.json": import.meta.env.VITE_GRAPH_URL,
+      "knowledge-graph.en.json": import.meta.env.VITE_GRAPH_EN_URL,
+      "domain-graph.json": import.meta.env.VITE_DOMAIN_GRAPH_URL,
+`,
+  ],
+  [
+    `function Dashboard({ accessToken }: { accessToken: string }) {
+`,
+    `function LanguageToggle({
+  language,
+  onChange,
+}: {
+  language: string;
+  onChange: (language: "ru" | "en") => void;
+}) {
+  return (
+    <div className="fixed bottom-4 right-4 z-[70] flex rounded-md border border-border-medium bg-surface p-0.5 shadow-lg">
+      {(["ru", "en"] as const).map((option) => (
+        <button
+          key={option}
+          type="button"
+          onClick={() => onChange(option)}
+          className={\`min-w-10 rounded px-2.5 py-1.5 text-xs font-semibold uppercase transition-colors \${
+            language === option
+              ? "bg-accent text-root"
+              : "text-text-muted hover:bg-elevated hover:text-text-primary"
+          }\`}
+          aria-pressed={language === option}
+        >
+          {option}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function Dashboard({ accessToken }: { accessToken: string }) {
+`,
+  ],
+  [
+    `  const [outputLanguage, setOutputLanguage] = useState<string | undefined>();
+`,
+    `  const [outputLanguage, setOutputLanguage] = useState<string>(() => {
+    return window.localStorage.getItem(LANGUAGE_STORAGE_KEY) ?? "ru";
+  });
+  const changeOutputLanguage = useCallback((language: "ru" | "en") => {
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+    setOutputLanguage(language);
+  }, []);
+`,
+  ],
+  [
+    `        if (config?.outputLanguage) setOutputLanguage(config.outputLanguage);
+`,
+    `        if (
+          config?.outputLanguage &&
+          !window.localStorage.getItem(LANGUAGE_STORAGE_KEY)
+        ) {
+          setOutputLanguage(config.outputLanguage);
+        }
+`,
+  ],
+  [
+    `    fetch(dataUrl("knowledge-graph.json", accessToken))
+`,
+    `    const graphFile =
+      outputLanguage === "en" ? "knowledge-graph.en.json" : "knowledge-graph.json";
+    fetch(dataUrl(graphFile, accessToken))
+`,
+  ],
+  [
+    `  }, [setGraph]);
+`,
+    `  }, [outputLanguage, setGraph]);
+`,
+  ],
+  [
+    `    <I18nProvider language={outputLanguage ?? "en"}>
+      <ThemeProvider metaTheme={metaTheme}>
+        <DashboardContent
+`,
+    `    <I18nProvider language={outputLanguage}>
+      <ThemeProvider metaTheme={metaTheme}>
+        <LanguageToggle language={outputLanguage} onChange={changeOutputLanguage} />
+        <DashboardContent
+`,
+  ],
+];
+
+for (const [current, replacement] of appReplacements) {
+  if (!appSource.includes(current)) {
+    throw new Error(`Expected App.tsx block was not found:\n${current}`);
+  }
+  appSource = appSource.replace(current, replacement);
+}
+
+fs.writeFileSync(appPath, appSource);
+console.log(`Patched ${appPath}`);

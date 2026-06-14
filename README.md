@@ -380,7 +380,7 @@ The repository publishes its Understand Anything knowledge graph to:
 
 https://eljke.github.io/DriftGuard/
 
-The GitHub Pages build provides graph navigation, search, architectural layers and the guided tour in Russian. Source nodes link to the corresponding file and line range on GitHub.
+The GitHub Pages build provides graph navigation, search, architectural layers and the guided tour with a Russian/English language switcher. Source nodes link to the corresponding file and line range on GitHub.
 
 ## License
 

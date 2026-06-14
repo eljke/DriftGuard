@@ -69,5 +69,6 @@ Desktop.ini
 ### Understand Anything ###
 .understand-anything/*
 !.understand-anything/knowledge-graph.json
+!.understand-anything/knowledge-graph.en.json
 !.understand-anything/config.json
 !.understand-anything/meta.json

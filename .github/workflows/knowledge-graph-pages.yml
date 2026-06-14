@@ -6,7 +6,9 @@ on:
       - master
     paths:
       - ".github/workflows/knowledge-graph-pages.yml"
+      - ".github/scripts/**"
       - ".understand-anything/knowledge-graph.json"
+      - ".understand-anything/knowledge-graph.en.json"
       - ".understand-anything/config.json"
       - ".understand-anything/meta.json"
   workflow_dispatch:
@@ -54,11 +56,15 @@ jobs:
       - name: Enable GitHub source links
         run: node .github/scripts/patch-dashboard-code-viewer.mjs .understand-dashboard
 
+      - name: Generate English knowledge graph
+        run: node .github/scripts/generate-english-knowledge-graph.mjs .
+
       - name: Build dashboard
         working-directory: .understand-dashboard
         env:
           BASE_PATH: /DriftGuard/
           VITE_GRAPH_URL: /DriftGuard/knowledge-graph.json
+          VITE_GRAPH_EN_URL: /DriftGuard/knowledge-graph.en.json
           VITE_META_URL: /DriftGuard/meta.json
           VITE_CONFIG_URL: /DriftGuard/config.json
           VITE_SOURCE_BASE_URL: https://github.com/eljke/DriftGuard/blob/${{ github.sha }}
@@ -88,6 +94,7 @@ jobs:
           mkdir -p _site
           cp -R "$DASHBOARD_DIST"/. _site/
           cp .understand-anything/knowledge-graph.json _site/
+          cp .understand-anything/knowledge-graph.en.json _site/
           cp .understand-anything/config.json _site/
           cp .understand-anything/meta.json _site/
           touch _site/.nojekyll
