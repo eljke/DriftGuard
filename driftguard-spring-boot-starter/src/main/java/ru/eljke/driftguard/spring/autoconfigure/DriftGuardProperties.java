@@ -95,6 +95,17 @@ public class DriftGuardProperties {
     @Setter
     public static class DetectorProperties {
         /**
+         * Sensitivity profile. CUSTOM uses the configured values directly.
+         * ADAPTIVE selects a profile independently for every metric stream.
+         */
+        private DetectorProfile profile = DetectorProfile.CUSTOM;
+
+        /**
+         * Baseline observations used before an adaptive profile is selected.
+         */
+        private int adaptiveCalibrationSamples = 100;
+
+        /**
          * Allows temporarily disabling a detector without removing its configuration.
          */
         private boolean enabled = true;
@@ -284,6 +295,14 @@ public class DriftGuardProperties {
          * Streams tasks.</p>
          */
         private boolean kafkaEnabled = true;
+    }
+
+    public enum DetectorProfile {
+        CUSTOM,
+        AGGRESSIVE,
+        BALANCED,
+        CONSERVATIVE,
+        ADAPTIVE
     }
 
     @Getter

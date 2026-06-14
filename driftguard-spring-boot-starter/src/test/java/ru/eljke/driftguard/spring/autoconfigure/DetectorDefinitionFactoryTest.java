@@ -6,6 +6,7 @@ import ru.eljke.driftguard.spring.kafka.*;
 import ru.eljke.driftguard.spring.metrics.*;
 import org.junit.jupiter.api.Test;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
+import ru.eljke.driftguard.algorithms.adaptive.AdaptivePageHinkleyConfig;
 
 import java.time.Duration;
 import java.util.List;
@@ -38,5 +39,27 @@ class DetectorDefinitionFactoryTest {
 
         assertEquals(2, definition.emissionPolicy().minConsecutiveSignals());
         assertEquals(Duration.ofSeconds(30), definition.emissionPolicy().cooldown());
+    }
+
+    @Test
+    void createsAdaptivePageHinkleyDefinition() {
+        DriftGuardProperties.DetectorProperties detector = new DriftGuardProperties.DetectorProperties();
+        detector.setName("adaptive-latency");
+        detector.setAlgorithm("page-hinkley");
+        detector.setProfile(DriftGuardProperties.DetectorProfile.ADAPTIVE);
+        detector.setAdaptiveCalibrationSamples(80);
+        detector.setWarningThreshold(25.0);
+        detector.setCriticalThreshold(50.0);
+
+        DriftGuardProperties properties = new DriftGuardProperties();
+        properties.setDetectors(List.of(detector));
+
+        AdaptivePageHinkleyConfig config = (AdaptivePageHinkleyConfig) DetectorDefinitionFactory.create(properties)
+                .getFirst()
+                .config();
+
+        assertEquals(80, config.calibrationSamples());
+        assertEquals(16.25, config.aggressive().warningThreshold());
+        assertEquals(45.0, config.conservative().warningThreshold());
     }
 }

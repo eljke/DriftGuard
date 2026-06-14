@@ -1,6 +1,8 @@
 package ru.eljke.driftguard.spring.autoconfigure;
 
 import ru.eljke.driftguard.algorithms.adwin.AdwinConfig;
+import ru.eljke.driftguard.algorithms.adaptive.AdaptivePageHinkleyConfig;
+import ru.eljke.driftguard.algorithms.adaptive.ScaleAwareProfileSelector;
 import ru.eljke.driftguard.algorithms.chisquare.ChiSquareConfig;
 import ru.eljke.driftguard.algorithms.ks.KsConfig;
 import ru.eljke.driftguard.algorithms.pagehinkley.PageHinkleyConfig;
@@ -66,14 +68,7 @@ final class DetectorDefinitionFactory {
                     properties.getDelta(),
                     properties.getCriticalMultiplier()
             );
-            case PageHinkleyConfig.ALGORITHM -> new PageHinkleyConfig(
-                    properties.getWarmupSamples(),
-                    properties.getDelta(),
-                    properties.getWarningThreshold(),
-                    properties.getCriticalThreshold(),
-                    properties.getAlpha(),
-                    properties.getDirection()
-            );
+            case PageHinkleyConfig.ALGORITHM -> pageHinkley(properties);
             case KsConfig.ALGORITHM -> new KsConfig(
                     properties.getBaselineWindowSize(),
                     properties.getCurrentWindowSize(),
@@ -90,6 +85,37 @@ final class DetectorDefinitionFactory {
             );
             default -> throw new DriftGuardValidationException(SpringDriftGuardErrorReason.UNSUPPORTED_ALGORITHM, algorithm);
         };
+    }
+
+    private static DetectorConfig pageHinkley(DriftGuardProperties.DetectorProperties properties) {
+        return switch (properties.getProfile()) {
+            case CUSTOM, BALANCED -> pageHinkley(properties, 1.0, 1.0, 1.0);
+            case AGGRESSIVE -> pageHinkley(properties, 0.6, 0.65, 0.7);
+            case CONSERVATIVE -> pageHinkley(properties, 1.5, 1.8, 1.6);
+            case ADAPTIVE -> new AdaptivePageHinkleyConfig(
+                    properties.getAdaptiveCalibrationSamples(),
+                    new ScaleAwareProfileSelector(),
+                    pageHinkley(properties, 0.6, 0.65, 0.7),
+                    pageHinkley(properties, 1.0, 1.0, 1.0),
+                    pageHinkley(properties, 1.5, 1.8, 1.6)
+            );
+        };
+    }
+
+    private static PageHinkleyConfig pageHinkley(
+            DriftGuardProperties.DetectorProperties properties,
+            double warmupFactor,
+            double warningFactor,
+            double criticalFactor
+    ) {
+        return new PageHinkleyConfig(
+                Math.max(2, (int) Math.round(properties.getWarmupSamples() * warmupFactor)),
+                properties.getDelta(),
+                properties.getWarningThreshold() * warningFactor,
+                properties.getCriticalThreshold() * criticalFactor,
+                properties.getAlpha(),
+                properties.getDirection()
+        );
     }
 
     private static MetricSelector selector(DriftGuardProperties.DetectorProperties properties) {

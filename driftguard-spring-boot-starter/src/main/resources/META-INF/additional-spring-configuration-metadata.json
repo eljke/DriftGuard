@@ -1,6 +1,18 @@
 {
   "properties": [
     {
+      "name": "driftguard.detectors[].profile",
+      "type": "ru.eljke.driftguard.spring.autoconfigure.DriftGuardProperties$DetectorProfile",
+      "defaultValue": "CUSTOM",
+      "description": "Page-Hinkley sensitivity profile: CUSTOM, AGGRESSIVE, BALANCED, CONSERVATIVE or ADAPTIVE."
+    },
+    {
+      "name": "driftguard.detectors[].adaptive-calibration-samples",
+      "type": "java.lang.Integer",
+      "defaultValue": 100,
+      "description": "Baseline observations collected per metric stream before ADAPTIVE selects a Page-Hinkley profile."
+    },
+    {
       "name": "driftguard.enabled",
       "type": "java.lang.Boolean",
       "description": "Enables DriftGuard auto-configuration.",
