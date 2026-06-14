@@ -11,6 +11,6 @@ public final class ScaleAwareProfileSelector implements PageHinkleyProfileSelect
                 || characteristics.coefficientOfVariation() >= 0.12) {
             return DetectorSensitivityProfile.CONSERVATIVE;
         }
-        return DetectorSensitivityProfile.CONSERVATIVE;
+        return DetectorSensitivityProfile.BALANCED;
     }
 }
