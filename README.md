@@ -136,6 +136,46 @@ driftguard:
 
 The starter creates a detector registry, runtime state store, detector definitions, `DriftDetectorEngine`, Micrometer listeners when a `MeterRegistry` is present, and a `DriftEventSinkListener` when custom `DriftEventSink` beans exist.
 
+### Adaptive Page-Hinkley profile
+
+Set `profile: adaptive` to select sensitivity independently for every `MetricKey` after an initial baseline:
+
+```yaml
+driftguard:
+  detectors:
+    - name: adaptive-latency
+      algorithm: page-hinkley
+      profile: adaptive
+      adaptive-calibration-samples: 100
+      services: [checkout-service]
+      metrics: [latency]
+      warmup-samples: 20
+      delta: 0.1
+      warning-threshold: 25.0
+      critical-threshold: 50.0
+      alpha: 0.05
+      emission-policy:
+        min-consecutive-signals: 2
+        cooldown: 30s
+        recovery-consecutive-normal: 3
+```
+
+The configured values form the balanced profile. The starter derives aggressive and conservative variants, collects the configured baseline for each stream and uses robust scale-aware characteristics to choose one variant. The choice is retained in detector state and emitted events contain `profileSelection=ADAPTIVE` and `selectedProfile`.
+
+For a calibrated domain-specific selector, construct `AdaptivePageHinkleyConfig` directly:
+
+```java
+AdaptivePageHinkleyConfig config = new AdaptivePageHinkleyConfig(
+        100,
+        characteristics -> trainedSelector.select(characteristics.featureVector()),
+        aggressiveConfig,
+        balancedConfig,
+        conservativeConfig
+);
+```
+
+`PageHinkleyProfileSelector` is the extension point for a trained model or explicit domain rules. Calibration must use representative historical streams; the built-in `ScaleAwareProfileSelector` is a production fallback, not a universal learned model.
+
 The starter also creates a `MetricPointPublisher` bean. A Spring application can publish observations without knowing the engine wiring:
 
 ```java
