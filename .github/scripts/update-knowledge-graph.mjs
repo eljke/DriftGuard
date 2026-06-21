@@ -18,6 +18,7 @@ const meta = readJson(metaPath);
 const commit = gitText(["rev-parse", "HEAD"]);
 const commitShort = gitText(["rev-parse", "--short", "HEAD"]);
 const commitDate = gitText(["show", "-s", "--format=%cI", "HEAD"]);
+const projectVersion = readProjectVersion();
 const baseCommit = meta.gitCommitHash;
 const committedChanged = gitLines(["diff", `${baseCommit}..${commit}`, "--name-only"]);
 const workingChanged = [
@@ -36,6 +37,7 @@ if (javaFiles.length > 0) {
 graph.project.gitCommitHash = commit;
 graph.project.gitCommitShort = commitShort;
 graph.project.gitCommitDate = commitDate;
+graph.project.version = projectVersion;
 graph.project.analyzedAt = new Date().toISOString();
 writeJson(graphPath, graph);
 
@@ -47,6 +49,7 @@ writeJson(metaPath, {
   gitCommitHash: commit,
   gitCommitShort: commitShort,
   gitCommitDate: commitDate,
+  projectVersion,
   analyzedFiles: new Set(graph.nodes.map((node) => node.filePath).filter(Boolean)).size,
 });
 updateFingerprints(changed, commit);
@@ -285,6 +288,13 @@ function gitText(args) {
 
 function gitLines(args) {
   return gitText(args).split(/\r?\n/).filter(Boolean);
+}
+
+function readProjectVersion() {
+  const pomPath = path.join(root, "pom.xml");
+  if (!fs.existsSync(pomPath)) return undefined;
+  const pom = fs.readFileSync(pomPath, "utf8");
+  return pom.match(/<project[\s\S]*?<version>([^<]+)<\/version>/)?.[1]?.trim();
 }
 
 function readJson(file) {

@@ -183,6 +183,7 @@ type SidebarTab = "info" | "files";
 
 function VersionBadge({ accessToken }: { accessToken: string }) {
   const [version, setVersion] = useState<{
+    projectVersion: string;
     hash: string;
     date: string;
   } | null>(null);
@@ -197,11 +198,12 @@ function VersionBadge({ accessToken }: { accessToken: string }) {
           graph.project.gitCommitShort ??
           String(graph.project.gitCommitHash ?? "").slice(0, 7);
         if (!hash) return;
+        const projectVersion = String(graph.project.version ?? "1.0.0");
         const rawDate = graph.project.gitCommitDate ?? graph.project.analyzedAt;
         const date = rawDate
           ? new Date(rawDate).toLocaleDateString("ru-RU")
           : "";
-        setVersion({ hash, date });
+        setVersion({ projectVersion, hash, date });
       })
       .catch(() => {});
 
@@ -213,10 +215,11 @@ function VersionBadge({ accessToken }: { accessToken: string }) {
   if (!version) return null;
 
   return (
-    <div className="fixed left-4 top-4 z-[70] rounded-md border border-border-medium bg-surface/95 px-2.5 py-1.5 text-xs text-text-muted shadow-lg">
-      <span className="font-semibold text-text-primary">DriftGuard</span>
-      <span className="ml-2 font-mono">{version.hash}</span>
-      {version.date && <span className="ml-2">{version.date}</span>}
+    <div className="fixed left-3 top-2 z-[70] w-[136px] rounded-md border border-border-medium bg-surface/95 px-2.5 py-2 text-[11px] leading-tight text-text-muted shadow-lg">
+      <div className="text-sm font-semibold text-text-primary">DriftGuard</div>
+      <div className="mt-0.5 font-mono">{version.projectVersion}</div>
+      <div className="mt-0.5 font-mono">{version.hash}</div>
+      {version.date && <div className="mt-0.5">{version.date}</div>}
     </div>
   );
 }
