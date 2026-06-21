@@ -6,7 +6,7 @@
     <parent>
         <groupId>ru.eljke</groupId>
         <artifactId>driftguard</artifactId>
-        <version>1.0.0</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>driftguard-algorithms</artifactId>

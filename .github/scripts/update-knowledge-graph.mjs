@@ -294,7 +294,11 @@ function readProjectVersion() {
   const pomPath = path.join(root, "pom.xml");
   if (!fs.existsSync(pomPath)) return undefined;
   const pom = fs.readFileSync(pomPath, "utf8");
-  return pom.match(/<project[\s\S]*?<version>([^<]+)<\/version>/)?.[1]?.trim();
+  const version = pom.match(/<project[\s\S]*?<version>([^<]+)<\/version>/)?.[1]?.trim();
+  if (version === "${revision}") {
+    return pom.match(/<revision>([^<]+)<\/revision>/)?.[1]?.trim();
+  }
+  return version;
 }
 
 function readJson(file) {
