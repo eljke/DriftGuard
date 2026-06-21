@@ -20,10 +20,10 @@
       "Spring Boot"
     ],
     "description": "Модульная библиотека на Java 21 для обнаружения data drift в потоковых технических метриках и публикации уведомлений о дрейфе. Репозиторий организован как Maven multi-module и включает core API, алгоритмы детектирования, интеграцию с Kafka Streams, Spring Boot starter и testkit. Примечание: проект содержит более 100 исходных файлов; для ускорения анализа можно ограничить его отдельным подкаталогом.",
-    "analyzedAt": "2026-06-21T09:12:58.884Z",
-    "gitCommitHash": "5dc306f1ebdbda0d960ea8c91b65dd2d77a3ffe0",
-    "gitCommitShort": "5dc306f",
-    "gitCommitDate": "2026-06-21T12:12:36+03:00"
+    "analyzedAt": "2026-06-21T09:17:44.883Z",
+    "gitCommitHash": "0177851cc70a4a9cb19a451e86c9ab481b112b9b",
+    "gitCommitShort": "0177851",
+    "gitCommitDate": "2026-06-21T12:17:44+03:00"
   },
   "nodes": [
     {
