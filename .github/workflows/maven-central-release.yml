@@ -45,9 +45,10 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
 
       - name: Publish artifacts
-        run: >
-          ./mvnw -B -Prelease deploy
-          -Dgpg.passphrase="$GPG_PASSPHRASE"
+        run: |
+          chmod +x mvnw
+          ./mvnw -B -Prelease deploy \
+          -Dgpg.passphrase="$GPG_PASSPHRASE" \
           -Dgpg.pinentry.mode=loopback
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
