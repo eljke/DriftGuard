@@ -22,9 +22,6 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: maven
-          server-id: central
-          server-username: CENTRAL_USERNAME
-          server-password: CENTRAL_PASSWORD
 
       - name: Import GPG key
         run: |
@@ -34,8 +31,28 @@ jobs:
 
       - name: Publish artifacts
         run: |
+          python3 - <<'PY' > "$RUNNER_TEMP/maven-settings.xml"
+          import os
+          from xml.sax.saxutils import escape
+
+          username = escape(os.environ["CENTRAL_USERNAME"])
+          password = escape(os.environ["CENTRAL_PASSWORD"])
+
+          print(f"""<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <id>central</id>
+                <username>{username}</username>
+                <password>{password}</password>
+              </server>
+            </servers>
+          </settings>""")
+          PY
+
           chmod +x mvnw
-          ./mvnw -B -Prelease deploy \
+          ./mvnw -B --settings "$RUNNER_TEMP/maven-settings.xml" -Prelease deploy \
           -Dgpg.pinentry.mode=loopback
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
