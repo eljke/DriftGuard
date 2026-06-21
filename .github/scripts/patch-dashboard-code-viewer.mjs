@@ -248,9 +248,11 @@ function Dashboard({ accessToken }: { accessToken: string }) {
 `,
   ],
   [
-    `    fetch(dataUrl("knowledge-graph.json", accessToken))
+    `  useEffect(() => {
+    fetch(dataUrl("knowledge-graph.json", accessToken))
 `,
-    `    const graphFile =
+    `  useEffect(() => {
+    const graphFile =
       outputLanguage === "en" ? "knowledge-graph.en.json" : "knowledge-graph.json";
     fetch(dataUrl(graphFile, accessToken))
 `,
