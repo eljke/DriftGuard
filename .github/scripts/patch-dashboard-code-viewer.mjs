@@ -187,6 +187,7 @@ function VersionBadge({ accessToken }: { accessToken: string }) {
     hash: string;
     date: string;
   } | null>(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -215,11 +216,36 @@ function VersionBadge({ accessToken }: { accessToken: string }) {
   if (!version) return null;
 
   return (
-    <div className="fixed left-3 top-2 z-[70] w-[136px] rounded-md border border-border-medium bg-surface/95 px-2.5 py-2 text-[11px] leading-tight text-text-muted shadow-lg">
-      <div className="text-sm font-semibold text-text-primary">DriftGuard</div>
-      <div className="mt-0.5 font-mono">{version.projectVersion}</div>
-      <div className="mt-0.5 font-mono">{version.hash}</div>
-      {version.date && <div className="mt-0.5">{version.date}</div>}
+    <div className="fixed bottom-4 left-4 z-[70]">
+      {open && (
+        <div className="mb-2 w-52 rounded-md border border-border-medium bg-surface/95 p-3 text-xs text-text-muted shadow-lg">
+          <div className="text-sm font-semibold text-text-primary">DriftGuard</div>
+          <dl className="mt-2 space-y-1.5">
+            <div className="flex items-center justify-between gap-3">
+              <dt>Версия</dt>
+              <dd className="font-mono text-text-primary">{version.projectVersion}</dd>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <dt>Коммит</dt>
+              <dd className="font-mono text-text-primary">{version.hash}</dd>
+            </div>
+            {version.date && (
+              <div className="flex items-center justify-between gap-3">
+                <dt>Дата</dt>
+                <dd className="text-text-primary">{version.date}</dd>
+              </div>
+            )}
+          </dl>
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        className="rounded-md border border-border-medium bg-surface/95 px-3 py-1.5 text-xs font-semibold text-text-primary shadow-lg transition-colors hover:bg-elevated"
+        aria-expanded={open}
+      >
+        DriftGuard <span className="ml-1 font-mono text-text-muted">{version.projectVersion}</span>
+      </button>
     </div>
   );
 }
