@@ -10,6 +10,8 @@
     </parent>
 
     <artifactId>driftguard-kafka</artifactId>
+    <name>DriftGuard Kafka</name>
+    <description>Kafka Streams integration for DriftGuard drift detection.</description>
 
     <dependencies>
         <dependency>

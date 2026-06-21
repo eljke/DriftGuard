@@ -10,6 +10,8 @@
     </parent>
 
     <artifactId>driftguard-algorithms</artifactId>
+    <name>DriftGuard Algorithms</name>
+    <description>Statistical drift detection algorithms for DriftGuard.</description>
 
     <dependencies>
         <dependency>

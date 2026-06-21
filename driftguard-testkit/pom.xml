@@ -10,6 +10,8 @@
     </parent>
 
     <artifactId>driftguard-testkit</artifactId>
+    <name>DriftGuard Testkit</name>
+    <description>Testing utilities and fixtures for DriftGuard integrations.</description>
 
     <dependencies>
         <dependency>

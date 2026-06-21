@@ -10,6 +10,8 @@
     </parent>
 
     <artifactId>driftguard-core</artifactId>
+    <name>DriftGuard Core</name>
+    <description>Core abstractions and data models for DriftGuard drift detection.</description>
 
     <dependencies>
         <dependency>
