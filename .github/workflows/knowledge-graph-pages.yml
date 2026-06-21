@@ -101,14 +101,17 @@ jobs:
           touch _site/.nojekyll
 
       - name: Configure GitHub Pages
+        if: github.ref == 'refs/heads/master'
         uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/master'
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
 
   deploy:
+    if: github.ref == 'refs/heads/master'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
