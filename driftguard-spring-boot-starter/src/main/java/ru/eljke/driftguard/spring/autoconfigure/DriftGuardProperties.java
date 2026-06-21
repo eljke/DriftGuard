@@ -3,10 +3,12 @@ package ru.eljke.driftguard.spring.autoconfigure;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import ru.eljke.driftguard.core.config.CalendarBaselineMode;
 import ru.eljke.driftguard.core.domain.DriftDirection;
 import ru.eljke.driftguard.core.domain.MetricKind;
 
 import java.time.Duration;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedHashMap;
@@ -233,6 +235,11 @@ public class DriftGuardProperties {
          */
         private EmissionPolicyProperties emissionPolicy = new EmissionPolicyProperties();
 
+        /**
+         * Calendar regime used to keep separate baselines for seasonal traffic.
+         */
+        private CalendarBaselineProperties calendarBaseline = new CalendarBaselineProperties();
+
         public void setServices(List<String> services) {
             this.services = services == null ? new ArrayList<>() : services;
         }
@@ -251,6 +258,28 @@ public class DriftGuardProperties {
 
         public void setEmissionPolicy(EmissionPolicyProperties emissionPolicy) {
             this.emissionPolicy = emissionPolicy == null ? new EmissionPolicyProperties() : emissionPolicy;
+        }
+
+        public void setCalendarBaseline(CalendarBaselineProperties calendarBaseline) {
+            this.calendarBaseline = calendarBaseline == null ? new CalendarBaselineProperties() : calendarBaseline;
+        }
+    }
+
+    @Getter
+    @Setter
+    public static class CalendarBaselineProperties {
+        /**
+         * Calendar mode used to isolate detector state.
+         */
+        private CalendarBaselineMode mode = CalendarBaselineMode.DISABLED;
+
+        /**
+         * Time zone used to calculate calendar slots.
+         */
+        private ZoneId zoneId = ZoneId.of("UTC");
+
+        public void setZoneId(ZoneId zoneId) {
+            this.zoneId = zoneId == null ? ZoneId.of("UTC") : zoneId;
         }
     }
 

@@ -13,6 +13,18 @@
       "description": "Baseline observations collected per metric stream before ADAPTIVE selects a Page-Hinkley profile."
     },
     {
+      "name": "driftguard.detectors[].calendar-baseline.mode",
+      "type": "ru.eljke.driftguard.core.config.CalendarBaselineMode",
+      "defaultValue": "DISABLED",
+      "description": "Calendar regime used to isolate detector state: DISABLED, HOUR_OF_DAY or HOUR_OF_WEEK."
+    },
+    {
+      "name": "driftguard.detectors[].calendar-baseline.zone-id",
+      "type": "java.time.ZoneId",
+      "defaultValue": "UTC",
+      "description": "Time zone used to calculate calendar baseline slots."
+    },
+    {
       "name": "driftguard.enabled",
       "type": "java.lang.Boolean",
       "description": "Enables DriftGuard auto-configuration.",

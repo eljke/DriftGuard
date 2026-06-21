@@ -1,6 +1,8 @@
 package ru.eljke.driftguard.core.detector;
 
 import org.junit.jupiter.api.Test;
+import ru.eljke.driftguard.core.config.CalendarBaselineConfig;
+import ru.eljke.driftguard.core.config.CalendarBaselineMode;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
 import ru.eljke.driftguard.core.config.EmissionPolicyConfig;
@@ -12,8 +14,9 @@ import ru.eljke.driftguard.core.domain.MetricKey;
 import ru.eljke.driftguard.core.domain.MetricPoint;
 import ru.eljke.driftguard.core.state.InMemoryDetectorStateStore;
 
-import java.time.Instant;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 
@@ -26,11 +29,7 @@ class DriftDetectorEngineTest {
         CountingAlgorithm algorithm = new CountingAlgorithm();
         InMemoryDetectorStateStore stateStore = new InMemoryDetectorStateStore();
         DetectorDefinition definition = new DetectorDefinition("counting", new CountingConfig(3), key -> key.metric().equals("latency"));
-        DriftDetectorEngine engine = new DriftDetectorEngine(
-                new SimpleDetectorRegistry(List.of(algorithm)),
-                stateStore,
-                List.of(definition)
-        );
+        DriftDetectorEngine engine = engine(algorithm, stateStore, definition);
 
         MetricKey key = MetricKey.of("orders", "latency");
         assertTrue(engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:00Z"), 100)).isEmpty());
@@ -52,11 +51,7 @@ class DriftDetectorEngineTest {
                 key -> true,
                 new EmissionPolicyConfig(2, Duration.ofSeconds(10))
         );
-        DriftDetectorEngine engine = new DriftDetectorEngine(
-                new SimpleDetectorRegistry(List.of(algorithm)),
-                new InMemoryDetectorStateStore(),
-                List.of(definition)
-        );
+        DriftDetectorEngine engine = engine(algorithm, definition);
         MetricKey key = MetricKey.of("orders", "latency");
 
         assertTrue(engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:00Z"), 100)).isEmpty());
@@ -77,11 +72,7 @@ class DriftDetectorEngineTest {
                 key -> true,
                 new EmissionPolicyConfig(1, Duration.ZERO, 2)
         );
-        DriftDetectorEngine engine = new DriftDetectorEngine(
-                new SimpleDetectorRegistry(List.of(algorithm)),
-                new InMemoryDetectorStateStore(),
-                List.of(definition)
-        );
+        DriftDetectorEngine engine = engine(algorithm, definition);
         MetricKey key = MetricKey.of("checkout-service", "throughput");
 
         assertEquals(DriftEventPhase.STARTED, engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:00Z"), 430)).getFirst().phase());
@@ -104,11 +95,7 @@ class DriftDetectorEngineTest {
                 key -> true,
                 new EmissionPolicyConfig(1, Duration.ZERO, 1)
         );
-        DriftDetectorEngine engine = new DriftDetectorEngine(
-                new SimpleDetectorRegistry(List.of(algorithm)),
-                new InMemoryDetectorStateStore(),
-                List.of(definition)
-        );
+        DriftDetectorEngine engine = engine(algorithm, definition);
         MetricKey key = MetricKey.of("checkout-service", "throughput");
 
         assertEquals(DriftEventPhase.STARTED, engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:00Z"), 430)).getFirst().phase());
@@ -130,11 +117,7 @@ class DriftDetectorEngineTest {
                 key -> true,
                 new EmissionPolicyConfig(1, Duration.ZERO, 1)
         );
-        DriftDetectorEngine engine = new DriftDetectorEngine(
-                new SimpleDetectorRegistry(List.of(algorithm)),
-                new InMemoryDetectorStateStore(),
-                List.of(definition)
-        );
+        DriftDetectorEngine engine = engine(algorithm, definition);
         MetricKey key = MetricKey.of("checkout-service", "throughput");
 
         DriftEvent started = engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:00Z"), 430)).getFirst();
@@ -146,6 +129,47 @@ class DriftDetectorEngineTest {
         assertEquals(1000.0, started.baselineValue());
         assertEquals(1000.0, ongoing.baselineValue());
         assertEquals(DriftEventPhase.RECOVERED, recovered.phase());
+    }
+
+    @Test
+    void isolatesDetectorStateByCalendarSlot() {
+        CountingAlgorithm algorithm = new CountingAlgorithm();
+        DetectorDefinition definition = new DetectorDefinition(
+                "counting",
+                new CountingConfig(2),
+                key -> true,
+                EmissionPolicyConfig.DEFAULT,
+                new CalendarBaselineConfig(CalendarBaselineMode.HOUR_OF_DAY, ZoneId.of("UTC"))
+        );
+        DriftDetectorEngine engine = engine(algorithm, definition);
+        MetricKey key = MetricKey.of("checkout-service", "latency");
+
+        assertTrue(engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:00:00Z"), 100)).isEmpty());
+        assertTrue(engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T11:00:00Z"), 180)).isEmpty());
+        List<DriftEvent> events = engine.detect(MetricPoint.gauge(key, Instant.parse("2026-05-01T10:05:00Z"), 110));
+
+        assertEquals(1, events.size());
+        assertEquals("hour-10", events.getFirst().details().get("calendarBaselineSlot"));
+        assertEquals("HOUR_OF_DAY", events.getFirst().details().get("calendarBaselineMode"));
+    }
+
+    private static DriftDetectorEngine engine(
+            DetectorAlgorithm<?, ?> algorithm,
+            DetectorDefinition definition
+    ) {
+        return engine(algorithm, new InMemoryDetectorStateStore(), definition);
+    }
+
+    private static DriftDetectorEngine engine(
+            DetectorAlgorithm<?, ?> algorithm,
+            InMemoryDetectorStateStore stateStore,
+            DetectorDefinition definition
+    ) {
+        return new DriftDetectorEngine(
+                new SimpleDetectorRegistry(List.of(algorithm)),
+                stateStore,
+                List.of(definition)
+        );
     }
 
     private record CountingConfig(int emitAt) implements DetectorConfig {

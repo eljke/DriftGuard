@@ -7,6 +7,7 @@ import ru.eljke.driftguard.algorithms.chisquare.ChiSquareConfig;
 import ru.eljke.driftguard.algorithms.ks.KsConfig;
 import ru.eljke.driftguard.algorithms.pagehinkley.PageHinkleyConfig;
 import ru.eljke.driftguard.algorithms.psi.PsiConfig;
+import ru.eljke.driftguard.core.config.CalendarBaselineConfig;
 import ru.eljke.driftguard.core.config.DetectorConfig;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
 import ru.eljke.driftguard.core.config.EmissionPolicyConfig;
@@ -39,7 +40,18 @@ final class DetectorDefinitionFactory {
         String name = properties.getName() == null || properties.getName().isBlank()
                 ? config.algorithm() + "-detector"
                 : properties.getName().trim();
-        return new DetectorDefinition(name, config, selector(properties), emissionPolicy(properties));
+        return new DetectorDefinition(
+                name,
+                config,
+                selector(properties),
+                emissionPolicy(properties),
+                calendarBaseline(properties)
+        );
+    }
+
+    private static CalendarBaselineConfig calendarBaseline(DriftGuardProperties.DetectorProperties properties) {
+        DriftGuardProperties.CalendarBaselineProperties calendarBaseline = properties.getCalendarBaseline();
+        return new CalendarBaselineConfig(calendarBaseline.getMode(), calendarBaseline.getZoneId());
     }
 
     private static EmissionPolicyConfig emissionPolicy(DriftGuardProperties.DetectorProperties properties) {

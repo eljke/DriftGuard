@@ -30,6 +30,8 @@ Metric source
 
 `DetectorDefinition` binds a named detector instance to a typed algorithm configuration, a metric selector and an emission policy. Several definitions may use the same algorithm with different thresholds or selectors.
 
+For metrics with clear calendar regimes, a detector can also use a calendar baseline. In that mode DriftGuard keeps independent detector state for every configured slot, for example every hour of day or every weekday/hour pair. This prevents normal morning, night or Monday traffic patterns from being mixed into one baseline.
+
 `DriftEvent` is the stable output contract for REST APIs, Kafka topics, UI tables, logs and custom alert sinks. Public events have lifecycle phases:
 
 ```text
@@ -133,6 +135,22 @@ driftguard:
         cooldown: 30s
         recovery-consecutive-normal: 3
 ```
+
+For seasonal operational metrics, enable calendar baseline partitioning:
+
+```yaml
+driftguard:
+  detectors:
+    - name: latency-page-hinkley
+      algorithm: page-hinkley
+      services: [checkout-service]
+      metrics: [latency]
+      calendar-baseline:
+        mode: hour-of-week
+        zone-id: Europe/Moscow
+```
+
+`hour-of-day` keeps separate state for each hour in a daily cycle. `hour-of-week` keeps separate state for weekday/hour pairs and fits weekly business rhythms. Emitted events include `calendarBaselineMode`, `calendarBaselineZone` and `calendarBaselineSlot` in `details`.
 
 The starter creates a detector registry, runtime state store, detector definitions, `DriftDetectorEngine`, Micrometer listeners when a `MeterRegistry` is present, and a `DriftEventSinkListener` when custom `DriftEventSink` beans exist.
 

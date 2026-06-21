@@ -6,9 +6,11 @@ import ru.eljke.driftguard.spring.kafka.*;
 import ru.eljke.driftguard.spring.metrics.*;
 import org.junit.jupiter.api.Test;
 import ru.eljke.driftguard.core.config.DetectorDefinition;
+import ru.eljke.driftguard.core.config.CalendarBaselineMode;
 import ru.eljke.driftguard.algorithms.adaptive.AdaptivePageHinkleyConfig;
 
 import java.time.Duration;
+import java.time.ZoneId;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -61,5 +63,22 @@ class DetectorDefinitionFactoryTest {
         assertEquals(80, config.calibrationSamples());
         assertEquals(16.25, config.aggressive().warningThreshold());
         assertEquals(45.0, config.conservative().warningThreshold());
+    }
+
+    @Test
+    void mapsCalendarBaselineProperties() {
+        DriftGuardProperties.DetectorProperties detector = new DriftGuardProperties.DetectorProperties();
+        detector.setName("latency-seasonal");
+        detector.setAlgorithm("page-hinkley");
+        detector.getCalendarBaseline().setMode(CalendarBaselineMode.HOUR_OF_WEEK);
+        detector.getCalendarBaseline().setZoneId(ZoneId.of("Europe/Moscow"));
+
+        DriftGuardProperties properties = new DriftGuardProperties();
+        properties.setDetectors(List.of(detector));
+
+        DetectorDefinition definition = DetectorDefinitionFactory.create(properties).getFirst();
+
+        assertEquals(CalendarBaselineMode.HOUR_OF_WEEK, definition.calendarBaseline().mode());
+        assertEquals(ZoneId.of("Europe/Moscow"), definition.calendarBaseline().zoneId());
     }
 }

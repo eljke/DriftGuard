@@ -17,7 +17,9 @@ import ru.eljke.driftguard.core.state.InMemoryEmissionStateStore;
 import ru.eljke.driftguard.core.state.SplitDetectorRuntimeStateStore;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -125,7 +127,10 @@ public final class DriftDetectorEngine {
             DetectorAlgorithm<C, S> algorithm
     ) {
         C config = algorithm.configType().cast(definition.config());
-        DetectorInstanceKey instanceKey = new DetectorInstanceKey(point.key(), definition.name());
+        DetectorInstanceKey instanceKey = new DetectorInstanceKey(
+                point.key(),
+                definition.stateDetectorName(point.timestamp())
+        );
         AtomicReference<List<DriftEvent>> eventsReference = new AtomicReference<>(List.of());
         runtimeStateStore.update(
                 instanceKey,
@@ -146,6 +151,7 @@ public final class DriftDetectorEngine {
 
                     EmissionPolicyConfig emissionPolicy = emissionPolicy(definition, result.state());
                     EmissionTransition emissionTransition = result.eventValue()
+                            .map(event -> enrichCalendarDetails(event, definition, point))
                             .map(event -> onDriftSignal(currentRuntimeState.emissionState(), emissionPolicy, event))
                             .orElseGet(() -> onNormalSignal(point, currentRuntimeState.emissionState(), emissionPolicy));
                     eventsReference.set(emissionTransition.events());
@@ -299,6 +305,38 @@ public final class DriftDetectorEngine {
             return stateAware.emissionPolicy(state, definition.emissionPolicy());
         }
         return definition.emissionPolicy();
+    }
+
+    private static DriftEvent enrichCalendarDetails(
+            DriftEvent event,
+            DetectorDefinition definition,
+            MetricPoint point
+    ) {
+        if (!definition.calendarBaseline().enabled()) {
+            return event;
+        }
+        Map<String, Object> details = new LinkedHashMap<>(event.details());
+        details.put("calendarBaselineMode", definition.calendarBaseline().mode().name());
+        details.put("calendarBaselineZone", definition.calendarBaseline().zoneId().getId());
+        details.put("calendarBaselineSlot", definition.calendarBaseline().slot(point.timestamp()));
+        return new DriftEvent(
+                event.id(),
+                event.key(),
+                event.detectedAt(),
+                event.windowStart(),
+                event.windowEnd(),
+                event.phase(),
+                event.direction(),
+                event.severity(),
+                event.score(),
+                event.currentValue(),
+                event.baselineValue(),
+                event.detector(),
+                event.algorithm(),
+                event.reason(),
+                event.tags(),
+                details
+        );
     }
 
     private record EmissionTransition(EmissionState state, List<DriftEvent> events) {
