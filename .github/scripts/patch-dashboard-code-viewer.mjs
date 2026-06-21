@@ -181,6 +181,46 @@ type SidebarTab = "info" | "files";
   );
 }
 
+function VersionBadge({ accessToken }: { accessToken: string }) {
+  const [version, setVersion] = useState<{
+    hash: string;
+    date: string;
+  } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(dataUrl("knowledge-graph.json", accessToken))
+      .then((response) => (response.ok ? response.json() : null))
+      .then((graph) => {
+        if (cancelled || !graph?.project) return;
+        const hash =
+          graph.project.gitCommitShort ??
+          String(graph.project.gitCommitHash ?? "").slice(0, 7);
+        if (!hash) return;
+        const rawDate = graph.project.gitCommitDate ?? graph.project.analyzedAt;
+        const date = rawDate
+          ? new Date(rawDate).toLocaleDateString("ru-RU")
+          : "";
+        setVersion({ hash, date });
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken]);
+
+  if (!version) return null;
+
+  return (
+    <div className="fixed left-4 top-4 z-[70] rounded-md border border-border-medium bg-surface/95 px-2.5 py-1.5 text-xs text-text-muted shadow-lg">
+      <span className="font-semibold text-text-primary">DriftGuard</span>
+      <span className="ml-2 font-mono">{version.hash}</span>
+      {version.date && <span className="ml-2">{version.date}</span>}
+    </div>
+  );
+}
+
 function Dashboard({ accessToken }: { accessToken: string }) {
 `,
   ],
@@ -229,6 +269,7 @@ function Dashboard({ accessToken }: { accessToken: string }) {
     `    <I18nProvider language={outputLanguage}>
       <ThemeProvider metaTheme={metaTheme}>
         <LanguageToggle language={outputLanguage} onChange={changeOutputLanguage} />
+        <VersionBadge accessToken={accessToken} />
         <DashboardContent
 `,
   ],

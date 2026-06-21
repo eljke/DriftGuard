@@ -16,10 +16,16 @@ const git = process.platform === "win32"
 const graph = readJson(graphPath);
 const meta = readJson(metaPath);
 const commit = gitText(["rev-parse", "HEAD"]);
+const commitShort = gitText(["rev-parse", "--short", "HEAD"]);
+const commitDate = gitText(["show", "-s", "--format=%cI", "HEAD"]);
 const baseCommit = meta.gitCommitHash;
-const changed = gitText(["diff", `${baseCommit}..${commit}`, "--name-only"])
-  .split(/\r?\n/)
-  .filter(Boolean);
+const committedChanged = gitLines(["diff", `${baseCommit}..${commit}`, "--name-only"]);
+const workingChanged = [
+  ...gitLines(["diff", "--name-only"]),
+  ...gitLines(["diff", "--cached", "--name-only"]),
+  ...gitLines(["ls-files", "--others", "--exclude-standard"]),
+];
+const changed = [...new Set([...committedChanged, ...workingChanged])];
 const javaFiles = changed.filter((file) => file.endsWith(".java"));
 
 if (javaFiles.length > 0) {
@@ -28,6 +34,8 @@ if (javaFiles.length > 0) {
 }
 
 graph.project.gitCommitHash = commit;
+graph.project.gitCommitShort = commitShort;
+graph.project.gitCommitDate = commitDate;
 graph.project.analyzedAt = new Date().toISOString();
 writeJson(graphPath, graph);
 
@@ -37,6 +45,8 @@ writeJson(metaPath, {
   ...meta,
   lastAnalyzedAt: new Date().toISOString(),
   gitCommitHash: commit,
+  gitCommitShort: commitShort,
+  gitCommitDate: commitDate,
   analyzedFiles: new Set(graph.nodes.map((node) => node.filePath).filter(Boolean)).size,
 });
 updateFingerprints(changed, commit);
@@ -271,6 +281,10 @@ function humanize(value) {
 
 function gitText(args) {
   return execFileSync(git, args, { cwd: root, encoding: "utf8" }).trim();
+}
+
+function gitLines(args) {
+  return gitText(args).split(/\r?\n/).filter(Boolean);
 }
 
 function readJson(file) {

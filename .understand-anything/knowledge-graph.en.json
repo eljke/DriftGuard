@@ -20,8 +20,10 @@
       "Spring Boot"
     ],
     "description": "A modular Java library for detecting data drift in streaming technical metrics and publishing structured drift alerts.",
-    "analyzedAt": "2026-06-14T19:32:22.422Z",
-    "gitCommitHash": "895d786490af3c30bb0d0e2ee73ecab487709732"
+    "analyzedAt": "2026-06-21T09:03:50.610Z",
+    "gitCommitHash": "68f7f6ced72f80aaf12109fe9ecc6235201d8933",
+    "gitCommitShort": "68f7f6c",
+    "gitCommitDate": "2026-06-21T12:03:50+03:00"
   },
   "nodes": [
     {
@@ -1705,21 +1707,6 @@
         "java",
         "method",
         "behavior"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
-      "type": "file",
-      "name": "DetectorDefinition.java",
-      "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
-      "summary": "Provides DetectorDefinition for detector configuration in the driftguard-core module.",
-      "tags": [
-        "java",
-        "drift-detection",
-        "driftguard-core",
-        "component",
-        "tested"
       ],
       "complexity": "simple"
     },
@@ -4889,121 +4876,6 @@
         78
       ],
       "summary": "Verifies event behavior in DriftAlertListenerTest.",
-      "tags": [
-        "test",
-        "junit",
-        "test-method"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "type": "file",
-      "name": "DriftDetectorEngineTest.java",
-      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "summary": "Tests DriftDetectorEngineTest behavior and its integration with the driftguard-core module.",
-      "tags": [
-        "test",
-        "junit",
-        "behavior-test"
-      ],
-      "complexity": "complex"
-    },
-    {
-      "id": "class:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:DriftDetectorEngineTest",
-      "type": "class",
-      "name": "DriftDetectorEngineTest",
-      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "lineRange": [
-        23,
-        448
-      ],
-      "summary": "Encapsulates drift detector engine test behavior for behavior and integration tests in driftguard-core.",
-      "tags": [
-        "test",
-        "junit",
-        "test-class"
-      ],
-      "complexity": "complex"
-    },
-    {
-      "id": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:delegatesToMatchingDetectorAndPersistsState",
-      "type": "function",
-      "name": "delegatesToMatchingDetectorAndPersistsState",
-      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "lineRange": [
-        24,
-        44
-      ],
-      "summary": "Verifies delegates to matching detector and persists state behavior in DriftDetectorEngineTest.",
-      "tags": [
-        "test",
-        "junit",
-        "test-method"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:appliesConsecutiveSignalAndCooldownPolicy",
-      "type": "function",
-      "name": "appliesConsecutiveSignalAndCooldownPolicy",
-      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "lineRange": [
-        46,
-        69
-      ],
-      "summary": "Verifies applies consecutive signal and cooldown policy behavior in DriftDetectorEngineTest.",
-      "tags": [
-        "test",
-        "junit",
-        "test-method"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:recoversDownwardEpisodeOnlyAfterMetricReturnsNearBaseline",
-      "type": "function",
-      "name": "recoversDownwardEpisodeOnlyAfterMetricReturnsNearBaseline",
-      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "lineRange": [
-        71,
-        96
-      ],
-      "summary": "Verifies recovers downward episode only after metric returns near baseline behavior in DriftDetectorEngineTest.",
-      "tags": [
-        "test",
-        "junit",
-        "test-method"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:doesNotRecoverDownwardEpisodeOnOppositeSignalFarFromBaseline",
-      "type": "function",
-      "name": "doesNotRecoverDownwardEpisodeOnOppositeSignalFarFromBaseline",
-      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "lineRange": [
-        98,
-        122
-      ],
-      "summary": "Verifies does not recover downward episode on opposite signal far from baseline behavior in DriftDetectorEngineTest.",
-      "tags": [
-        "test",
-        "junit",
-        "test-method"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:keepsEpisodeBaselineAcrossOngoingSignals",
-      "type": "function",
-      "name": "keepsEpisodeBaselineAcrossOngoingSignals",
-      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "lineRange": [
-        124,
-        149
-      ],
-      "summary": "Verifies keeps episode baseline across ongoing signals behavior in DriftDetectorEngineTest.",
       "tags": [
         "test",
         "junit",
@@ -10553,6 +10425,218 @@
       "complexity": "simple"
     },
     {
+      "id": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java",
+      "type": "file",
+      "name": "CalendarBaselineConfig.java",
+      "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java",
+      "summary": "Provides CalendarBaselineConfig for detector configuration in the driftguard-core module.",
+      "tags": [
+        "java",
+        "drift-detection",
+        "core",
+        "component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java:CalendarBaselineConfig",
+      "type": "class",
+      "name": "CalendarBaselineConfig",
+      "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java",
+      "lineRange": [
+        18,
+        49
+      ],
+      "summary": "Encapsulates calendar baseline config behavior for detector configuration in driftguard-core.",
+      "tags": [
+        "java",
+        "record",
+        "domain-component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java:enabled",
+      "type": "function",
+      "name": "enabled",
+      "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java",
+      "lineRange": [
+        32,
+        34
+      ],
+      "summary": "Implements enabled behavior in CalendarBaselineConfig.",
+      "tags": [
+        "java",
+        "method",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java:slot",
+      "type": "function",
+      "name": "slot",
+      "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java",
+      "lineRange": [
+        36,
+        44
+      ],
+      "summary": "Implements slot behavior in CalendarBaselineConfig.",
+      "tags": [
+        "java",
+        "method",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java:day",
+      "type": "function",
+      "name": "day",
+      "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java",
+      "lineRange": [
+        46,
+        48
+      ],
+      "summary": "Implements day behavior in CalendarBaselineConfig.",
+      "tags": [
+        "java",
+        "method",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineMode.java",
+      "type": "file",
+      "name": "CalendarBaselineMode.java",
+      "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineMode.java",
+      "summary": "Provides CalendarBaselineMode for detector configuration in the driftguard-core module.",
+      "tags": [
+        "java",
+        "drift-detection",
+        "core",
+        "component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineMode.java:CalendarBaselineMode",
+      "type": "class",
+      "name": "CalendarBaselineMode",
+      "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineMode.java",
+      "lineRange": [
+        6,
+        21
+      ],
+      "summary": "Encapsulates calendar baseline mode behavior for detector configuration in driftguard-core.",
+      "tags": [
+        "java",
+        "enum",
+        "domain-component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "type": "file",
+      "name": "DetectorDefinition.java",
+      "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "summary": "Provides DetectorDefinition for detector configuration in the driftguard-core module.",
+      "tags": [
+        "java",
+        "drift-detection",
+        "core",
+        "component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java:DetectorDefinition",
+      "type": "class",
+      "name": "DetectorDefinition",
+      "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "lineRange": [
+        23,
+        65
+      ],
+      "summary": "Encapsulates detector definition behavior for detector configuration in driftguard-core.",
+      "tags": [
+        "java",
+        "record",
+        "domain-component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java:DetectorDefinition",
+      "type": "function",
+      "name": "DetectorDefinition",
+      "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "lineRange": [
+        38,
+        40
+      ],
+      "summary": "Constructs DetectorDefinition instances used for detector configuration.",
+      "tags": [
+        "java",
+        "method",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java:matches",
+      "type": "function",
+      "name": "matches",
+      "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "lineRange": [
+        51,
+        53
+      ],
+      "summary": "Implements matches behavior in DetectorDefinition.",
+      "tags": [
+        "java",
+        "method",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java:stateDetectorName",
+      "type": "function",
+      "name": "stateDetectorName",
+      "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "lineRange": [
+        55,
+        60
+      ],
+      "summary": "Implements state detector name behavior in DetectorDefinition.",
+      "tags": [
+        "java",
+        "method",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java:normalize",
+      "type": "function",
+      "name": "normalize",
+      "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "lineRange": [
+        62,
+        64
+      ],
+      "summary": "Implements normalize behavior in DetectorDefinition.",
+      "tags": [
+        "java",
+        "method",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
       "id": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/detector/DriftDetectorEngine.java",
       "type": "file",
       "name": "DriftDetectorEngine.java",
@@ -10572,8 +10656,8 @@
       "name": "DriftDetectorEngine",
       "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/detector/DriftDetectorEngine.java",
       "lineRange": [
-        33,
-        44
+        34,
+        369
       ],
       "summary": "Encapsulates drift detector engine behavior for detector execution in driftguard-core.",
       "tags": [
@@ -10589,8 +10673,8 @@
       "name": "detect",
       "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/detector/DriftDetectorEngine.java",
       "lineRange": [
-        96,
-        114
+        98,
+        116
       ],
       "summary": "Implements detect behavior in DriftDetectorEngine.",
       "tags": [
@@ -10606,8 +10690,8 @@
       "name": "detectWithDefinition",
       "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/detector/DriftDetectorEngine.java",
       "lineRange": [
-        116,
-        120
+        118,
+        122
       ],
       "summary": "Implements detect with definition behavior in DriftDetectorEngine.",
       "tags": [
@@ -10623,8 +10707,8 @@
       "name": "isOppositeDirection",
       "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/detector/DriftDetectorEngine.java",
       "lineRange": [
-        254,
-        260
+        260,
+        266
       ],
       "summary": "Implements is opposite direction behavior in DriftDetectorEngine.",
       "tags": [
@@ -10640,8 +10724,8 @@
       "name": "isBackNearBaseline",
       "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/detector/DriftDetectorEngine.java",
       "lineRange": [
-        262,
-        264
+        268,
+        270
       ],
       "summary": "Implements is back near baseline behavior in DriftDetectorEngine.",
       "tags": [
@@ -10657,8 +10741,8 @@
       "name": "EmissionTransition",
       "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/detector/DriftDetectorEngine.java",
       "lineRange": [
-        304,
-        305
+        342,
+        343
       ],
       "summary": "Implements emission transition behavior in DriftDetectorEngine.",
       "tags": [
@@ -10674,8 +10758,8 @@
       "name": "notifyCompleted",
       "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/detector/DriftDetectorEngine.java",
       "lineRange": [
-        307,
-        315
+        345,
+        353
       ],
       "summary": "Implements notify completed behavior in DriftDetectorEngine.",
       "tags": [
@@ -10691,8 +10775,8 @@
       "name": "notifyFailed",
       "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/detector/DriftDetectorEngine.java",
       "lineRange": [
-        317,
-        325
+        355,
+        363
       ],
       "summary": "Implements notify failed behavior in DriftDetectorEngine.",
       "tags": [
@@ -10708,13 +10792,214 @@
       "name": "castState",
       "filePath": "driftguard-core/src/main/java/ru/eljke/driftguard/core/detector/DriftDetectorEngine.java",
       "lineRange": [
-        328,
-        330
+        366,
+        368
       ],
       "summary": "Implements cast state behavior in DriftDetectorEngine.",
       "tags": [
         "java",
         "method",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "type": "file",
+      "name": "DriftDetectorEngineTest.java",
+      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "summary": "Tests DriftDetectorEngineTest behavior and its integration with the driftguard-core module.",
+      "tags": [
+        "java",
+        "tests",
+        "tests",
+        "behavior-test"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:DriftDetectorEngineTest",
+      "type": "class",
+      "name": "DriftDetectorEngineTest",
+      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "lineRange": [
+        26,
+        472
+      ],
+      "summary": "Encapsulates drift detector engine test behavior for behavior and integration tests in driftguard-core.",
+      "tags": [
+        "java",
+        "class",
+        "domain-component"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:delegatesToMatchingDetectorAndPersistsState",
+      "type": "function",
+      "name": "delegatesToMatchingDetectorAndPersistsState",
+      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "lineRange": [
+        28,
+        43
+      ],
+      "summary": "Verifies delegates to matching detector and persists state behavior in DriftDetectorEngineTest.",
+      "tags": [
+        "java",
+        "test",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:appliesConsecutiveSignalAndCooldownPolicy",
+      "type": "function",
+      "name": "appliesConsecutiveSignalAndCooldownPolicy",
+      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "lineRange": [
+        46,
+        64
+      ],
+      "summary": "Verifies applies consecutive signal and cooldown policy behavior in DriftDetectorEngineTest.",
+      "tags": [
+        "java",
+        "test",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:recoversDownwardEpisodeOnlyAfterMetricReturnsNearBaseline",
+      "type": "function",
+      "name": "recoversDownwardEpisodeOnlyAfterMetricReturnsNearBaseline",
+      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "lineRange": [
+        67,
+        87
+      ],
+      "summary": "Verifies recovers downward episode only after metric returns near baseline behavior in DriftDetectorEngineTest.",
+      "tags": [
+        "java",
+        "test",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:doesNotRecoverDownwardEpisodeOnOppositeSignalFarFromBaseline",
+      "type": "function",
+      "name": "doesNotRecoverDownwardEpisodeOnOppositeSignalFarFromBaseline",
+      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "lineRange": [
+        90,
+        109
+      ],
+      "summary": "Verifies does not recover downward episode on opposite signal far from baseline behavior in DriftDetectorEngineTest.",
+      "tags": [
+        "java",
+        "test",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:keepsEpisodeBaselineAcrossOngoingSignals",
+      "type": "function",
+      "name": "keepsEpisodeBaselineAcrossOngoingSignals",
+      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "lineRange": [
+        112,
+        132
+      ],
+      "summary": "Verifies keeps episode baseline across ongoing signals behavior in DriftDetectorEngineTest.",
+      "tags": [
+        "java",
+        "test",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:isolatesDetectorStateByCalendarSlot",
+      "type": "function",
+      "name": "isolatesDetectorStateByCalendarSlot",
+      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "lineRange": [
+        135,
+        154
+      ],
+      "summary": "Verifies isolates detector state by calendar slot behavior in DriftDetectorEngineTest.",
+      "tags": [
+        "java",
+        "test",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:algorithm",
+      "type": "function",
+      "name": "algorithm",
+      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "lineRange": [
+        177,
+        179
+      ],
+      "summary": "Verifies algorithm behavior in DriftDetectorEngineTest.",
+      "tags": [
+        "java",
+        "test",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:name",
+      "type": "function",
+      "name": "name",
+      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "lineRange": [
+        191,
+        193
+      ],
+      "summary": "Verifies name behavior in DriftDetectorEngineTest.",
+      "tags": [
+        "java",
+        "test",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:configType",
+      "type": "function",
+      "name": "configType",
+      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "lineRange": [
+        196,
+        198
+      ],
+      "summary": "Verifies config type behavior in DriftDetectorEngineTest.",
+      "tags": [
+        "java",
+        "test",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:initialState",
+      "type": "function",
+      "name": "initialState",
+      "filePath": "driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "lineRange": [
+        201,
+        203
+      ],
+      "summary": "Verifies initial state behavior in DriftDetectorEngineTest.",
+      "tags": [
+        "java",
+        "test",
         "behavior"
       ],
       "complexity": "simple"
@@ -10739,8 +11024,8 @@
       "name": "DetectorDefinitionFactory",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java",
       "lineRange": [
-        20,
-        143
+        21,
+        155
       ],
       "summary": "Encapsulates detector definition factory behavior for Spring Boot auto-configuration in driftguard-spring-boot-starter.",
       "tags": [
@@ -10756,8 +11041,8 @@
       "name": "DetectorDefinitionFactory",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java",
       "lineRange": [
-        21,
-        22
+        22,
+        23
       ],
       "summary": "Constructs DetectorDefinitionFactory instances used for Spring Boot auto-configuration.",
       "tags": [
@@ -10773,10 +11058,27 @@
       "name": "create",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java",
       "lineRange": [
-        24,
-        35
+        25,
+        36
       ],
       "summary": "Implements create behavior in DetectorDefinitionFactory.",
+      "tags": [
+        "java",
+        "method",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java:calendarBaseline",
+      "type": "function",
+      "name": "calendarBaseline",
+      "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java",
+      "lineRange": [
+        52,
+        55
+      ],
+      "summary": "Implements calendar baseline behavior in DetectorDefinitionFactory.",
       "tags": [
         "java",
         "method",
@@ -10790,8 +11092,8 @@
       "name": "emissionPolicy",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java",
       "lineRange": [
-        45,
-        52
+        57,
+        64
       ],
       "summary": "Implements emission policy behavior in DetectorDefinitionFactory.",
       "tags": [
@@ -10807,8 +11109,8 @@
       "name": "config",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java",
       "lineRange": [
-        54,
-        88
+        66,
+        100
       ],
       "summary": "Implements config behavior in DetectorDefinitionFactory.",
       "tags": [
@@ -10824,8 +11126,8 @@
       "name": "pageHinkley",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java",
       "lineRange": [
-        90,
-        103
+        102,
+        115
       ],
       "summary": "Implements page hinkley behavior in DetectorDefinitionFactory.",
       "tags": [
@@ -10841,8 +11143,8 @@
       "name": "selector",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java",
       "lineRange": [
-        121,
-        128
+        133,
+        140
       ],
       "summary": "Implements selector behavior in DetectorDefinitionFactory.",
       "tags": [
@@ -10858,8 +11160,8 @@
       "name": "required",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java",
       "lineRange": [
-        130,
-        135
+        142,
+        147
       ],
       "summary": "Implements required behavior in DetectorDefinitionFactory.",
       "tags": [
@@ -10875,8 +11177,8 @@
       "name": "defaultDefinitions",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java",
       "lineRange": [
-        137,
-        142
+        149,
+        154
       ],
       "summary": "Implements default definitions behavior in DetectorDefinitionFactory.",
       "tags": [
@@ -10906,8 +11208,8 @@
       "name": "is",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
       "lineRange": [
-        18,
-        19
+        20,
+        21
       ],
       "summary": "Encapsulates is behavior for Spring Boot auto-configuration in driftguard-spring-boot-starter.",
       "tags": [
@@ -10923,8 +11225,8 @@
       "name": "setDetectors",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
       "lineRange": [
-        74,
-        76
+        76,
+        78
       ],
       "summary": "Implements set detectors behavior in DriftGuardProperties.",
       "tags": [
@@ -10940,8 +11242,8 @@
       "name": "setKafka",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
       "lineRange": [
-        78,
-        80
+        80,
+        82
       ],
       "summary": "Implements set kafka behavior in DriftGuardProperties.",
       "tags": [
@@ -10957,8 +11259,8 @@
       "name": "setMetrics",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
       "lineRange": [
-        82,
-        84
+        84,
+        86
       ],
       "summary": "Implements set metrics behavior in DriftGuardProperties.",
       "tags": [
@@ -10974,8 +11276,8 @@
       "name": "setAlerts",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
       "lineRange": [
-        86,
-        88
+        88,
+        90
       ],
       "summary": "Implements set alerts behavior in DriftGuardProperties.",
       "tags": [
@@ -10991,8 +11293,8 @@
       "name": "setMicrometerInput",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
       "lineRange": [
-        90,
-        92
+        92,
+        94
       ],
       "summary": "Implements set micrometer input behavior in DriftGuardProperties.",
       "tags": [
@@ -11008,8 +11310,8 @@
       "name": "setServices",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
       "lineRange": [
-        236,
-        238
+        243,
+        245
       ],
       "summary": "Implements set services behavior in DriftGuardProperties.",
       "tags": [
@@ -11025,8 +11327,8 @@
       "name": "setOperations",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
       "lineRange": [
-        244,
-        246
+        251,
+        253
       ],
       "summary": "Implements set operations behavior in DriftGuardProperties.",
       "tags": [
@@ -11042,8 +11344,8 @@
       "name": "setInstances",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
       "lineRange": [
-        248,
-        250
+        255,
+        257
       ],
       "summary": "Implements set instances behavior in DriftGuardProperties.",
       "tags": [
@@ -11059,10 +11361,44 @@
       "name": "setEmissionPolicy",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
       "lineRange": [
-        252,
-        254
+        259,
+        261
       ],
       "summary": "Implements set emission policy behavior in DriftGuardProperties.",
+      "tags": [
+        "java",
+        "method",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java:setCalendarBaseline",
+      "type": "function",
+      "name": "setCalendarBaseline",
+      "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
+      "lineRange": [
+        263,
+        265
+      ],
+      "summary": "Implements set calendar baseline behavior in DriftGuardProperties.",
+      "tags": [
+        "java",
+        "method",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java:setZoneId",
+      "type": "function",
+      "name": "setZoneId",
+      "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
+      "lineRange": [
+        281,
+        283
+      ],
+      "summary": "Implements set zone id behavior in DriftGuardProperties.",
       "tags": [
         "java",
         "method",
@@ -11076,8 +11412,8 @@
       "name": "setWebhook",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
       "lineRange": [
-        326,
-        328
+        355,
+        357
       ],
       "summary": "Implements set webhook behavior in DriftGuardProperties.",
       "tags": [
@@ -11093,8 +11429,8 @@
       "name": "setHeaders",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
       "lineRange": [
-        354,
-        356
+        383,
+        385
       ],
       "summary": "Implements set headers behavior in DriftGuardProperties.",
       "tags": [
@@ -11110,8 +11446,8 @@
       "name": "setMeters",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
       "lineRange": [
-        382,
-        384
+        411,
+        413
       ],
       "summary": "Implements set meters behavior in DriftGuardProperties.",
       "tags": [
@@ -11127,8 +11463,8 @@
       "name": "setTags",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
       "lineRange": [
-        430,
-        432
+        459,
+        461
       ],
       "summary": "Implements set tags behavior in DriftGuardProperties.",
       "tags": [
@@ -11144,8 +11480,8 @@
       "name": "setInputTopics",
       "filePath": "driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
       "lineRange": [
-        481,
-        483
+        510,
+        512
       ],
       "summary": "Implements set input topics behavior in DriftGuardProperties.",
       "tags": [
@@ -11167,7 +11503,7 @@
         "tests",
         "behavior-test"
       ],
-      "complexity": "simple"
+      "complexity": "moderate"
     },
     {
       "id": "class:driftguard-spring-boot-starter/src/test/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactoryTest.java:DetectorDefinitionFactoryTest",
@@ -11175,8 +11511,8 @@
       "name": "DetectorDefinitionFactoryTest",
       "filePath": "driftguard-spring-boot-starter/src/test/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactoryTest.java",
       "lineRange": [
-        17,
-        65
+        19,
+        84
       ],
       "summary": "Encapsulates detector definition factory test behavior for behavior and integration tests in driftguard-spring-boot-starter.",
       "tags": [
@@ -11184,7 +11520,7 @@
         "class",
         "domain-component"
       ],
-      "complexity": "simple"
+      "complexity": "moderate"
     },
     {
       "id": "function:driftguard-spring-boot-starter/src/test/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactoryTest.java:createsDefaultDefinitionsWhenNoPropertiesProvided",
@@ -11192,8 +11528,8 @@
       "name": "createsDefaultDefinitionsWhenNoPropertiesProvided",
       "filePath": "driftguard-spring-boot-starter/src/test/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactoryTest.java",
       "lineRange": [
-        19,
-        24
+        21,
+        26
       ],
       "summary": "Verifies creates default definitions when no properties provided behavior in DetectorDefinitionFactoryTest.",
       "tags": [
@@ -11209,8 +11545,8 @@
       "name": "mapsEmissionPolicyProperties",
       "filePath": "driftguard-spring-boot-starter/src/test/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactoryTest.java",
       "lineRange": [
-        27,
-        42
+        29,
+        44
       ],
       "summary": "Verifies maps emission policy properties behavior in DetectorDefinitionFactoryTest.",
       "tags": [
@@ -11226,10 +11562,27 @@
       "name": "createsAdaptivePageHinkleyDefinition",
       "filePath": "driftguard-spring-boot-starter/src/test/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactoryTest.java",
       "lineRange": [
-        45,
-        64
+        47,
+        66
       ],
       "summary": "Verifies creates adaptive page hinkley definition behavior in DetectorDefinitionFactoryTest.",
+      "tags": [
+        "java",
+        "test",
+        "behavior"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:driftguard-spring-boot-starter/src/test/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactoryTest.java:mapsCalendarBaselineProperties",
+      "type": "function",
+      "name": "mapsCalendarBaselineProperties",
+      "filePath": "driftguard-spring-boot-starter/src/test/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactoryTest.java",
+      "lineRange": [
+        69,
+        83
+      ],
+      "summary": "Verifies maps calendar baseline properties behavior in DetectorDefinitionFactoryTest.",
       "tags": [
         "java",
         "test",
@@ -12878,20 +13231,6 @@
       "weight": 1
     },
     {
-      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
-      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/domain/MetricKey.java",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
-      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/error/DriftGuardErrors.java",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
       "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/ThresholdConfig.java",
       "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/error/DriftGuardErrors.java",
       "type": "imports",
@@ -13025,29 +13364,8 @@
       "weight": 0.5
     },
     {
-      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
-      "target": "file:driftguard-kafka/src/test/java/ru/eljke/driftguard/kafka/topology/KafkaDriftGuardEndToEndTest.java",
-      "type": "tested_by",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
-      "target": "file:driftguard-kafka/src/test/java/ru/eljke/driftguard/kafka/topology/KafkaStatefulDriftGuardTopologyBuilderTest.java",
-      "type": "tested_by",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
       "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/detector/DetectorInstanceKey.java",
       "target": "file:driftguard-kafka/src/test/java/ru/eljke/driftguard/kafka/topology/KafkaStatefulDriftGuardTopologyBuilderTest.java",
-      "type": "tested_by",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
-      "target": "file:driftguard-spring-boot-starter/src/test/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactoryTest.java",
       "type": "tested_by",
       "direction": "forward",
       "weight": 0.5
@@ -16338,118 +16656,6 @@
     {
       "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/alert/DriftAlertListenerTest.java",
       "target": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/alert/DriftAlertListenerTest.java:event",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorConfig.java",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/EmissionPolicyConfig.java",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/domain/DriftDirection.java",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/domain/DriftEvent.java",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/domain/DriftEventPhase.java",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/domain/DriftSeverity.java",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/domain/MetricKey.java",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/domain/MetricPoint.java",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/state/InMemoryDetectorStateStore.java",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "target": "class:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:DriftDetectorEngineTest",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "target": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:delegatesToMatchingDetectorAndPersistsState",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "target": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:appliesConsecutiveSignalAndCooldownPolicy",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "target": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:recoversDownwardEpisodeOnlyAfterMetricReturnsNearBaseline",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "target": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:doesNotRecoverDownwardEpisodeOnOppositeSignalFarFromBaseline",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
-      "target": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:keepsEpisodeBaselineAcrossOngoingSignals",
       "type": "contains",
       "direction": "forward",
       "weight": 1
@@ -21019,6 +21225,118 @@
       "weight": 0.7
     },
     {
+      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java",
+      "target": "class:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java:CalendarBaselineConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java",
+      "target": "class:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java:CalendarBaselineConfig",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java",
+      "target": "function:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java:enabled",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java",
+      "target": "function:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java:slot",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java",
+      "target": "function:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java:day",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/error/DriftGuardErrors.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineMode.java",
+      "target": "class:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineMode.java:CalendarBaselineMode",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineMode.java",
+      "target": "class:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineMode.java:CalendarBaselineMode",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "target": "class:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java:DetectorDefinition",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "target": "class:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java:DetectorDefinition",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "target": "function:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java:DetectorDefinition",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "target": "function:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java:matches",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "target": "function:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java:stateDetectorName",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "target": "function:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java:normalize",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/domain/MetricKey.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/error/DriftGuardErrors.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
       "source": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/detector/DriftDetectorEngine.java",
       "target": "class:driftguard-core/src/main/java/ru/eljke/driftguard/core/detector/DriftDetectorEngine.java:DriftDetectorEngine",
       "type": "contains",
@@ -21194,6 +21512,174 @@
       "weight": 0.7
     },
     {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "class:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:DriftDetectorEngineTest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "class:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:DriftDetectorEngineTest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:delegatesToMatchingDetectorAndPersistsState",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:appliesConsecutiveSignalAndCooldownPolicy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:recoversDownwardEpisodeOnlyAfterMetricReturnsNearBaseline",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:doesNotRecoverDownwardEpisodeOnOppositeSignalFarFromBaseline",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:keepsEpisodeBaselineAcrossOngoingSignals",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:isolatesDetectorStateByCalendarSlot",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:algorithm",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:name",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:configType",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "function:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java:initialState",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineMode.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorConfig.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/EmissionPolicyConfig.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/domain/DriftDirection.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/domain/DriftEvent.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/domain/DriftEventPhase.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/domain/DriftSeverity.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/domain/MetricKey.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/domain/MetricPoint.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:driftguard-core/src/test/java/ru/eljke/driftguard/core/detector/DriftDetectorEngineTest.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/state/InMemoryDetectorStateStore.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
       "source": "file:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java",
       "target": "class:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java:DetectorDefinitionFactory",
       "type": "contains",
@@ -21217,6 +21703,13 @@
     {
       "source": "file:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java",
       "target": "function:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java:create",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java",
+      "target": "function:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java:calendarBaseline",
       "type": "contains",
       "direction": "forward",
       "weight": 1
@@ -21308,6 +21801,13 @@
     {
       "source": "file:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java",
       "target": "file:driftguard-algorithms/src/main/java/ru/eljke/driftguard/algorithms/psi/PsiConfig.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactory.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java",
       "type": "imports",
       "direction": "forward",
       "weight": 0.7
@@ -21433,6 +21933,20 @@
     },
     {
       "source": "file:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
+      "target": "function:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java:setCalendarBaseline",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
+      "target": "function:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java:setZoneId",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
       "target": "function:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java:setWebhook",
       "type": "contains",
       "direction": "forward",
@@ -21465,6 +21979,13 @@
       "type": "contains",
       "direction": "forward",
       "weight": 1
+    },
+    {
+      "source": "file:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineMode.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
     },
     {
       "source": "file:driftguard-spring-boot-starter/src/main/java/ru/eljke/driftguard/spring/autoconfigure/DriftGuardProperties.java",
@@ -21517,7 +22038,21 @@
     },
     {
       "source": "file:driftguard-spring-boot-starter/src/test/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactoryTest.java",
+      "target": "function:driftguard-spring-boot-starter/src/test/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactoryTest.java:mapsCalendarBaselineProperties",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:driftguard-spring-boot-starter/src/test/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactoryTest.java",
       "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/DetectorDefinition.java",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:driftguard-spring-boot-starter/src/test/java/ru/eljke/driftguard/spring/autoconfigure/DetectorDefinitionFactoryTest.java",
+      "target": "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineMode.java",
       "type": "imports",
       "direction": "forward",
       "weight": 0.7
@@ -21589,7 +22124,9 @@
         "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/error/ErrorReason.java",
         "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/state/DetectorRuntimeStateSnapshot.java",
         "config:driftguard-core/pom.xml",
-        "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/StateAwareEmissionPolicy.java"
+        "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/StateAwareEmissionPolicy.java",
+        "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineConfig.java",
+        "file:driftguard-core/src/main/java/ru/eljke/driftguard/core/config/CalendarBaselineMode.java"
       ]
     },
     {
