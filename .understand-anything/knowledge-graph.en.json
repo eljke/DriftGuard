@@ -20,10 +20,10 @@
       "Spring Boot"
     ],
     "description": "A modular Java library for detecting data drift in streaming technical metrics and publishing structured drift alerts.",
-    "analyzedAt": "2026-06-21T10:20:41.127Z",
-    "gitCommitHash": "b87245c9aca30dbe574017fe6b9ae8fa938c7be5",
-    "gitCommitShort": "b87245c",
-    "gitCommitDate": "2026-06-21T13:20:40+03:00",
+    "analyzedAt": "2026-06-21T10:27:42.989Z",
+    "gitCommitHash": "e8bfd95b606c6927fcc2ae7f7a317a94882b0762",
+    "gitCommitShort": "e8bfd95",
+    "gitCommitDate": "2026-06-21T13:27:42+03:00",
     "version": "1.0.0"
   },
   "nodes": [
