@@ -6,6 +6,7 @@ target/
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar.sha256
 dependency-reduced-pom.xml
+.flattened-pom.xml
 
 ### Logs and runtime files ###
 *.log

@@ -14,6 +14,20 @@ The demo application lives in a separate sibling project: `DriftGuardDemo`.
 | `driftguard-spring-boot-starter` | Spring Boot auto-configuration and `application.yml` binding.                                                           |
 | `driftguard-testkit`             | Reproducible synthetic metric scenarios, expected drift intervals and quality gates.                                    |
 
+## Maven Coordinates
+
+After publication to Maven Central, modules can be added to a Maven project with the `io.github.eljke` group:
+
+```xml
+<dependency>
+    <groupId>io.github.eljke</groupId>
+    <artifactId>driftguard-spring-boot-starter</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+Use the module artifact that matches the integration surface: `driftguard-core`, `driftguard-algorithms`, `driftguard-kafka`, `driftguard-spring-boot-starter` or `driftguard-testkit`.
+
 ## Runtime Flow
 
 ```text
