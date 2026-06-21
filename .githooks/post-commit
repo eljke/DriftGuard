@@ -7,4 +7,15 @@ fi
 if [ -f .understand-anything/config.json ] \
   && grep -q '"autoUpdate"[[:space:]]*:[[:space:]]*true' .understand-anything/config.json; then
   node .github/scripts/update-knowledge-graph.mjs .
+
+  if ! git diff --quiet -- \
+    .understand-anything/knowledge-graph.en.json \
+    .understand-anything/knowledge-graph.json \
+    .understand-anything/meta.json; then
+    git add -u -- \
+      .understand-anything/knowledge-graph.en.json \
+      .understand-anything/knowledge-graph.json \
+      .understand-anything/meta.json
+    UNDERSTAND_SKIP_AUTO_UPDATE=1 git commit -m "docs: refresh knowledge graph"
+  fi
 fi
